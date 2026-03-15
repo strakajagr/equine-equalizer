@@ -241,6 +241,10 @@ class IngestionService:
             return race_id
 
         except Exception as e:
+            try:
+                self.conn.rollback()
+            except Exception:
+                pass
             logger.error(
                 f"store_race_card failed: {e}",
                 exc_info=True

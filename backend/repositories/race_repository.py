@@ -180,7 +180,10 @@ class RaceRepository(BaseRepository):
                 race_data['track_id'],
                 race_data['race_date'],
                 race_data['race_number'],
-                race_data.get('post_time'),
+                self._parse_post_time(
+                    race_data.get('post_time'),
+                    race_data.get('race_date')
+                ),
                 race_data['distance_furlongs'],
                 race_data['surface'],
                 race_data['race_type'],
@@ -218,6 +221,33 @@ class RaceRepository(BaseRepository):
                WHERE race_id = %s""",
             (condition, moisture_level, race_id)
         )
+
+    def _parse_post_time(self, post_time_str, race_date):
+        """
+        Convert bare time string '1:33 PM' to datetime
+        using race_date for the date component.
+        Returns None if post_time_str is None or unparseable.
+        """
+        if not post_time_str:
+            return None
+        if hasattr(post_time_str, 'hour'):
+            # Already a time or datetime object
+            return post_time_str
+        try:
+            from datetime import datetime
+            t = datetime.strptime(
+                str(post_time_str).strip(), '%I:%M %p'
+            ).time()
+            if race_date:
+                d = race_date if hasattr(race_date, 'year') \
+                    else date.fromisoformat(str(race_date))
+                return datetime(
+                    d.year, d.month, d.day,
+                    t.hour, t.minute, t.second
+                )
+            return t
+        except (ValueError, AttributeError):
+            return None
 
     def _build_race_list(
         self, rows: list[dict]
