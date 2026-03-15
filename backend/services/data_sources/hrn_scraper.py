@@ -14,27 +14,25 @@ from shared.constants import (
 
 logger = logging.getLogger(__name__)
 
-# Track name to code mapping
-# HRN uses full names, we need Equibase codes
+# Track slug to code mapping (exact match only)
+# HRN uses slugified track names in URLs
 HRN_TRACK_MAP = {
     'churchill-downs': 'CD',
-    'saratoga': 'SAR',
     'saratoga-race-course': 'SAR',
+    'saratoga': 'SAR',
     'keeneland': 'KEE',
     'belmont-park': 'BEL',
-    'belmont': 'BEL',
-    'santa-anita': 'SA',
+    'belmont-at-the-big-a': 'BEL',
     'santa-anita-park': 'SA',
+    'santa-anita': 'SA',
     'gulfstream-park': 'GP',
-    'gulfstream': 'GP',
     'del-mar': 'DMR',
     'oaklawn-park': 'OP',
     'oaklawn': 'OP',
     'monmouth-park': 'MTH',
-    'monmouth': 'MTH',
     'aqueduct': 'AQU',
-    'pimlico': 'PIM',
     'pimlico-race-course': 'PIM',
+    'pimlico': 'PIM',
 }
 
 HRN_TRACK_NAMES = {
@@ -53,41 +51,31 @@ HRN_TRACK_NAMES = {
 
 # Surface normalization
 SURFACE_MAP = {
-    'dirt': 'dirt',
-    'd': 'dirt',
-    'turf': 'turf',
-    't': 'turf',
-    'synthetic': 'synthetic',
-    'synth': 'synthetic',
-    's': 'synthetic',
     'all weather': 'synthetic',
-    'aw': 'synthetic',
+    'all-weather': 'synthetic',
+    'synthetic': 'synthetic',
+    'turf': 'turf',
+    'dirt': 'dirt',
 }
 
-# Race type normalization
+# Race type normalization (longest match first)
 RACE_TYPE_MAP = {
-    'maiden special weight': 'maiden',
-    'msw': 'maiden',
-    'maiden': 'maiden',
-    'maiden claiming': 'maiden_claiming',
-    'mc': 'maiden_claiming',
-    'claiming': 'claiming',
-    'clm': 'claiming',
-    'allowance': 'allowance',
-    'alw': 'allowance',
     'allowance optional claiming':
-        'allowance_optional_claiming',
-    'aoc': 'allowance_optional_claiming',
-    'optional claiming':
         'allowance_optional_claiming',
     'starter optional claiming':
         'allowance_optional_claiming',
-    'stakes': 'stakes',
-    'stk': 'stakes',
+    'optional claiming':
+        'allowance_optional_claiming',
+    'maiden special weight': 'maiden',
+    'maiden claiming': 'maiden_claiming',
+    'graded stakes': 'graded_stakes',
     'grade 1': 'graded_stakes',
     'grade 2': 'graded_stakes',
     'grade 3': 'graded_stakes',
-    'graded stakes': 'graded_stakes',
+    'allowance': 'allowance',
+    'claiming': 'claiming',
+    'maiden': 'maiden',
+    'stakes': 'stakes',
     'listed': 'stakes',
 }
 
@@ -104,13 +92,21 @@ class HRNScraper(DataSourceInterface):
     free public access to entries and results for
     all North American thoroughbred tracks.
 
-    URL structure:
-    Entries: entries.horseracingnation.com/
-             entries-results/{track}/{date}
-    Date:    YYYY-MM-DD
+    Page structure (per track/date):
+    Each race lives inside a <div class="my-5">
+    containing:
+      <h2>  — track name, race number, post time
+      <div class="race-distance"> — distance, surface,
+                                    race type, claiming
+      <div class="race-purse">   — purse amount
+      <div class="race-restrictions"> — conditions
+      <div class="race-with-results row"> — two cols:
+        col 1: <table class="table-entries"> — entries
+        col 2: results table (if race is complete)
 
-    Respects rate limits with REQUEST_DELAY
-    between requests to avoid overloading server.
+    Entries table uses data-label attributes:
+      "Post Position", "Horse / Sire",
+      "Trainer / Jockey", "Morning Line Odds"
     """
 
     def __init__(self):
@@ -236,8 +232,8 @@ class HRNScraper(DataSourceInterface):
         Fetch the daily index page and extract
         list of tracks racing today.
 
-        URL: entries.horseracingnation.com/
-             entries-results/YYYY-MM-DD
+        Deduplicates by track_code so we only
+        fetch each track's card once.
         """
         date_str = race_date.strftime('%Y-%m-%d')
         url = f"{BASE_URL}/entries-results/{date_str}"
@@ -247,40 +243,23 @@ class HRNScraper(DataSourceInterface):
             return []
 
         tracks = []
+        seen_codes = set()
 
-        # Find the tracks table
-        # HRN shows a table with Time | Track | Purses
-        # | #/race | Dirt | Turf | Synth columns
-        tables = soup.find_all('table')
-        for table in tables:
-            headers = table.find_all('th')
-            header_text = [
-                h.get_text(strip=True).lower()
-                for h in headers
-            ]
-            if 'track' in header_text:
-                rows = table.find_all('tr')[1:]
-                # Skip header row
-                for row in rows:
-                    cells = row.find_all('td')
-                    if len(cells) < 2:
-                        continue
-                    # Find the track link
-                    track_link = row.find('a')
-                    if not track_link:
-                        continue
-                    href = track_link.get('href', '')
-                    track_code = self._extract_track_code(
-                        href
-                    )
-                    if track_code:
-                        tracks.append({
-                            'track_code': track_code,
-                            'track_name': HRN_TRACK_NAMES.get(
-                                track_code, track_code
-                            ),
-                            'hrn_url': href,
-                        })
+        # Find all links to track pages
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            if '/entries-results/' not in href:
+                continue
+            track_code = self._extract_track_code(href)
+            if track_code and track_code not in seen_codes:
+                seen_codes.add(track_code)
+                tracks.append({
+                    'track_code': track_code,
+                    'track_name': HRN_TRACK_NAMES.get(
+                        track_code, track_code
+                    ),
+                    'hrn_url': href,
+                })
 
         return tracks
 
@@ -296,11 +275,15 @@ class HRNScraper(DataSourceInterface):
         """
         Fetch full race card for one track.
         Returns list of race dicts.
+
+        Each race lives inside a <div class="my-5">
+        parent containing the h2 header, race info
+        divs, and the entries/results table.
         """
         date_str = race_date.strftime('%Y-%m-%d')
-        track_slug = track['hrn_url'].split(
-            '/entries-results/'
-        )[-1].split('/')[0]
+        track_slug = self._get_track_slug(
+            track['hrn_url']
+        )
         url = (
             f"{BASE_URL}/entries-results/"
             f"{track_slug}/{date_str}"
@@ -312,27 +295,26 @@ class HRNScraper(DataSourceInterface):
 
         races = []
 
-        # Find individual race sections
-        # HRN marks each race with an anchor
-        # like <div id="race-1"> or similar
-        race_sections = soup.find_all(
-            'div', class_=lambda c: c and 'race' in c.lower()
-        )
+        # Each race is in a <div class="my-5"> that
+        # contains an h2 with "Race #N"
+        # h2.string is None (mixed content), so
+        # filter via get_text() instead
+        race_containers = [
+            h2 for h2 in soup.find_all('h2')
+            if 'race #' in h2.get_text().lower()
+        ]
 
-        if not race_sections:
-            # Try finding by race headers
-            race_sections = soup.find_all(
-                ['h2', 'h3'],
-                string=re.compile(r'race\s+\d+', re.I)
-            )
-
-        for i, section in enumerate(race_sections):
+        for h2 in race_containers:
             try:
-                race_dict = self._parse_race_section(
-                    section,
+                # The parent <div class="my-5"> is
+                # the full race container
+                container = h2.parent
+
+                race_dict = self._parse_race_container(
+                    container,
+                    h2,
                     track,
-                    race_date,
-                    i + 1
+                    race_date
                 )
                 if race_dict and self._is_qualifying_race(
                     track['track_code'],
@@ -342,49 +324,92 @@ class HRNScraper(DataSourceInterface):
             except Exception as e:
                 logger.warning(
                     f"HRN: failed to parse race "
-                    f"{i+1} at {track['track_code']}: {e}"
+                    f"at {track['track_code']}: {e}"
                 )
 
         return races
 
     # ─────────────────────────────────────────
-    # PRIVATE: Parse race section HTML
+    # PRIVATE: Parse race container
     # ─────────────────────────────────────────
 
-    def _parse_race_section(
+    def _parse_race_container(
         self,
-        section,
+        container,
+        h2,
         track: dict,
-        race_date: date,
-        race_number: int
+        race_date: date
     ) -> Optional[dict]:
         """
-        Parse a single race section from HTML.
-        Extract race conditions and entry list.
-        """
-        text = section.get_text(separator=' ', strip=True)
+        Parse a full race container div.
 
-        # Extract distance
-        distance = self._parse_distance(text)
+        Structure:
+          <h2> "Track Race #N, HH:MM PM"
+          <div class="race-distance"> distance, surface
+          <div class="race-purse"> purse
+          <div class="race-restrictions"> conditions
+          <div class="race-with-results">
+            <table class="table-entries"> entries
+        """
+        # Extract race number from h2
+        # Format: "Track Race #\nN,HH:MM PM"
+        h2_text = h2.get_text(separator=' ', strip=True)
+        race_num_match = re.search(
+            r'Race\s*#\s*(\d+)', h2_text, re.I
+        )
+        race_number = int(
+            race_num_match.group(1)
+        ) if race_num_match else 1
+
+        # Extract post time from h2
+        time_match = re.search(
+            r'(\d{1,2}:\d{2}\s*[AP]M)', h2_text, re.I
+        )
+        post_time = time_match.group(1) if time_match else None
+
+        # Race distance div — contains distance,
+        # surface, race type, claiming price
+        dist_div = container.find(
+            'div', class_='race-distance'
+        )
+        dist_text = dist_div.get_text(
+            separator=' ', strip=True
+        ) if dist_div else ''
+
+        distance = self._parse_distance(dist_text)
         if not distance:
             return None
 
-        # Extract surface
-        surface = self._parse_surface(text)
-
-        # Extract race type
-        race_type = self._parse_race_type(text)
-
-        # Extract purse
-        purse = self._parse_purse(text)
-
-        # Extract claiming price
+        surface = self._parse_surface(dist_text)
+        race_type = self._parse_race_type(dist_text)
         claiming_price = self._parse_claiming_price(
-            text, race_type
+            dist_text, race_type
         )
 
-        # Extract entries table
-        entries = self._parse_entries_table(section)
+        # Purse div
+        purse_div = container.find(
+            'div', class_='race-purse'
+        )
+        purse_text = purse_div.get_text(
+            strip=True
+        ) if purse_div else ''
+        purse = self._parse_purse(purse_text)
+
+        # Restrictions div — race conditions
+        restr_div = container.find(
+            'div', class_='race-restrictions'
+        )
+        conditions = restr_div.get_text(
+            separator=' ', strip=True
+        ) if restr_div else ''
+
+        # Entries table
+        entries_table = container.find(
+            'table', class_='table-entries'
+        )
+        entries = self._parse_entries_table(
+            entries_table
+        ) if entries_table else []
 
         if not entries:
             return None
@@ -402,8 +427,10 @@ class HRNScraper(DataSourceInterface):
                 'race_type': race_type,
                 'purse': purse,
                 'claiming_price': claiming_price,
-                'conditions': text[:500],
-                'post_time': None,
+                'conditions': (
+                    f"{dist_text} | {conditions}"
+                )[:500],
+                'post_time': post_time,
             },
             'entries': entries,
         }
@@ -413,56 +440,29 @@ class HRNScraper(DataSourceInterface):
     # ─────────────────────────────────────────
 
     def _parse_entries_table(
-        self, section
+        self, table
     ) -> list[dict]:
         """
-        Find and parse the entries table in a
-        race section. Returns list of entry dicts.
+        Parse the entries table using data-label
+        attributes on <td> elements.
+
+        HRN table structure per row:
+          td[data-label^="Program Number"] — pgm #
+          td[data-label="Post Position"]   — PP
+          td[data-label="Horse / Sire"]    — horse/sire
+          td[data-label="Trainer / Jockey"] — trainer/jock
+          td[data-label="Morning Line Odds"] — ML
         """
         entries = []
 
-        # Find tables within this section
-        # or the next sibling elements
-        tables = section.find_all('table')
-        if not tables:
-            # Look in siblings
-            sibling = section.find_next_sibling()
-            while sibling:
-                tables = sibling.find_all('table')
-                if tables:
-                    break
-                sibling = sibling.find_next_sibling()
-
-        for table in tables:
-            rows = table.find_all('tr')
-            if len(rows) < 2:
+        for row in table.find_all('tr'):
+            cells = row.find_all('td')
+            if not cells:
                 continue
 
-            # Check if this looks like an entries table
-            header_cells = rows[0].find_all(
-                ['th', 'td']
-            )
-            header_text = ' '.join(
-                c.get_text(strip=True).lower()
-                for c in header_cells
-            )
-
-            if not any(
-                kw in header_text
-                for kw in ['horse', 'jockey', 'trainer', 'pp']
-            ):
-                continue
-
-            # Parse column positions
-            cols = self._detect_columns(header_cells)
-
-            for row in rows[1:]:
-                cells = row.find_all(['td', 'th'])
-                if len(cells) < 2:
-                    continue
-                entry = self._parse_entry_row(cells, cols)
-                if entry:
-                    entries.append(entry)
+            entry = self._parse_entry_row_by_label(cells)
+            if entry:
+                entries.append(entry)
 
         return entries
 
@@ -470,76 +470,126 @@ class HRNScraper(DataSourceInterface):
     # PRIVATE: Parse single entry row
     # ─────────────────────────────────────────
 
-    def _parse_entry_row(
+    def _parse_entry_row_by_label(
         self,
-        cells: list,
-        cols: dict
+        cells: list
     ) -> Optional[dict]:
-        """Parse one horse entry from a table row."""
+        """
+        Parse one horse entry using data-label
+        attributes to identify each cell's role.
+        """
+        cell_map = {}
+        for cell in cells:
+            label = cell.get('data-label', '')
+            cell_map[label] = cell
 
-        def cell_text(col_name: str) -> str:
-            idx = cols.get(col_name)
-            if idx is not None and idx < len(cells):
-                return cells[idx].get_text(strip=True)
-            return ''
-
-        horse_name = cell_text('horse')
-        if not horse_name or horse_name.lower() in [
-            'horse', 'name', ''
-        ]:
+        # ── Horse name + sire ──
+        horse_cell = cell_map.get('Horse / Sire')
+        if not horse_cell:
             return None
 
-        # Clean horse name
-        # Remove program number if prepended
-        horse_name = re.sub(
-            r'^\d+[a-zA-Z]?\s+', '', horse_name
-        ).strip()
+        # Horse name is in <h4><a class="horse-link">
+        horse_link = horse_cell.find(
+            'a', class_='horse-link'
+        )
+        if not horse_link:
+            # Fallback: try any <h4>
+            h4 = horse_cell.find('h4')
+            horse_name = h4.get_text(
+                strip=True
+            ) if h4 else None
+        else:
+            horse_name = horse_link.get_text(strip=True)
 
-        # Post position
-        pp_text = cell_text('pp')
+        if not horse_name:
+            return None
+
+        # Sire is in the <p> below
+        sire_p = horse_cell.find('p')
+        sire = sire_p.get_text(
+            strip=True
+        ) if sire_p else None
+
+        # ── Post position ──
+        pp_cell = cell_map.get('Post Position')
+        pp_text = pp_cell.get_text(
+            strip=True
+        ) if pp_cell else ''
         try:
             post_position = int(
                 re.search(r'\d+', pp_text).group()
-            ) if pp_text else 1
+            )
         except (AttributeError, ValueError):
             post_position = 1
 
-        # Morning line
-        ml_text = cell_text('ml')
-        morning_line = self._parse_odds(ml_text)
+        # ── Program number ──
+        # data-label starts with "Program Number"
+        pgm_num = str(post_position)
+        for label, cell in cell_map.items():
+            if label.startswith('Program Number'):
+                # Extract from "Program Number: X"
+                m = re.search(r':\s*(\w+)', label)
+                if m:
+                    pgm_num = m.group(1)
+                else:
+                    # Try from img alt attribute
+                    img = cell.find('img')
+                    if img:
+                        pgm_num = img.get(
+                            'alt', str(post_position)
+                        )
+                break
 
-        # Jockey
-        jockey_name = cell_text('jockey')
-
-        # Trainer
-        trainer_name = cell_text('trainer')
-
-        # Weight
-        wgt_text = cell_text('weight')
-        try:
-            weight = int(
-                re.search(r'\d+', wgt_text).group()
-            ) if wgt_text else None
-        except (AttributeError, ValueError):
-            weight = None
-
-        # Medication/equipment flags
-        # Look for M/E column or parse from horse name
-        me_text = cell_text('me') or cell_text('medication')
-        lasix = 'L' in me_text.upper()
-        lasix_first = (
-            'L1' in me_text.upper() or
-            'FL' in me_text.upper()
-        )
-        blinkers = 'B' in me_text.upper()
+        # ── Trainer + Jockey ──
+        tj_cell = cell_map.get('Trainer / Jockey')
+        trainer_name = ''
+        jockey_name = ''
+        if tj_cell:
+            paragraphs = tj_cell.find_all('p')
+            if len(paragraphs) >= 1:
+                trainer_name = paragraphs[0].get_text(
+                    strip=True
+                )
+            if len(paragraphs) >= 2:
+                jockey_name = paragraphs[1].get_text(
+                    strip=True
+                )
 
         if not trainer_name:
             return None
 
+        # ── Morning line odds ──
+        ml_cell = cell_map.get('Morning Line Odds')
+        ml_text = ''
+        if ml_cell:
+            ml_p = ml_cell.find('p')
+            ml_text = ml_p.get_text(
+                strip=True
+            ) if ml_p else ml_cell.get_text(strip=True)
+        morning_line = self._parse_odds(ml_text)
+
+        # ── Scratch check ──
+        scratch_cell = cell_map.get('Scratched?')
+        if scratch_cell:
+            scratch_text = scratch_cell.get_text(
+                strip=True
+            ).lower()
+            if scratch_text in ['s', 'scr', 'scratched']:
+                return None
+
+        # Check if row has scratch CSS class
+        parent_row = cells[0].parent if cells else None
+        if parent_row:
+            row_classes = ' '.join(
+                parent_row.get('class', [])
+            ).lower()
+            if 'scratch' in row_classes:
+                return None
+
         return {
             'horse': {
                 'horse_name': horse_name,
-                'sire': None,
+                'sire': sire,
                 'dam': None,
             },
             'trainer': {
@@ -550,14 +600,12 @@ class HRNScraper(DataSourceInterface):
             } if jockey_name else None,
             'entry': {
                 'post_position': post_position,
-                'program_number': pp_text or str(
-                    post_position
-                ),
+                'program_number': pgm_num,
                 'morning_line_odds': morning_line,
-                'weight_carried': weight,
-                'lasix': lasix,
-                'lasix_first_time': lasix_first,
-                'blinkers_on': blinkers,
+                'weight_carried': None,
+                'lasix': False,
+                'lasix_first_time': False,
+                'blinkers_on': False,
                 'blinkers_first_time': False,
                 'equipment_change_from_last': False,
                 'medication_change_from_last': False,
@@ -578,12 +626,17 @@ class HRNScraper(DataSourceInterface):
         """
         Fetch results for all races at a track.
         HRN shows results on the same page as entries
-        after races have been run.
+        in the second column of race-with-results div.
+
+        Results table headers:
+          Runner(Speed) | Win | Place | Show
+        Exotic payouts in a separate table:
+          Pool | Finish | $2 Payout | Total Pool
         """
         date_str = race_date.strftime('%Y-%m-%d')
-        track_slug = track['hrn_url'].split(
-            '/entries-results/'
-        )[-1].split('/')[0]
+        track_slug = self._get_track_slug(
+            track['hrn_url']
+        )
         url = (
             f"{BASE_URL}/entries-results/"
             f"{track_slug}/{date_str}"
@@ -594,94 +647,172 @@ class HRNScraper(DataSourceInterface):
             return []
 
         results = []
-        # Results parsing — HRN shows finish order
-        # after races complete, same page structure
-        # Look for result indicators in race sections
-        race_sections = soup.find_all(
-            'div',
-            class_=lambda c: c and 'race' in c.lower()
-        )
 
-        for i, section in enumerate(race_sections):
+        # Find race containers via h2 headers
+        race_headers = [
+            h2 for h2 in soup.find_all('h2')
+            if 'race #' in h2.get_text().lower()
+        ]
+
+        for h2 in race_headers:
             try:
+                container = h2.parent
+                race_num_match = re.search(
+                    r'Race\s*#\s*(\d+)',
+                    h2.get_text(strip=True), re.I
+                )
+                race_number = int(
+                    race_num_match.group(1)
+                ) if race_num_match else 0
+
                 result = self._parse_race_result(
-                    section,
+                    container,
                     track['track_code'],
                     race_date,
-                    i + 1
+                    race_number
                 )
                 if result:
                     results.append(result)
             except Exception as e:
                 logger.warning(
                     f"HRN: result parse failed "
-                    f"race {i+1} {track['track_code']}: {e}"
+                    f"{track['track_code']}: {e}"
                 )
 
         return results
 
     def _parse_race_result(
         self,
-        section,
+        container,
         track_code: str,
         race_date: date,
         race_number: int
     ) -> Optional[dict]:
         """
-        Parse finish order and payouts from
-        a race section that has completed.
+        Parse finish order and payouts from the
+        results column of a race-with-results div.
+
+        Results table has Runner(Speed) header.
+        Each row: horse name | win $ | place $ | show $
         """
-        text = section.get_text(separator=' ', strip=True)
+        # Find the results table (has Runner header)
+        results_table = None
+        for table in container.find_all('table'):
+            headers = [
+                th.get_text(strip=True).lower()
+                for th in table.find_all('th')
+            ]
+            if any('runner' in h for h in headers):
+                results_table = table
+                break
 
-        # Look for finish position indicators
-        # HRN shows "1st", "2nd", "3rd" or
-        # numbered finish order in result table
-        result_rows = []
-
-        tables = section.find_all('table')
-        for table in tables:
-            rows = table.find_all('tr')
-            for row in rows:
-                cells = row.find_all('td')
-                if len(cells) < 2:
-                    continue
-                row_text = ' '.join(
-                    c.get_text(strip=True)
-                    for c in cells
-                )
-                # Look for rows with finish positions
-                if re.search(r'\b[1-9]\b', row_text):
-                    result_rows.append(cells)
-
-        if not result_rows:
+        if not results_table:
             return None
 
         results = []
-        for i, cells in enumerate(result_rows[:20]):
-            cell_texts = [
-                c.get_text(strip=True) for c in cells
-            ]
-            horse_name = None
-            for ct in cell_texts:
-                if (len(ct) > 2 and
-                        not ct.isdigit() and
-                        not re.match(r'^\d+[\./]\d+', ct)):
-                    horse_name = ct
-                    break
+        for i, row in enumerate(
+            results_table.find_all('tr')[1:]
+        ):
+            cells = row.find_all('td')
+            if not cells:
+                continue
 
-            if horse_name:
-                results.append({
-                    'horse_name': horse_name,
-                    'finish_position': i + 1,
-                    'official_finish': i + 1,
-                    'lengths_behind': 0.0,
-                    'final_time': None,
-                    'win_payout': None,
-                    'place_payout': None,
-                    'show_payout': None,
-                    'exacta_payout': None,
-                    'trifecta_payout': None,
-                })
+            # First cell: horse name (with speed fig)
+            horse_text = cells[0].get_text(strip=True)
+            # Remove speed figure: "Horse Name (93*)"
+            horse_name = re.sub(
+                r'\s*\(\d+\*?\)\s*$', '', horse_text
+            ).strip()
+
+            if not horse_name:
+                continue
+
+            # Payout cells
+            def parse_payout(idx):
+                if idx < len(cells):
+                    txt = cells[idx].get_text(strip=True)
+                    txt = txt.replace('$', '').replace(
+                        ',', ''
+                    ).strip()
+                    try:
+                        return float(txt)
+                    except ValueError:
+                        return None
+                return None
+
+            results.append({
+                'horse_name': horse_name,
+                'finish_position': i + 1,
+                'official_finish': i + 1,
+                'lengths_behind': 0.0,
+                'final_time': None,
+                'win_payout': parse_payout(1),
+                'place_payout': parse_payout(2),
+                'show_payout': parse_payout(3),
+                'exacta_payout': None,
+                'trifecta_payout': None,
+            })
+
+        # Parse exotic payouts from pool table
+        for table in container.find_all('table'):
+            headers = [
+                th.get_text(strip=True).lower()
+                for th in table.find_all('th')
+            ]
+            if any('pool' in h for h in headers):
+                for row in table.find_all('tr')[1:]:
+                    cells = row.find_all('td')
+                    if len(cells) < 3:
+                        continue
+                    pool = cells[0].get_text(
+                        strip=True
+                    ).lower()
+                    payout_txt = cells[2].get_text(
+                        strip=True
+                    ).replace('$', '').replace(
+                        ',', ''
+                    ).strip()
+                    try:
+                        payout = float(payout_txt)
+                    except ValueError:
+                        continue
+                    if 'exacta' in pool and results:
+                        results[0]['exacta_payout'] = payout
+                    elif 'trifecta' in pool and results:
+                        results[0]['trifecta_payout'] = payout
+                break
+
+        # Also check for also-rans (horses that
+        # finished but aren't in the top 3 table)
+        also_rans = container.find(
+            'div', class_='race-also-rans'
+        )
+        if also_rans:
+            ar_text = also_rans.get_text(strip=True)
+            # Parse comma-separated horse names
+            # after "Also Ran:" or similar prefix
+            ar_text = re.sub(
+                r'^.*?:\s*', '', ar_text
+            )
+            for name in ar_text.split(','):
+                name = name.strip()
+                # Remove trailing period or parenthetical
+                name = re.sub(
+                    r'\s*\(.*?\)\s*$', '', name
+                ).strip(' .')
+                if name and len(name) > 1:
+                    results.append({
+                        'horse_name': name,
+                        'finish_position': len(results) + 1,
+                        'official_finish': len(results) + 1,
+                        'lengths_behind': 0.0,
+                        'final_time': None,
+                        'win_payout': None,
+                        'place_payout': None,
+                        'show_payout': None,
+                        'exacta_payout': None,
+                        'trifecta_payout': None,
+                    })
 
         if not results:
             return None
@@ -731,93 +862,65 @@ class HRNScraper(DataSourceInterface):
         Extract track code from HRN URL.
         /entries-results/gulfstream-park/2026-03-14
         -> 'GP'
-        """
-        parts = href.strip('/').split('/')
-        # Find the track slug part
-        for part in parts:
-            if part in HRN_TRACK_MAP:
-                return HRN_TRACK_MAP[part]
-            # Try partial match
-            for slug, code in HRN_TRACK_MAP.items():
-                if slug in part or part in slug:
-                    return code
-        return None
 
-    def _detect_columns(
-        self, header_cells: list
-    ) -> dict:
+        Uses exact slug matching only to avoid
+        false positives from partial matches.
         """
-        Detect column positions from header cells.
-        Returns dict mapping column name to index.
-        """
-        cols = {}
-        for i, cell in enumerate(header_cells):
-            text = cell.get_text(strip=True).lower()
-            if any(
-                kw in text
-                for kw in ['horse', 'name']
-            ):
-                cols['horse'] = i
-            elif any(
-                kw in text
-                for kw in ['pp', 'post', '#']
-            ):
-                cols['pp'] = i
-            elif any(
-                kw in text
-                for kw in ['jockey', 'jock']
-            ):
-                cols['jockey'] = i
-            elif 'trainer' in text:
-                cols['trainer'] = i
-            elif any(
-                kw in text
-                for kw in ['wt', 'weight', 'lbs']
-            ):
-                cols['weight'] = i
-            elif any(
-                kw in text
-                for kw in ['ml', 'morning', 'odds', 'ml odds']
-            ):
-                cols['ml'] = i
-            elif any(
-                kw in text
-                for kw in ['m/e', 'med', 'equip']
-            ):
-                cols['me'] = i
-        return cols
+        # Extract the track slug from the URL path
+        m = re.search(
+            r'/entries-results/([a-z0-9-]+)',
+            href.lower()
+        )
+        if not m:
+            return None
+
+        slug = m.group(1)
+
+        # Skip date-only slugs (YYYY-MM-DD)
+        if re.match(r'^\d{4}-\d{2}-\d{2}$', slug):
+            return None
+
+        # Exact match only
+        return HRN_TRACK_MAP.get(slug)
+
+    def _get_track_slug(self, hrn_url: str) -> str:
+        """Extract track slug from HRN URL path."""
+        m = re.search(
+            r'/entries-results/([a-z0-9-]+)',
+            hrn_url.lower()
+        )
+        return m.group(1) if m else ''
 
     def _parse_distance(
         self, text: str
     ) -> Optional[float]:
         """
         Parse distance in furlongs from text.
-        Examples: '6f', '6 furlongs', '1 mile',
-        '1 1/16 miles', '1m', '5 1/2f'
+        HRN formats: '6F', '5 1/2F', '1 1/16M',
+        '1 Mile', '1 1/8 Miles', '5 f'
         """
-        text = text.lower()
+        text_lower = text.lower()
 
-        # Match furlongs: 6f, 5.5f, 5 1/2f
+        # Match furlongs: 6f, 5.5f, 5 1/2f, 5 1/2 f
         m = re.search(
             r'(\d+(?:\s+\d+/\d+)?|\d+\.?\d*)'
-            r'\s*(?:f|fur|furlong)',
-            text
+            r'\s*f\b',
+            text_lower
         )
         if m:
             return self._parse_fraction(m.group(1))
 
-        # Match miles: 1 mile, 1 1/16 miles,
-        # 1m, 1 1/16m
+        # Match miles: 1m, 1 1/16m, 1 mile,
+        # 1 1/16 miles, 1 1/8miles
         m = re.search(
             r'(\d+(?:\s+\d+/\d+)?|\d+\.?\d*)'
-            r'\s*(?:m|mi|mile)',
-            text
+            r'\s*m(?:ile|iles?)?\b',
+            text_lower
         )
         if m:
             miles = self._parse_fraction(m.group(1))
             if miles:
                 return round(miles * 8, 1)
-                # 1 mile = 8 furlongs
 
         return None
 
@@ -828,7 +931,6 @@ class HRNScraper(DataSourceInterface):
         text = text.strip()
         parts = text.split()
         if len(parts) == 2:
-            # e.g. '5 1/2'
             whole = float(parts[0])
             num, den = parts[1].split('/')
             return whole + float(num) / float(den)
@@ -844,9 +946,12 @@ class HRNScraper(DataSourceInterface):
     def _parse_surface(self, text: str) -> str:
         """Extract surface from race conditions."""
         text_lower = text.lower()
-        for keyword, surface in SURFACE_MAP.items():
+        # Check longest matches first
+        for keyword in sorted(
+            SURFACE_MAP.keys(), key=len, reverse=True
+        ):
             if keyword in text_lower:
-                return surface
+                return SURFACE_MAP[keyword]
         return 'dirt'  # default
 
     def _parse_race_type(self, text: str) -> str:
@@ -885,16 +990,15 @@ class HRNScraper(DataSourceInterface):
         """Extract claiming price if claiming race."""
         if 'claiming' not in race_type:
             return None
+        # HRN format: "$17,500 Maiden Claiming"
+        # or "Claiming $25,000"
         m = re.search(
-            r'clm\s*\$?([\d,]+)|'
-            r'claiming\s*\$?([\d,]+)|'
-            r'\$?([\d,]+)\s*claiming',
+            r'\$([\d,]+)\s*(?:maiden\s+)?claiming|'
+            r'claiming\s*\$([\d,]+)',
             text.lower()
         )
         if m:
-            val = next(
-                g for g in m.groups() if g
-            )
+            val = m.group(1) or m.group(2)
             try:
                 return int(val.replace(',', ''))
             except ValueError:
@@ -906,16 +1010,23 @@ class HRNScraper(DataSourceInterface):
     ) -> Optional[float]:
         """
         Parse morning line odds to decimal.
-        '5-1' -> 5.0
-        '8-5' -> 1.6 (not 8/5 -- it's X to 1 basis)
-        '3-2' -> 1.5
-        'Evens' or '1-1' -> 1.0
+        '5/1' -> 5.0, '8/5' -> 1.6,
+        '3/2' -> 1.5, 'Evens' -> 1.0
+        HRN uses slash format: '20/1', '8/5'
         """
         if not text:
             return None
         text = text.strip()
         if text.lower() in ['evens', 'even', 'e']:
             return 1.0
+        # HRN uses slash: 20/1, 8/5
+        m = re.search(r'(\d+)\s*/\s*(\d+)', text)
+        if m:
+            num = float(m.group(1))
+            den = float(m.group(2))
+            if den > 0:
+                return round(num / den, 2)
+        # Also try dash: 5-1
         m = re.search(r'(\d+)-(\d+)', text)
         if m:
             num = float(m.group(1))
