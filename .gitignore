@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+.Python
+env/
+venv/
+.env
+.env.local
+*.egg
+
+# Node / React
+node_modules/
+frontend/build/
+frontend/.env.local
+npm-debug.log*
+
+# CDK
+infrastructure/cdk/cdk.out/
+infrastructure/cdk/node_modules/
+infrastructure/cdk/*.js
+infrastructure/cdk/*.d.ts
+!infrastructure/cdk/jest.config.js
+
+# AWS / Secrets
+.aws/
+*.pem
+secrets.json
+
+# Data files (can be large)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Model artifacts (stored in S3, not git)
+model/artifacts/*
+!model/artifacts/.gitkeep
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
