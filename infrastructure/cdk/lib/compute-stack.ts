@@ -241,9 +241,19 @@ export class ComputeStack extends cdk.Stack {
         description:
           'HTTP API for Equine Equalizer predictions',
         corsPreflight: {
-          allowOrigins: ['*'],
-          allowMethods: [apigwv2.CorsHttpMethod.GET],
-          allowHeaders: ['Content-Type'],
+          allowOrigins: [
+            'https://d4nlmxq220z0z.cloudfront.net',
+            'http://localhost:3000',
+          ],
+          allowMethods: [
+            apigwv2.CorsHttpMethod.GET,
+            apigwv2.CorsHttpMethod.OPTIONS,
+          ],
+          allowHeaders: [
+            'Content-Type',
+            'Authorization',
+          ],
+          maxAge: cdk.Duration.days(1),
         },
       }
     );
@@ -271,6 +281,21 @@ export class ComputeStack extends cdk.Stack {
     });
     httpApi.addRoutes({
       path: '/health',
+      methods: [apigwv2.HttpMethod.GET],
+      integration: inferenceIntegration,
+    });
+    httpApi.addRoutes({
+      path: '/predictions/today',
+      methods: [apigwv2.HttpMethod.GET],
+      integration: inferenceIntegration,
+    });
+    httpApi.addRoutes({
+      path: '/predictions/value',
+      methods: [apigwv2.HttpMethod.GET],
+      integration: inferenceIntegration,
+    });
+    httpApi.addRoutes({
+      path: '/predictions/{date}',
       methods: [apigwv2.HttpMethod.GET],
       integration: inferenceIntegration,
     });
