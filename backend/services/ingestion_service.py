@@ -27,6 +27,7 @@ from repositories.workout_repository import (
     WorkoutRepository
 )
 from models.canonical import RaceCard
+from services.data_sources import HRNScraper
 
 logger = logging.getLogger(__name__)
 
@@ -63,25 +64,62 @@ class IngestionService:
         self.pp_repo = PastPerformanceRepository(conn)
         self.workout_repo = WorkoutRepository(conn)
 
+        # Data source — swap this one line to
+        # change data providers
+        self.data_source = HRNScraper()
+
     # ═══════════════════════════════════════════
     # PUBLIC: Daily pipeline entry point
     # ═══════════════════════════════════════════
 
     def fetch_daily_entries(
         self, race_date: date
-    ) -> None:
+    ) -> dict:
         """
         Pull today's race entries and PP data
-        from external data source.
-
-        TODO: Implement when data source confirmed.
-        Equibase paid API or scraper goes here.
-        For now logs intent and returns.
+        from configured data source.
+        Store races, entries, horses, trainers,
+        jockeys, past performances, workouts.
+        Returns summary dict.
         """
         logger.info(
-            f"fetch_daily_entries called for {race_date}"
-            f" — data source not yet configured"
+            f"Fetching entries for {race_date} "
+            f"via {self.data_source.get_source_name()}"
         )
+
+        races = self.data_source.fetch_entries(
+            race_date
+        )
+
+        summary = {
+            'date': str(race_date),
+            'source': self.data_source.get_source_name(),
+            'races_fetched': len(races),
+            'races_stored': 0,
+            'races_skipped': 0,
+            'errors': []
+        }
+
+        for race_data in races:
+            try:
+                race_id = self.store_race_card(race_data)
+                if race_id:
+                    summary['races_stored'] += 1
+                else:
+                    summary['races_skipped'] += 1
+            except Exception as e:
+                summary['errors'].append(str(e))
+                logger.error(
+                    f"Failed to store race: {e}",
+                    exc_info=True
+                )
+
+        logger.info(
+            f"Ingestion complete for {race_date}: "
+            f"{summary['races_stored']} stored, "
+            f"{summary['races_skipped']} skipped"
+        )
+        return summary
 
     # ═══════════════════════════════════════════
     # PUBLIC: File parsing (stubbed)
