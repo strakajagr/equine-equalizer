@@ -4,51 +4,80 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
-interface FrontendStackProps extends cdk.StackProps {
-  frontendBucket: s3.Bucket;
-}
-
 export class FrontendStack extends cdk.Stack {
   public readonly distribution: cloudfront.Distribution;
+  public readonly frontendBucket: s3.Bucket;
 
-  constructor(scope: Construct, id: string, props: FrontendStackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props?: cdk.StackProps
+  ) {
     super(scope, id, props);
 
-    // Origin Access Identity so CloudFront can read from the private S3 bucket
-    const oai = new cloudfront.OriginAccessIdentity(this, 'OAI', {
-      comment: 'OAI for Equine Equalizer frontend bucket',
-    });
-    props.frontendBucket.grantRead(oai);
+    // Frontend bucket lives here, not in StorageStack.
+    // It is a frontend concern, not a data concern.
+    this.frontendBucket = new s3.Bucket(
+      this,
+      'FrontendBucket',
+      {
+        bucketName: 'equine-frontend',
+        blockPublicAccess:
+          s3.BlockPublicAccess.BLOCK_ALL,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      }
+    );
 
-    this.distribution = new cloudfront.Distribution(this, 'FrontendDistribution', {
-      defaultBehavior: {
-        origin: new origins.S3Origin(props.frontendBucket, {
-          originAccessIdentity: oai,
-        }),
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      },
-      defaultRootObject: 'index.html',
-      // React Router SPA fallback — redirect 403/404 to index.html
-      errorResponses: [
-        {
-          httpStatus: 403,
-          responseHttpStatus: 200,
-          responsePagePath: '/index.html',
-          ttl: cdk.Duration.seconds(0),
+    // OAC — no cross-stack reference needed,
+    // bucket and distribution are in same stack
+    this.distribution = new cloudfront.Distribution(
+      this,
+      'FrontendDistribution',
+      {
+        defaultBehavior: {
+          origin: origins.S3BucketOrigin
+            .withOriginAccessControl(
+              this.frontendBucket
+            ),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy
+              .REDIRECT_TO_HTTPS,
+          cachePolicy:
+            cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },
-        {
-          httpStatus: 404,
-          responseHttpStatus: 200,
-          responsePagePath: '/index.html',
-          ttl: cdk.Duration.seconds(0),
-        },
-      ],
+        defaultRootObject: 'index.html',
+        errorResponses: [
+          {
+            httpStatus: 403,
+            responseHttpStatus: 200,
+            responsePagePath: '/index.html',
+            ttl: cdk.Duration.seconds(0),
+          },
+          {
+            httpStatus: 404,
+            responseHttpStatus: 200,
+            responsePagePath: '/index.html',
+            ttl: cdk.Duration.seconds(0),
+          },
+        ],
+      }
+    );
+
+    new cdk.CfnOutput(this, 'FrontendBucketName', {
+      value: this.frontendBucket.bucketName,
+      exportName: 'EquineFrontendBucketName',
     });
 
     new cdk.CfnOutput(this, 'DistributionUrl', {
-      value: `https://${this.distribution.distributionDomainName}`,
+      value: this.distribution
+        .distributionDomainName,
       exportName: 'EquineDistributionUrl',
+    });
+
+    new cdk.CfnOutput(this, 'DistributionId', {
+      value: this.distribution.distributionId,
+      exportName: 'EquineDistributionId',
     });
   }
 }

@@ -1,0 +1,30 @@
+# Exclude infrastructure (not needed in Lambda)
+infrastructure/
+
+# Exclude frontend (not needed in Lambda)
+frontend/
+
+# Exclude data files (large, not needed)
+data/
+
+# Exclude layer build artifacts
+backend/layers/
+
+# Exclude Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+
+# Exclude dev files
+.env
+.env.local
+*.log
+.git/
+.gitignore
+node_modules/
+scripts/
+docs/

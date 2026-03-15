@@ -51,7 +51,7 @@ export class DatabaseStack extends cdk.Stack {
     // Aurora Serverless v2 PostgreSQL — scales to near-zero when idle
     this.cluster = new rds.DatabaseCluster(this, 'EquineDatabase', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_15_4,
+        version: rds.AuroraPostgresEngineVersion.VER_16_4,
       }),
       defaultDatabaseName: 'equine_equalizer',
       credentials: rds.Credentials.fromGeneratedSecret('equine_admin', {

@@ -6,7 +6,6 @@ export class StorageStack extends cdk.Stack {
   public readonly rawDataBucket: s3.Bucket;
   public readonly processedDataBucket: s3.Bucket;
   public readonly modelArtifactsBucket: s3.Bucket;
-  public readonly frontendBucket: s3.Bucket;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -45,14 +44,6 @@ export class StorageStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    // Built React static files served via CloudFront
-    this.frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
-      bucketName: 'equine-frontend',
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
-
     // CloudFormation outputs
     new cdk.CfnOutput(this, 'RawDataBucketArn', {
       value: this.rawDataBucket.bucketArn,
@@ -77,14 +68,6 @@ export class StorageStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ModelArtifactsBucketName', {
       value: this.modelArtifactsBucket.bucketName,
       exportName: 'EquineModelArtifactsBucketName',
-    });
-    new cdk.CfnOutput(this, 'FrontendBucketArn', {
-      value: this.frontendBucket.bucketArn,
-      exportName: 'EquineFrontendBucketArn',
-    });
-    new cdk.CfnOutput(this, 'FrontendBucketName', {
-      value: this.frontendBucket.bucketName,
-      exportName: 'EquineFrontendBucketName',
     });
   }
 }

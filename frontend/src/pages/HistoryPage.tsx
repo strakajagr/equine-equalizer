@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { format } from 'date-fns';
 import { getRacesByDate } from '../api/client';
 import { TodayResponse } from '../types';
 import RaceCard from '../components/RaceCard/RaceCard';

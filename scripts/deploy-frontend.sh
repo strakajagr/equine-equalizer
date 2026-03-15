@@ -95,8 +95,17 @@ S3_BUCKET environment variable manually:
   fi
 fi
 
-# Get CloudFront distribution ID for cache invalidation
-CF_DIST_ID=$(python3 -c "
+# Get CloudFront distribution ID
+# Check environment variable first,
+# then .cf-distribution-id file,
+# then fall back to cdk-outputs.json
+if [ -n "$CF_DIST_ID" ]; then
+  success "CloudFront distribution: $CF_DIST_ID"
+elif [ -f "$PROJECT_ROOT/.cf-distribution-id" ]; then
+  CF_DIST_ID=$(cat "$PROJECT_ROOT/.cf-distribution-id")
+  success "CloudFront distribution: $CF_DIST_ID"
+else
+  CF_DIST_ID=$(python3 -c "
 import json, sys
 try:
   with open('$PROJECT_ROOT/cdk-outputs.json') as f:
@@ -110,11 +119,13 @@ except:
   pass
 " 2>/dev/null || echo "")
 
-if [ -n "$CF_DIST_ID" ]; then
-  success "CloudFront distribution: $CF_DIST_ID"
-else
-  warn "CloudFront distribution ID not found"
-  warn "Cache invalidation will be skipped"
+  if [ -n "$CF_DIST_ID" ]; then
+    success "CloudFront distribution: $CF_DIST_ID"
+  else
+    warn "CloudFront distribution ID not found"
+    warn "Cache invalidation will be skipped"
+    warn "Pass it via: CF_DIST_ID=XXXXX ./scripts/deploy-frontend.sh"
+  fi
 fi
 
 # ─────────────────────────────────────────

@@ -31,11 +31,13 @@ const compute = new ComputeStack(app, 'EquineComputeStack', {
 compute.addDependency(storage);
 compute.addDependency(database);
 
-// 4. FrontendStack — CloudFront distribution (depends on Storage)
-const frontend = new FrontendStack(app, 'EquineFrontendStack', {
-  env,
-  frontendBucket: storage.frontendBucket,
-});
-frontend.addDependency(storage);
+// 4. FrontendStack — CloudFront + S3
+// No dependency on other stacks —
+// bucket and distribution are self-contained
+const frontend = new FrontendStack(
+  app,
+  'EquineFrontendStack',
+  { env }
+);
 
 app.synth();

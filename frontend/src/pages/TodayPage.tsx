@@ -27,8 +27,6 @@ const TodayPage: React.FC = () => {
 
   const dateStr = format(new Date(), 'EEEE, MMMM d');
 
-  const raceCount = data?.race_count ?? 0;
-
   return (
     <div>
       {/* Page header */}

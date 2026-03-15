@@ -1,9 +1,11 @@
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib/core';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
-import * as apigwv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import * as apigwv2Integrations
+  from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as rds from 'aws-cdk-lib/aws-rds';
@@ -24,134 +26,233 @@ export class ComputeStack extends cdk.Stack {
   public readonly inferenceFn: lambda.Function;
   public readonly resultsFn: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: ComputeStackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: ComputeStackProps
+  ) {
     super(scope, id, props);
 
-    const backendPath = '../../../backend';
+    const backendPath = path.join(
+      __dirname, '../../../backend'
+    );
+    const projectRoot = path.join(
+      __dirname, '../../..'
+    );
 
-    // Shared environment variables for all Lambdas
+    // Shared environment variables
     const sharedEnv = {
       DB_SECRET_ARN: props.dbCluster.secret!.secretArn,
       RAW_DATA_BUCKET: props.rawDataBucket.bucketName,
-      PROCESSED_DATA_BUCKET: props.processedDataBucket.bucketName,
-      MODEL_ARTIFACTS_BUCKET: props.modelArtifactsBucket.bucketName,
+      PROCESSED_DATA_BUCKET:
+        props.processedDataBucket.bucketName,
+      MODEL_ARTIFACTS_BUCKET:
+        props.modelArtifactsBucket.bucketName,
     };
 
-    // Shared Lambda config
-    const sharedLambdaProps = {
-      runtime: lambda.Runtime.PYTHON_3_11,
+    // Shared Lambda config for container Lambdas
+    // No runtime specified — container provides it
+    // No layers — packages are in the container
+    const sharedProps = {
       timeout: cdk.Duration.minutes(5),
       memorySize: 512,
       vpc: props.vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+      },
       securityGroups: [props.lambdaSecurityGroup],
       environment: sharedEnv,
     };
 
-    // --- Lambda Functions ---
+    // ─────────────────────────────────────
+    // Lambda Functions (Docker container images)
+    // CDK automatically:
+    // 1. Runs docker build using the Dockerfile
+    // 2. Creates an ECR repository
+    // 3. Pushes the image to ECR
+    // 4. Wires Lambda to use the ECR image
+    // ─────────────────────────────────────
 
-    this.ingestionFn = new lambda.Function(this, 'IngestionFunction', {
-      ...sharedLambdaProps,
-      functionName: 'equine-ingestion',
-      description: 'Pulls daily race entries and PP data from Equibase',
-      code: lambda.Code.fromAsset(`${backendPath}/lambdas/ingestion`),
-      handler: 'handler.handler',
-    });
+    this.ingestionFn = new lambda.DockerImageFunction(
+      this,
+      'IngestionFunction',
+      {
+        ...sharedProps,
+        functionName: 'equine-ingestion',
+        description:
+          'Pulls daily race entries and PP data',
+        code: lambda.DockerImageCode.fromImageAsset(
+          projectRoot,
+          {
+            file: 'Dockerfile.ingestion',
+          }
+        ),
+      }
+    );
 
-    this.featureEngineeringFn = new lambda.Function(this, 'FeatureEngineeringFunction', {
-      ...sharedLambdaProps,
-      functionName: 'equine-feature-engineering',
-      description: 'Transforms raw PP data into model features',
-      code: lambda.Code.fromAsset(`${backendPath}/lambdas/feature-engineering`),
-      handler: 'handler.handler',
-    });
+    this.featureEngineeringFn =
+      new lambda.DockerImageFunction(
+        this,
+        'FeatureEngineeringFunction',
+        {
+          ...sharedProps,
+          functionName: 'equine-feature-engineering',
+          description:
+            'Transforms raw PP data into features',
+          code: lambda.DockerImageCode.fromImageAsset(
+            projectRoot,
+            {
+              file: 'Dockerfile.feature-engineering',
+            }
+          ),
+        }
+      );
 
-    this.inferenceFn = new lambda.Function(this, 'InferenceFunction', {
-      ...sharedLambdaProps,
-      functionName: 'equine-inference',
-      description: 'Loads model artifact and runs predictions on upcoming races',
-      memorySize: 1024,
-      code: lambda.Code.fromAsset(`${backendPath}/lambdas/inference`),
-      handler: 'handler.handler',
-    });
+    this.inferenceFn = new lambda.DockerImageFunction(
+      this,
+      'InferenceFunction',
+      {
+        ...sharedProps,
+        functionName: 'equine-inference',
+        description:
+          'Loads model and runs predictions',
+        memorySize: 1024,
+        code: lambda.DockerImageCode.fromImageAsset(
+          projectRoot,
+          {
+            file: 'Dockerfile.inference',
+          }
+        ),
+      }
+    );
 
-    this.resultsFn = new lambda.Function(this, 'ResultsFunction', {
-      ...sharedLambdaProps,
-      functionName: 'equine-results',
-      description: 'Ingests race results for model evaluation',
-      code: lambda.Code.fromAsset(`${backendPath}/lambdas/results`),
-      handler: 'handler.handler',
-    });
+    this.resultsFn = new lambda.DockerImageFunction(
+      this,
+      'ResultsFunction',
+      {
+        ...sharedProps,
+        functionName: 'equine-results',
+        description: 'Ingests race results',
+        code: lambda.DockerImageCode.fromImageAsset(
+          projectRoot,
+          {
+            file: 'Dockerfile.results',
+          }
+        ),
+      }
+    );
 
-    // --- IAM Permissions ---
+    // ─────────────────────────────────────
+    // IAM Permissions (unchanged)
+    // ─────────────────────────────────────
 
-    // All Lambdas can read DB credentials from Secrets Manager
-    props.dbCluster.secret!.grantRead(this.ingestionFn);
-    props.dbCluster.secret!.grantRead(this.featureEngineeringFn);
-    props.dbCluster.secret!.grantRead(this.inferenceFn);
-    props.dbCluster.secret!.grantRead(this.resultsFn);
+    props.dbCluster.secret!.grantRead(
+      this.ingestionFn
+    );
+    props.dbCluster.secret!.grantRead(
+      this.featureEngineeringFn
+    );
+    props.dbCluster.secret!.grantRead(
+      this.inferenceFn
+    );
+    props.dbCluster.secret!.grantRead(
+      this.resultsFn
+    );
 
-    // Ingestion writes raw data
-    props.rawDataBucket.grantReadWrite(this.ingestionFn);
-
-    // Feature engineering reads raw, writes processed
-    props.rawDataBucket.grantRead(this.featureEngineeringFn);
-    props.processedDataBucket.grantReadWrite(this.featureEngineeringFn);
-
-    // Inference reads model artifacts and processed data
-    props.modelArtifactsBucket.grantRead(this.inferenceFn);
-    props.processedDataBucket.grantRead(this.inferenceFn);
-
-    // Results reads raw data (for race IDs) and writes processed (scoring output)
+    props.rawDataBucket.grantReadWrite(
+      this.ingestionFn
+    );
+    props.rawDataBucket.grantRead(
+      this.featureEngineeringFn
+    );
+    props.processedDataBucket.grantReadWrite(
+      this.featureEngineeringFn
+    );
+    props.modelArtifactsBucket.grantRead(
+      this.inferenceFn
+    );
+    props.processedDataBucket.grantRead(
+      this.inferenceFn
+    );
     props.rawDataBucket.grantRead(this.resultsFn);
-    props.processedDataBucket.grantReadWrite(this.resultsFn);
+    props.processedDataBucket.grantReadWrite(
+      this.resultsFn
+    );
 
-    // --- EventBridge Cron Schedule ---
+    // ─────────────────────────────────────
+    // EventBridge Schedules (unchanged)
+    // ─────────────────────────────────────
 
-    // 6 AM ET = 11 AM UTC — pull daily entries
     new events.Rule(this, 'IngestionSchedule', {
       ruleName: 'equine-ingestion-daily',
-      schedule: events.Schedule.expression('cron(0 11 * * ? *)'),
-      targets: [new targets.LambdaFunction(this.ingestionFn)],
+      schedule: events.Schedule.expression(
+        'cron(0 11 * * ? *)'
+      ),
+      targets: [
+        new targets.LambdaFunction(this.ingestionFn)
+      ],
     });
 
-    // 7 AM ET = 12 PM UTC — transform raw data into features
-    new events.Rule(this, 'FeatureEngineeringSchedule', {
-      ruleName: 'equine-feature-engineering-daily',
-      schedule: events.Schedule.expression('cron(0 12 * * ? *)'),
-      targets: [new targets.LambdaFunction(this.featureEngineeringFn)],
-    });
+    new events.Rule(
+      this,
+      'FeatureEngineeringSchedule',
+      {
+        ruleName: 'equine-feature-engineering-daily',
+        schedule: events.Schedule.expression(
+          'cron(0 12 * * ? *)'
+        ),
+        targets: [
+          new targets.LambdaFunction(
+            this.featureEngineeringFn
+          )
+        ],
+      }
+    );
 
-    // 7:30 AM ET = 12:30 PM UTC — run predictions
     new events.Rule(this, 'InferenceSchedule', {
       ruleName: 'equine-inference-daily',
-      schedule: events.Schedule.expression('cron(30 12 * * ? *)'),
-      targets: [new targets.LambdaFunction(this.inferenceFn)],
+      schedule: events.Schedule.expression(
+        'cron(30 12 * * ? *)'
+      ),
+      targets: [
+        new targets.LambdaFunction(this.inferenceFn)
+      ],
     });
 
-    // 11 PM ET = 4 AM UTC next day — ingest results
     new events.Rule(this, 'ResultsSchedule', {
       ruleName: 'equine-results-daily',
-      schedule: events.Schedule.expression('cron(0 4 * * ? *)'),
-      targets: [new targets.LambdaFunction(this.resultsFn)],
+      schedule: events.Schedule.expression(
+        'cron(0 4 * * ? *)'
+      ),
+      targets: [
+        new targets.LambdaFunction(this.resultsFn)
+      ],
     });
 
-    // --- HTTP API Gateway ---
+    // ─────────────────────────────────────
+    // HTTP API Gateway (unchanged)
+    // ─────────────────────────────────────
 
-    const httpApi = new apigwv2.HttpApi(this, 'EquineApi', {
-      apiName: 'equine-api',
-      description: 'HTTP API for Equine Equalizer race predictions',
-      corsPreflight: {
-        allowOrigins: ['*'],
-        allowMethods: [apigwv2.CorsHttpMethod.GET],
-        allowHeaders: ['Content-Type'],
-      },
-    });
-
-    const inferenceIntegration = new apigwv2Integrations.HttpLambdaIntegration(
-      'InferenceIntegration',
-      this.inferenceFn,
+    const httpApi = new apigwv2.HttpApi(
+      this,
+      'EquineApi',
+      {
+        apiName: 'equine-api',
+        description:
+          'HTTP API for Equine Equalizer predictions',
+        corsPreflight: {
+          allowOrigins: ['*'],
+          allowMethods: [apigwv2.CorsHttpMethod.GET],
+          allowHeaders: ['Content-Type'],
+        },
+      }
     );
+
+    const inferenceIntegration =
+      new apigwv2Integrations.HttpLambdaIntegration(
+        'InferenceIntegration',
+        this.inferenceFn,
+      );
 
     httpApi.addRoutes({
       path: '/races/today',

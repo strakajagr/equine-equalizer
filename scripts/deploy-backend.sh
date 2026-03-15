@@ -243,6 +243,26 @@ for stack in outputs.values():
       > "$PROJECT_ROOT/.frontend-bucket"
   fi
 
+  # Save CloudFront distribution ID
+  CF_ID=$(python3 -c "
+import json, sys
+try:
+  with open('$PROJECT_ROOT/cdk-outputs.json') as f:
+    outputs = json.load(f)
+  for stack in outputs.values():
+    for key, val in stack.items():
+      if 'DistributionId' in key:
+        print(val)
+        sys.exit(0)
+except:
+  pass
+" 2>/dev/null || echo "")
+
+  if [ -n "$CF_ID" ]; then
+    echo "$CF_ID" > "$PROJECT_ROOT/.cf-distribution-id"
+    success "CloudFront ID saved to .cf-distribution-id"
+  fi
+
   echo -e "${GOLD}════════════════════════════════════════${NC}"
   echo ""
   echo -e "${DIM}Next step: run ./scripts/deploy-frontend.sh${NC}"

@@ -19,6 +19,9 @@ frontend/build/
 frontend/.env.local
 npm-debug.log*
 
+# Lambda layer build artifacts (installed via pip, not source)
+backend/layers/*/python/
+
 # CDK
 infrastructure/cdk/cdk.out/
 infrastructure/cdk/node_modules/
@@ -52,3 +55,9 @@ model/artifacts/*
 # Logs
 *.log
 logs/
+
+# Deployment artifacts (machine-specific)
+.frontend-bucket
+.cf-distribution-id
+cdk-outputs.json
+frontend/.env.production

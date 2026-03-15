@@ -1,0 +1,14 @@
+FROM public.ecr.aws/lambda/python:3.11
+
+COPY . ${LAMBDA_TASK_ROOT}
+
+RUN pip install --no-cache-dir \
+  psycopg2-binary==2.9.9 \
+  boto3==1.34.0 \
+  xgboost==2.0.3 \
+  pandas==2.1.4 \
+  numpy==1.26.3 \
+  scikit-learn==1.3.2 \
+  scipy==1.11.4
+
+CMD ["lambdas/results/handler.handler"]
