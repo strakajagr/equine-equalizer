@@ -18,7 +18,9 @@ from shared.constants import (
     PACE_SCENARIO_THRESHOLDS,
     MIN_STARTS_FOR_SPEED_TREND,
     MIN_STARTS_FOR_STYLE,
-    WORKOUT_LOOKBACK_DAYS
+    WORKOUT_LOOKBACK_DAYS,
+    RACE_QUALITY_TIERS,
+    MIN_CLAIMING_PRICE
 )
 
 logger = logging.getLogger(__name__)
@@ -871,6 +873,26 @@ class FeatureEngineeringService:
         today_claiming = race.claiming_price or 0
 
         if not pps:
+            # Still compute quality tier even with
+            # no past performances — it's a race-level
+            # feature, not horse-level
+            rt = race.race_type
+            cl = race.claiming_price or 0
+            if rt == 'graded_stakes':
+                qt = 1.0
+            elif rt == 'stakes':
+                qt = 2.0
+            elif rt in [
+                'allowance',
+                'allowance_optional_claiming'
+            ]:
+                qt = 3.0
+            elif rt == 'claiming':
+                qt = 4.0 if cl >= 25000 else 5.0
+            elif rt == 'maiden':
+                qt = 6.0
+            else:
+                qt = 5.0
             return {
                 'class_direction': 0.0,
                 'purse_change_pct': 0.0,
@@ -878,6 +900,7 @@ class FeatureEngineeringService:
                 'career_class_ceiling': 0.0,
                 'current_vs_ceiling_pct': 0.0,
                 'class_consistency': 0.0,
+                'race_quality_tier': qt,
             }
 
         last_pp = pps[0]
@@ -951,6 +974,32 @@ class FeatureEngineeringService:
             float(len(similar_class)) / 5.0
         )
 
+        # ── Race quality tier ──
+        # Encodes race prestige as ordinal number
+        # Model learns that Beyer 95 in Grade 1
+        # means something different than
+        # Beyer 95 in a $15k claimer
+        race_type = race.race_type
+        claiming = race.claiming_price or 0
+        if race_type == 'graded_stakes':
+            quality_tier = 1.0
+        elif race_type == 'stakes':
+            quality_tier = 2.0
+        elif race_type in [
+            'allowance',
+            'allowance_optional_claiming'
+        ]:
+            quality_tier = 3.0
+        elif race_type == 'claiming':
+            if claiming >= 25000:
+                quality_tier = 4.0
+            else:
+                quality_tier = 5.0
+        elif race_type == 'maiden':
+            quality_tier = 6.0
+        else:
+            quality_tier = 5.0  # safe default
+
         return {
             'class_direction': class_direction,
             'purse_change_pct': purse_change_pct,
@@ -962,6 +1011,7 @@ class FeatureEngineeringService:
                 current_vs_ceiling
             ),
             'class_consistency': class_consistency,
+            'race_quality_tier': quality_tier,
         }
 
     # ═══════════════════════════════════════════
@@ -1369,13 +1419,14 @@ class FeatureEngineeringService:
             'trainer_change_flag',
             'trainer_sample_size',
 
-            # Class (6)
+            # Class (7)
             'class_direction',
             'purse_change_pct',
             'claiming_price_change_pct',
             'career_class_ceiling',
             'current_vs_ceiling_pct',
             'class_consistency',
+            'race_quality_tier',
 
             # Equipment (8)
             'lasix_first_time',

@@ -90,6 +90,29 @@ def handler(event, context):
                 })
             }
 
+    # ── Test scrape action ──
+    # Invoked manually to test the HRN scraper
+    if action == 'test_scrape':
+        logger.info("Running test scrape")
+        test_date = event.get('date')
+        if test_date:
+            from datetime import date as date_type
+            scrape_date = date_type.fromisoformat(
+                test_date
+            )
+        else:
+            scrape_date = date.today()
+
+        with get_db() as conn:
+            service = IngestionService(conn)
+            summary = service.fetch_daily_entries(
+                scrape_date
+            )
+        return {
+            'statusCode': 200,
+            'body': json.dumps(summary)
+        }
+
     # ── Health check action ──
     if action == 'health':
         with get_db() as conn:

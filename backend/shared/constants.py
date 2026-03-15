@@ -3,7 +3,7 @@ QUALIFYING_TRACKS = [
     'GP', 'DMR', 'OP', 'MTH', 'AQU', 'PIM'
 ]
 
-MIN_CLAIMING_PRICE = 25000
+MIN_CLAIMING_PRICE = 15000
 
 QUALIFYING_RACE_TYPES = [
     'allowance',
@@ -25,6 +25,22 @@ RACE_TYPES = [
     'graded_stakes'
 ]
 
+# Race quality tier classification.
+# Used as feature 73 in the model.
+# Lower number = higher quality race.
+# Model learns that same speed figure means
+# different things at different quality levels.
+RACE_QUALITY_TIERS = {
+    'graded_stakes':              1,
+    'stakes':                     2,
+    'allowance':                  3,
+    'allowance_optional_claiming': 3,
+    'claiming_high':              4,  # $25k+
+    'claiming_mid':               5,  # $15-25k
+    'maiden':                     6,
+    'maiden_claiming':            7,
+}
+
 TRACK_CONDITIONS_DIRT = [
     'fast', 'good', 'sloppy', 'muddy',
     'heavy', 'sealed'
@@ -38,7 +54,7 @@ PP_LOOKBACK_STARTS = 10
 
 WORKOUT_LOOKBACK_DAYS = 45
 
-FEATURE_COUNT = 70
+FEATURE_COUNT = 73
 
 MODEL_ARTIFACTS_PREFIX = 'models/'
 

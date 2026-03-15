@@ -90,6 +90,7 @@ FEATURE_GROUPS = {
             'career_class_ceiling',
             'current_vs_ceiling_pct',
             'class_consistency',
+            'race_quality_tier',
         ],
         'description': (
             'Class movement. Class drop is one '
@@ -140,7 +141,7 @@ ALL_FEATURES = []
 for group in FEATURE_GROUPS.values():
     ALL_FEATURES.extend(group['features'])
 
-FEATURE_COUNT = len(ALL_FEATURES)  # should be 72
+FEATURE_COUNT = len(ALL_FEATURES)  # should be 73
 
 # Target variable name
 TARGET_COLUMN = 'finish_position'
