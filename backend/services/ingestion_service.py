@@ -101,23 +101,33 @@ class IngestionService:
         }
 
         for race_data in races:
+            # Each race gets its own connection
+            # so a failure in one race cannot
+            # poison subsequent races
             try:
-                race_id = self.store_race_card(race_data)
-                if race_id:
-                    summary['races_stored'] += 1
-                else:
-                    summary['races_skipped'] += 1
+                from shared.db import get_db
+                with get_db() as race_conn:
+                    service = IngestionService(race_conn)
+                    race_id = service.store_race_card(
+                        race_data
+                    )
+                    if race_id:
+                        summary['races_stored'] += 1
+                    else:
+                        summary['races_skipped'] += 1
             except Exception as e:
+                summary['races_skipped'] += 1
                 summary['errors'].append(str(e))
                 logger.error(
-                    f"Failed to store race: {e}",
+                    f"Race failed: {e}",
                     exc_info=True
                 )
 
         logger.info(
             f"Ingestion complete for {race_date}: "
             f"{summary['races_stored']} stored, "
-            f"{summary['races_skipped']} skipped"
+            f"{summary['races_skipped']} skipped, "
+            f"{len(summary['errors'])} errors"
         )
         return summary
 
