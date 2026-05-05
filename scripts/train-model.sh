@@ -61,7 +61,7 @@ log "S3 bucket: ${S3_BUCKET:-not found}"
 
 cd "$PROJECT_ROOT/backend"
 
-TRAIN_ARGS="--start-date 2023-01-01 --end-date 2023-12-31"
+TRAIN_ARGS="--start-date 2022-01-01 --end-date 2025-12-31"
 
 if [ -n "$S3_BUCKET" ]; then
   TRAIN_ARGS="$TRAIN_ARGS --s3-bucket $S3_BUCKET"

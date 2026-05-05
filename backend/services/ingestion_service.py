@@ -213,20 +213,14 @@ class IngestionService:
                 )
                 return None
 
-            # Step 2: Quality filter
-            if not self._is_qualifying_race(
-                race_data['track'].get('track_code'),
-                race_data['race']
-            ):
-                logger.debug(
-                    f"Skipping non-qualifying race: "
-                    f"{race_data['track'].get('track_code')} "
-                    f"R{race_data['race'].get('race_number')} "
-                    f"{race_data['race'].get('race_type')}"
-                )
-                return None
+            # Quality-filter applied at inference layer instead, via
+            # race_repository.get_qualifying_races_by_date(). Ingestion
+            # captures the full daily card so /cards endpoint, SmartBoard
+            # display, and any future use cases can see all races.
+            # _is_qualifying_race() retained on this class for callers
+            # that still want the check.
 
-            # Step 3: Insert race
+            # Step 2: Insert race
             race_insert = dict(race_data['race'])
             race_insert['track_id'] = track_id
             race_id = self.race_repo.insert_race(

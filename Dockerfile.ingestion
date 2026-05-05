@@ -1,12 +1,6 @@
-FROM public.ecr.aws/lambda/python:3.11
+FROM public.ecr.aws/lambda/python:3.12
 
-# Copy backend (application code)
-COPY backend/ ${LAMBDA_TASK_ROOT}/
-
-# Copy model directory (feature definitions,
-# training pipeline imports)
-COPY model/ ${LAMBDA_TASK_ROOT}/model/
-
+# Install Python dependencies FIRST — cached unless requirements.txt changes
 RUN pip install --no-cache-dir \
   psycopg2-binary==2.9.9 \
   boto3==1.34.0 \
@@ -17,6 +11,46 @@ RUN pip install --no-cache-dir \
   scipy==1.11.4 \
   beautifulsoup4==4.12.3 \
   requests==2.31.0 \
-  lxml==4.9.3
+  lxml==4.9.3 \
+  pdfplumber==0.10.3 \
+  playwright==1.42.0
+
+# Install Chromium system dependencies for Amazon Linux 2023
+# (playwright --with-deps uses apt-get which is unavailable on AL2023)
+RUN dnf install -y \
+  alsa-lib \
+  at-spi2-atk \
+  atk \
+  cairo \
+  cups-libs \
+  dbus-libs \
+  glib2 \
+  gtk3 \
+  libX11 \
+  libXcomposite \
+  libXcursor \
+  libXdamage \
+  libXext \
+  libXfixes \
+  libXi \
+  libXrandr \
+  libXrender \
+  libXtst \
+  libdrm \
+  libxcb \
+  libxkbcommon \
+  mesa-libgbm \
+  nspr \
+  nss \
+  pango \
+  && dnf clean all
+
+# Install Chromium browser into image (no --with-deps; handled above)
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN playwright install chromium
+
+# Copy application code LAST — changes here don't bust dependency cache
+COPY backend/ ${LAMBDA_TASK_ROOT}/
+COPY model/ ${LAMBDA_TASK_ROOT}/model/
 
 CMD ["lambdas/ingestion/handler.handler"]

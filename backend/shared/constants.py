@@ -13,6 +13,21 @@ QUALIFYING_RACE_TYPES = [
 ]
 # Claiming races included only if claiming_price >= MIN_CLAIMING_PRICE
 
+
+def is_qualifying_race_type(
+    race_type: str, claiming_price: int = 0
+) -> bool:
+    """True if race_type qualifies for prediction generation.
+    Mirrors the SQL filter in
+    race_repository.get_qualifying_races_by_date().
+    """
+    if race_type in QUALIFYING_RACE_TYPES:
+        return True
+    if (race_type == 'claiming'
+            and (claiming_price or 0) >= MIN_CLAIMING_PRICE):
+        return True
+    return False
+
 SURFACES = ['dirt', 'turf', 'synthetic', 'wet_dirt']
 
 RACE_TYPES = [
@@ -116,3 +131,25 @@ MIN_STARTS_FOR_STYLE = 3
 # If model win_probability exceeds morning line implied probability
 # by this margin, flag as value play.
 OVERLAY_THRESHOLD = 0.15
+
+# P&L model constants
+BANKROLL = 1000.0
+KELLY_FRACTION = 0.5           # half-Kelly
+MAX_BET_PCT = 0.10             # max 10% of bankroll per bet
+MIN_EDGE_TO_BET = 0.05         # minimum edge to place a bet
+STRONG_VALUE_THRESHOLD = 0.10  # edge for "strong value" flag
+
+# LS model constants
+LONGSHOT_ODDS_FLOOR = 10.0     # minimum odds to qualify as longshot (10-1+)
+LONGSHOT_ALERT_EDGE = 0.05     # minimum edge for longshot alert
+
+# Dual-prediction architecture (Stream A2 — 2026-04-29).
+# Tony's two-pass handicapping methodology:
+#   1. handicapping_prob — pure form-based model output, calibrated.
+#   2. market_prob       — 1 / (morning_line_odds + 1).
+#   3. edge_pct          — handicapping_prob - market_prob.
+# The displayed probability stored in win_probability/displayed_prob is a
+# weighted blend: w * handicapping_prob + (1 - w) * market_prob.
+# w = 1.0 → pure handicapping (initial). Tune downward only after seeing
+# holdout ROI at multiple weights.
+HANDICAPPING_BLEND_WEIGHT = 1.0

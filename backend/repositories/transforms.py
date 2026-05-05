@@ -96,18 +96,24 @@ def _compute_raw_speed_vs_par(
 
 def _compute_pace_delta(
     early_pace_figure: Optional[float],
-    late_pace_figure: Optional[float]
+    late_pace_figure: Optional[float],
+    call_2_position: Optional[int] = None,
+    finish_call_position: Optional[int] = None,
 ) -> Optional[float]:
     """
-    Pace delta = late_pace - early_pace.
-    Negative = horse accelerated (ran faster late).
-    Positive = horse decelerated (backed up).
-    A negative pace_delta in a fast-pace race
-    is a strong performance indicator.
+    Pace delta: how much a horse accelerated or decelerated.
+    Negative = improved (good). Positive = backed up (bad).
+
+    Primary: late_pace_figure - early_pace_figure (figure-based).
+    Fallback: finish_call_position - call_2_position (position-based).
+      e.g. call_2=4, finish=1 → 1-4 = -3 (gained 3 positions, good).
+    Returns None if neither source has sufficient data.
     """
-    if early_pace_figure is None or late_pace_figure is None:
-        return None
-    return round(late_pace_figure - early_pace_figure, 4)
+    if early_pace_figure is not None and late_pace_figure is not None:
+        return round(late_pace_figure - early_pace_figure, 4)
+    if call_2_position is not None and finish_call_position is not None:
+        return float(finish_call_position - call_2_position)
+    return None
 
 
 def _compute_running_style(
@@ -263,7 +269,12 @@ def transform_past_performance(
         final_time, distance)
     raw_speed_vs_par = _compute_raw_speed_vs_par(
         raw_speed_index, distance)
-    pace_delta = _compute_pace_delta(early_pace, late_pace)
+    pace_delta = _compute_pace_delta(
+        early_pace, late_pace,
+        call_2_position=_to_int(row.get('call_2_position')),
+        finish_call_position=_to_int(
+            row.get('finish_call_position') or row.get('finish_position')),
+    )
     running_style = (
         _to_str(row.get('running_style')) or
         _compute_running_style(
@@ -386,6 +397,19 @@ def transform_past_performance(
         class_rating=_to_int(row.get('class_rating')),
         days_since_last_race=_to_int(
             row.get('days_since_last_race')),
+        computed_speed_figure=_to_float(
+            row.get('computed_speed_figure')),
+        trip_troubled=_to_bool(row.get('trip_troubled')),
+        trip_pace_setter=_to_bool(
+            row.get('trip_pace_setter')),
+        trip_faded=_to_bool(row.get('trip_faded')),
+        trip_late_rally=_to_bool(
+            row.get('trip_late_rally')),
+        trip_no_factor=_to_bool(
+            row.get('trip_no_factor')),
+        trip_gate_issue=_to_bool(
+            row.get('trip_gate_issue')),
+        wide_path=_to_int(row.get('wide_path')) or 0,
         comment=_to_str(row.get('comment')),
         trouble_comment=_to_str(row.get('trouble_comment')),
         created_at=row.get('created_at')
@@ -542,6 +566,7 @@ def transform_prediction(
         prediction_id=_to_str(row.get('prediction_id')),
         entry=entry,
         race_id=_to_str(row.get('race_id')) or '',
+        race_number=_to_int(row.get('race_number')),
         horse_id=_to_str(row.get('horse_id')) or '',
         model_version_id=_to_str(
             row.get('model_version_id')),
@@ -569,7 +594,30 @@ def transform_prediction(
         was_show=row.get('was_show'),
         exacta_hit=row.get('exacta_hit'),
         trifecta_hit=row.get('trifecta_hit'),
-        created_at=row.get('created_at')
+        created_at=row.get('created_at'),
+        raw_win_prob=_to_float(row.get('raw_win_prob')),
+        rank_score=_to_float(row.get('rank_score')),
+        edge_pct=_to_float(row.get('edge_pct')),
+        kelly_fraction=_to_float(row.get('kelly_fraction')),
+        kelly_bet=_to_float(row.get('kelly_bet')),
+        has_workout_data=_to_bool(row.get('has_workout_data')),
+        model_used=_to_str(row.get('model_used')) or 'core',
+        ensemble_win_prob=_to_float(row.get('ensemble_win_prob')),
+        trajectory_score=_to_float(row.get('trajectory_score')),
+        longshot_prob=_to_float(row.get('longshot_prob')),
+        angle_name=_to_str(row.get('angle_name')),
+        angle_posterior=_to_float(row.get('angle_posterior')),
+        angle_ev=_to_float(row.get('angle_ev')),
+        longshot_alert=_to_bool(row.get('longshot_alert')),
+        confidence=_to_str(row.get('confidence')),
+        handicapping_prob=_to_float(row.get('handicapping_prob')),
+        market_prob=_to_float(row.get('market_prob')),
+        actual_finish_position=_to_int(row.get('actual_finish_position')),
+        actual_win_payout=_to_float(row.get('actual_win_payout')),
+        actual_place_payout=_to_float(row.get('actual_place_payout')),
+        actual_show_payout=_to_float(row.get('actual_show_payout')),
+        prediction_outcome=_to_str(row.get('prediction_outcome')),
+        flat_bet_pl=_to_float(row.get('flat_bet_pl')),
     )
 
 

@@ -2,6 +2,11 @@ from typing import Optional
 from .base_repository import BaseRepository
 from .transforms import transform_horse
 from models.canonical import Horse
+from shared.horse_naming import (
+    normalize_horse_name,
+    horse_match_key,
+    HORSE_MATCH_KEY_SQL,
+)
 
 
 class HorseRepository(BaseRepository):
@@ -29,14 +34,18 @@ class HorseRepository(BaseRepository):
         self, name: str
     ) -> Optional[Horse]:
         """
-        Case-insensitive name search.
-        Returns first match or None.
+        Match by aggressive key (lowercase + alphanumeric-only).
+        Treats 'Further Ado' / 'FurtherAdo' / 'Further-Ado' as the
+        same horse. Returns first match or None.
         """
+        key = horse_match_key(name)
+        if not key:
+            return None
         row = self._query_one(
-            """SELECT * FROM horses
-               WHERE LOWER(horse_name) = LOWER(%s)
-               LIMIT 1""",
-            (name,)
+            f"""SELECT * FROM horses
+                WHERE {HORSE_MATCH_KEY_SQL} = %s
+                LIMIT 1""",
+            (key,)
         )
         return transform_horse(row) if row else None
 
@@ -78,7 +87,7 @@ class HorseRepository(BaseRepository):
                RETURNING horse_id""",
             (
                 horse_data.get('registration_id'),
-                horse_data['horse_name'],
+                normalize_horse_name(horse_data['horse_name']),
                 horse_data.get('sire'),
                 horse_data.get('dam'),
                 horse_data.get('dam_sire'),
@@ -105,7 +114,7 @@ class HorseRepository(BaseRepository):
                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                RETURNING horse_id""",
             (
-                horse_data['horse_name'],
+                normalize_horse_name(horse_data['horse_name']),
                 horse_data.get('sire'),
                 horse_data.get('dam'),
                 horse_data.get('dam_sire'),

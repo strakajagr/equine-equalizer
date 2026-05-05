@@ -138,5 +138,11 @@ def _serialize_prediction(p) -> dict:
         'blinkers_first_time': p.entry.blinkers_first_time,
         'equipment_change': (
             p.entry.equipment_change_from_last
-        )
+        ),
+        'actual_finish': p.actual_finish,
+        'was_win': p.was_win,
+        'was_place': p.was_place,
+        'was_show': p.was_show,
+        'exacta_hit': p.exacta_hit,
+        'trifecta_hit': p.trifecta_hit,
     }

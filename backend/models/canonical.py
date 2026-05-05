@@ -179,6 +179,9 @@ class PastPerformance:
     raw_speed_index: Optional[float] = None
     raw_speed_vs_par: Optional[float] = None
 
+    # Computed speed figure (computed by ingestion pipeline)
+    computed_speed_figure: Optional[float] = None
+
     # Race context
     winner_name: Optional[str] = None
     second_name: Optional[str] = None
@@ -194,6 +197,15 @@ class PastPerformance:
     # Comments
     comment: Optional[str] = None
     trouble_comment: Optional[str] = None
+
+    # Trip flags (extracted from comment by ingestion)
+    trip_troubled: bool = False
+    trip_pace_setter: bool = False
+    trip_faded: bool = False
+    trip_late_rally: bool = False
+    trip_no_factor: bool = False
+    trip_gate_issue: bool = False
+    wide_path: int = 0
 
     created_at: Optional[datetime] = None
 
@@ -326,9 +338,90 @@ class ModelVersion:
     feature_list: dict = field(default_factory=dict)
     hyperparameters: dict = field(default_factory=dict)
     s3_artifact_path: Optional[str] = None
+    model_type: str = 'wr'
+    flat_bet_roi: Optional[float] = None
+    kelly_roi: Optional[float] = None
+    value_bet_win_rate: Optional[float] = None
     is_active: bool = False
     notes: Optional[str] = None
     created_at: Optional[datetime] = None
+
+
+@dataclass
+class PLPrediction:
+    entry: Entry
+    race_id: str
+    horse_id: str
+    prediction_id: Optional[str] = None
+    race_number: Optional[int] = None
+    model_version_id: Optional[str] = None
+    win_probability: Optional[float] = None
+    predicted_ev: Optional[float] = None
+    confidence_score: Optional[float] = None
+    predicted_rank: Optional[int] = None
+    is_top_pick: bool = False
+    closing_odds: Optional[float] = None
+    implied_probability: Optional[float] = None
+    edge_pct: Optional[float] = None
+    is_value_bet: bool = False
+    is_strong_value: bool = False
+    kelly_fraction: Optional[float] = None
+    kelly_bet_size: Optional[float] = None
+    feature_importance: dict = field(default_factory=dict)
+    actual_finish: Optional[int] = None
+    was_win: Optional[bool] = None
+    bet_profit: Optional[float] = None
+    created_at: Optional[datetime] = None
+    # Stream A2 dual-prediction (written by inference, surfaced via API)
+    handicapping_prob: Optional[float] = None
+    market_prob: Optional[float] = None
+    # Stream E results-aware fields (LEFT JOINed from results at read time).
+    actual_finish_position: Optional[int] = None
+    actual_win_payout: Optional[float] = None
+    actual_place_payout: Optional[float] = None
+    actual_show_payout: Optional[float] = None
+    prediction_outcome: Optional[str] = None
+    flat_bet_pl: Optional[float] = None
+    track_code: Optional[str] = None
+    track_name: Optional[str] = None
+
+
+@dataclass
+class LSPrediction:
+    entry: Entry
+    race_id: str
+    horse_id: str
+    prediction_id: Optional[str] = None
+    model_version_id: Optional[str] = None
+    final_win_probability: Optional[float] = None
+    longshot_alert: bool = False
+    confidence: Optional[str] = None
+    kelly_fraction: Optional[float] = None
+    predicted_rank: Optional[int] = None
+    xgb_rank_score: Optional[float] = None
+    rf_longshot_prob: Optional[float] = None
+    lstm_trajectory: Optional[float] = None
+    calibrated_win_prob: Optional[float] = None
+    bayesian_angle_ev: Optional[float] = None
+    angle_description: Optional[str] = None
+    feature_importance: dict = field(default_factory=dict)
+    actual_finish: Optional[int] = None
+    was_win: Optional[bool] = None
+    actual_odds: Optional[float] = None
+    bet_profit: Optional[float] = None
+    created_at: Optional[datetime] = None
+    # Race context for the longshot card UI (Bug 3 — race info on alerts)
+    race_date: Optional[date] = None
+    race_number: Optional[int] = None
+    track_code: Optional[str] = None
+    post_time: Optional[datetime] = None
+    # Stream E results-aware fields (LEFT JOINed from results at read time).
+    actual_finish_position: Optional[int] = None
+    actual_win_payout: Optional[float] = None
+    actual_place_payout: Optional[float] = None
+    actual_show_payout: Optional[float] = None
+    prediction_outcome: Optional[str] = None
+    flat_bet_pl: Optional[float] = None
 
 
 @dataclass
@@ -337,6 +430,7 @@ class Prediction:
     race_id: str
     horse_id: str
     prediction_id: Optional[str] = None
+    race_number: Optional[int] = None
     model_version_id: Optional[str] = None
     win_probability: Optional[float] = None
     place_probability: Optional[float] = None
@@ -357,3 +451,31 @@ class Prediction:
     exacta_hit: Optional[bool] = None
     trifecta_hit: Optional[bool] = None
     created_at: Optional[datetime] = None
+    # Layer 2-7 enrichment fields
+    raw_win_prob: Optional[float] = None
+    rank_score: Optional[float] = None
+    edge_pct: Optional[float] = None
+    kelly_fraction: Optional[float] = None
+    kelly_bet: Optional[float] = None
+    has_workout_data: bool = False
+    model_used: Optional[str] = 'core'
+    ensemble_win_prob: Optional[float] = None
+    trajectory_score: Optional[float] = None
+    longshot_prob: Optional[float] = None
+    angle_name: Optional[str] = None
+    angle_posterior: Optional[float] = None
+    angle_ev: Optional[float] = None
+    longshot_alert: bool = False
+    confidence: Optional[str] = None
+    # Stream A2 dual-prediction (written by inference, surfaced via API)
+    handicapping_prob: Optional[float] = None
+    market_prob: Optional[float] = None
+    # Stream E results-aware fields (LEFT JOINed from results at read time).
+    # prediction_outcome enum: 'win' | 'place' | 'show' | 'lose' | 'pending' | 'scratched'.
+    # flat_bet_pl: signed P/L for a hypothetical $2 win bet on this horse.
+    actual_finish_position: Optional[int] = None
+    actual_win_payout: Optional[float] = None
+    actual_place_payout: Optional[float] = None
+    actual_show_payout: Optional[float] = None
+    prediction_outcome: Optional[str] = None
+    flat_bet_pl: Optional[float] = None

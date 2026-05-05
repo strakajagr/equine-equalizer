@@ -222,6 +222,11 @@ class InferenceService:
 
         for race in races:
             try:
+                # Use savepoint so one race failure
+                # doesn't abort the whole transaction
+                with self.conn.cursor() as cur:
+                    cur.execute("SAVEPOINT race_sp")
+
                 # Load entries with PPs
                 race.entries = (
                     entry_repo.get_entries_by_race(
@@ -248,6 +253,9 @@ class InferenceService:
                     self._store_prediction(pred)
                     predictions_stored += 1
 
+                with self.conn.cursor() as cur:
+                    cur.execute("RELEASE SAVEPOINT race_sp")
+
                 races_processed += 1
                 logger.info(
                     f"Race {race.race_number} at "
@@ -261,6 +269,13 @@ class InferenceService:
                 )
                 errors.append(err)
                 logger.error(err, exc_info=True)
+                try:
+                    with self.conn.cursor() as cur:
+                        cur.execute(
+                            "ROLLBACK TO SAVEPOINT race_sp"
+                        )
+                except Exception:
+                    pass
 
         summary = {
             'date': str(race_date),
@@ -322,13 +337,46 @@ class InferenceService:
         # Run inference
         raw_scores = self.model.predict(dmatrix)
 
-        # Convert to probabilities via softmax
-        # Softmax within race so probabilities
-        # sum to 1.0 across the field
-        exp_scores = np.exp(
-            raw_scores - raw_scores.max()
-        )
+        # Convert to probabilities via temperature-scaled softmax
+        # Temperature < 1.0 sharpens the distribution,
+        # amplifying small score differences into
+        # meaningful probability gaps.
+        # Without temperature, a 0.05 score spread in a
+        # 6-horse field gives ~17% each (uniform).
+        # With T=0.15, same spread gives 25%/16%/... (useful).
+        SOFTMAX_TEMPERATURE = 0.15
+        scaled = (raw_scores - raw_scores.max()) / SOFTMAX_TEMPERATURE
+        # Clip to prevent overflow
+        scaled = np.clip(scaled, -20, 0)
+        exp_scores = np.exp(scaled)
         win_probs = exp_scores / exp_scores.sum()
+
+        # Compute SHAP values for feature explanations
+        # One call for entire race — fast
+        shap_map = {}
+        try:
+            shap_values = self.model.predict(
+                dmatrix, pred_contribs=True
+            )
+            for s_idx in range(len(shap_values)):
+                row_shap = shap_values[s_idx][:-1]
+                importance = {
+                    ALL_FEATURES[fi]: round(float(v), 4)
+                    for fi, v in enumerate(row_shap)
+                    if abs(v) > 0.001
+                }
+                top5 = dict(
+                    sorted(
+                        importance.items(),
+                        key=lambda x: abs(x[1]),
+                        reverse=True
+                    )[:5]
+                )
+                shap_map[s_idx] = top5
+        except Exception as shap_err:
+            logger.warning(
+                f"SHAP computation failed: {shap_err}"
+            )
 
         # Build Prediction objects
         predictions = []
@@ -378,7 +426,7 @@ class InferenceService:
                 is_value_flag=False,
                 morning_line_implied_prob=None,
                 overlay_pct=None,
-                feature_importance={},
+                feature_importance=shap_map.get(idx, {}),
             )
             predictions.append(pred)
 

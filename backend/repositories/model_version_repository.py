@@ -1,4 +1,5 @@
 from typing import Optional
+from psycopg2.extras import Json
 from .base_repository import BaseRepository
 from .transforms import transform_model_version
 from models.canonical import ModelVersion
@@ -59,8 +60,8 @@ class ModelVersionRepository(BaseRepository):
                 model_data['training_data_start'],
                 model_data['training_data_end'],
                 model_data.get('training_race_count'),
-                model_data.get('feature_list', {}),
-                model_data.get('hyperparameters', {}),
+                Json(model_data.get('feature_list', {})),
+                Json(model_data.get('hyperparameters', {})),
                 model_data.get('s3_artifact_path'),
                 model_data.get('is_active', False),
                 model_data.get('notes')
@@ -72,20 +73,46 @@ class ModelVersionRepository(BaseRepository):
         self, model_version_id: str
     ) -> None:
         """
-        Deactivate all models then activate one.
-        Only one model active at a time.
-        Called after retraining when new model
-        passes evaluation thresholds.
+        Deactivate models OF THE SAME TYPE only,
+        then activate this one. Called after training
+        when new model passes evaluation thresholds.
         """
-        self._write(
-            "UPDATE model_versions SET is_active = false"
-        )
-        self._write(
-            """UPDATE model_versions
-               SET is_active = true
-               WHERE model_version_id = %s""",
+        model = self._query_one(
+            "SELECT model_type FROM model_versions "
+            "WHERE model_version_id = %s",
             (model_version_id,)
         )
+        if not model:
+            raise ValueError(
+                f"Model {model_version_id} not found"
+            )
+        self._write(
+            "UPDATE model_versions SET is_active = false "
+            "WHERE model_type = %s",
+            (model['model_type'],)
+        )
+        self._write(
+            "UPDATE model_versions SET is_active = true "
+            "WHERE model_version_id = %s",
+            (model_version_id,)
+        )
+
+    def get_active_model_by_type(
+        self, model_type: str
+    ) -> Optional[ModelVersion]:
+        """
+        Get the active model for a specific type.
+        model_type must be 'wr', 'pl', or 'ls'.
+        Returns None if no active model of that type.
+        """
+        row = self._query_one(
+            """SELECT * FROM model_versions
+               WHERE is_active = true
+               AND model_type = %s
+               LIMIT 1""",
+            (model_type,)
+        )
+        return transform_model_version(row) if row else None
 
     def update_evaluation_metrics(
         self,

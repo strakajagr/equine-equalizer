@@ -1,0 +1,8 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir requests==2.31.0 boto3==1.34.0
+
+WORKDIR /app
+COPY option_b_probe.py /app/
+
+CMD ["python", "/app/option_b_probe.py"]

@@ -38,12 +38,16 @@ class EvaluationService:
         from repositories.prediction_repository import (
             PredictionRepository
         )
+        from repositories.wr_prediction_repository import (
+            WRPredictionRepository
+        )
         from repositories.race_repository import (
             RaceRepository
         )
 
         result_repo = ResultRepository(self.conn)
         pred_repo = PredictionRepository(self.conn)
+        wr_pred_repo = WRPredictionRepository(self.conn)
         race_repo = RaceRepository(self.conn)
 
         races = race_repo.get_qualifying_races_by_date(
@@ -55,8 +59,14 @@ class EvaluationService:
             results = result_repo.get_results_by_race(
                 race.race_id
             )
-            predictions = pred_repo \
+            # Try WR predictions first, fall back to old
+            predictions = wr_pred_repo \
                 .get_predictions_by_race(race.race_id)
+            active_pred_repo = wr_pred_repo
+            if not predictions:
+                predictions = pred_repo \
+                    .get_predictions_by_race(race.race_id)
+                active_pred_repo = pred_repo
 
             if not results or not predictions:
                 continue
@@ -104,7 +114,7 @@ class EvaluationService:
                     continue
 
                 actual_finish = result.official_finish
-                pred_repo.update_prediction_result(
+                active_pred_repo.update_prediction_result(
                     prediction_id=pred.prediction_id,
                     actual_finish=actual_finish,
                     was_win=(actual_finish == 1),

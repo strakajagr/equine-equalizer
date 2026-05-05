@@ -64,22 +64,20 @@ logger = logging.getLogger(__name__)
 DEFAULT_PARAMS = {
     'objective': 'rank:pairwise',
     'eval_metric': 'ndcg',
-    'eta': 0.05,             # learning rate — low = more trees needed
-                             # but better generalization
-    'max_depth': 6,          # tree depth — 6 is standard starting point
-    'min_child_weight': 5,   # min samples per leaf — prevents overfitting
-                             # on small horse samples
-    'subsample': 0.8,        # row sampling per tree — reduces overfitting
-    'colsample_bytree': 0.8, # feature sampling — forces diverse trees
-    'gamma': 1.0,            # min split gain — higher = more conservative
-    'reg_alpha': 0.1,        # L1 regularization
-    'reg_lambda': 1.0,       # L2 regularization
+    'eta': 0.03,             # lower LR = more rounds, better generalization
+    'max_depth': 5,          # slightly shallower to prevent overfitting
+    'min_child_weight': 3,   # lower = more splits, better discrimination
+    'subsample': 0.8,
+    'colsample_bytree': 0.7, # more diversity across trees
+    'gamma': 0.5,            # lower = allow more splits (was 1.0)
+    'reg_alpha': 0.05,       # lighter L1
+    'reg_lambda': 0.5,       # lighter L2
     'seed': 42,
     'verbosity': 1,
 }
 
-NUM_ROUNDS = 500           # max boosting rounds
-EARLY_STOPPING = 50        # stop if no improvement
+NUM_ROUNDS = 1000          # more rounds with lower LR
+EARLY_STOPPING = 100       # patient early stopping
 VALIDATION_SPLIT = 0.2     # 20% held out for eval
 MIN_RACES_FOR_TRAINING = 100
 
@@ -117,11 +115,11 @@ def load_training_data(
     races_processed = 0
     races_skipped = 0
 
-    # Get date range
+    # Get date range — use all available data by default
     if not start_date:
-        start_date = date(2023, 1, 1)
+        start_date = date(2022, 1, 1)
     if not end_date:
-        end_date = date(2023, 12, 31)
+        end_date = date(2025, 12, 31)
 
     # Get all qualifying races in range
     # Process month by month to manage memory
@@ -285,6 +283,40 @@ def prepare_xgboost_data(
         subset=['official_finish']
     )
 
+    # Remove clearly invalid entries (scratch codes, etc.)
+    before_filter = len(merged)
+    merged = merged[
+        (merged['official_finish'] > 0) &
+        (merged['official_finish'] < 90)
+    ].copy()
+    filtered = before_filter - len(merged)
+    if filtered > 0:
+        logger.info(
+            f"Removed {filtered} invalid entries "
+            f"(official_finish 0 or >= 90)"
+        )
+
+    # Drop races that lost too many horses from filtering
+    # Ranking needs >= 4 horses per race to learn
+    race_sizes = merged.groupby('race_id').size()
+    small_races = race_sizes[race_sizes < 4].index
+    if len(small_races) > 0:
+        before_small = len(merged)
+        merged = merged[
+            ~merged['race_id'].isin(small_races)
+        ].copy()
+        logger.info(
+            f"Dropped {len(small_races)} races with "
+            f"< 4 horses after filter "
+            f"({before_small - len(merged)} entries)"
+        )
+
+    # Re-rank official_finish within each race
+    # to be sequential (1,2,3...) after removals
+    merged['official_finish'] = merged.groupby(
+        'race_id'
+    )['official_finish'].rank(method='dense').astype(int)
+
     # Ensure feature columns all exist
     for col in ALL_FEATURES:
         if col not in merged.columns:
@@ -339,16 +371,19 @@ def prepare_xgboost_data(
     )['horse_id'].count().values
 
     # XGBoost label for ranking:
-    # INVERT finish position so rank 1 = highest label
-    # XGBoost rank:pairwise maximizes label ordering
-    train_labels = (
-        train_df['official_finish'].max() -
-        train_df['official_finish'] + 1
-    ).values
-    val_labels = (
-        val_df['official_finish'].max() -
-        val_df['official_finish'] + 1
-    ).values
+    # INVERT finish position per race so rank 1 = highest
+    # label. Cap at 31 to stay within NDCG exponential gain
+    # limit (safety net — DNF filter above keeps max ~20).
+    train_labels = train_df.groupby(
+        'race_id', sort=False
+    )['official_finish'].transform(
+        lambda x: min(x.max(), 31) - x + 1
+    ).clip(lower=1, upper=31).values
+    val_labels = val_df.groupby(
+        'race_id', sort=False
+    )['official_finish'].transform(
+        lambda x: min(x.max(), 31) - x + 1
+    ).clip(lower=1, upper=31).values
 
     # Create DMatrix objects
     dtrain = xgb.DMatrix(
@@ -617,6 +652,8 @@ def register_model(
     params: dict,
     s3_path: str,
     training_race_count: int,
+    start_date: date = None,
+    end_date: date = None,
     set_active: bool = False
 ) -> str:
     """
@@ -638,8 +675,8 @@ def register_model(
     model_data = {
         'version_name': version_name,
         'training_date': datetime.now(),
-        'training_data_start': date(2023, 1, 1),
-        'training_data_end': date(2023, 12, 31),
+        'training_data_start': start_date or date(2022, 1, 1),
+        'training_data_end': end_date or date(2025, 12, 31),
         'training_race_count': training_race_count,
         'exacta_hit_rate': metrics.get(
             'exacta_hit_rate'
@@ -657,8 +694,8 @@ def register_model(
         's3_artifact_path': s3_path,
         'is_active': set_active,
         'notes': (
-            'Initial model trained on '
-            '2023 Equibase dataset'
+            f'Trained on {start_date} to {end_date} '
+            f'Equibase dataset'
         ),
     }
 
@@ -748,12 +785,12 @@ def main():
     )
     parser.add_argument(
         '--start-date',
-        default='2023-01-01',
+        default='2022-01-01',
         help='Training data start date YYYY-MM-DD'
     )
     parser.add_argument(
         '--end-date',
-        default='2023-12-31',
+        default='2025-12-31',
         help='Training data end date YYYY-MM-DD'
     )
     parser.add_argument(
@@ -855,6 +892,8 @@ def main():
             params=DEFAULT_PARAMS,
             s3_path=s3_path,
             training_race_count=race_count,
+            start_date=start_date,
+            end_date=end_date,
             set_active=args.set_active
         )
 

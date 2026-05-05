@@ -143,6 +143,66 @@ class RaceRepository(BaseRepository):
             races=races
         )
 
+    def get_card_metadata(
+        self,
+        track_code: str,
+        race_date: date,
+    ) -> Optional[dict]:
+        """Lightweight card endpoint for /cards/{date}/{track_code}.
+        Returns dict with track + race list + non-scratched entry counts.
+        Used as authoritative race-list source by SmartBoard / external
+        clients — single source of truth for race metadata.
+        post_time stored as UTC; converted to America/New_York wall-clock
+        for display.
+        """
+        rows = self._query(
+            """SELECT
+                 t.track_code, t.track_name,
+                 r.race_id, r.race_number, r.race_name, r.race_type,
+                 r.grade, r.distance_furlongs, r.surface, r.purse,
+                 (r.post_time AT TIME ZONE 'America/New_York')::time
+                   AS post_time_et,
+                 (SELECT COUNT(*) FROM entries e
+                  WHERE e.race_id = r.race_id
+                    AND COALESCE(e.is_scratched, FALSE) = FALSE)
+                   AS field_size
+               FROM races r
+               JOIN tracks t ON t.track_id = r.track_id
+               WHERE t.track_code = %s AND r.race_date = %s
+               ORDER BY r.race_number""",
+            (track_code, race_date),
+        )
+        if not rows:
+            return None
+        return {
+            'date': race_date.isoformat(),
+            'track_code': rows[0]['track_code'],
+            'track_name': rows[0]['track_name'],
+            'races': [
+                {
+                    'race_id': str(r['race_id']),
+                    'race_number': r['race_number'],
+                    'race_name': r['race_name'],
+                    'post_time': (
+                        r['post_time_et'].strftime('%-I:%M %p ET')
+                        if r['post_time_et'] else None
+                    ),
+                    'distance_furlongs': (
+                        float(r['distance_furlongs'])
+                        if r['distance_furlongs'] is not None else None
+                    ),
+                    'surface': r['surface'],
+                    'purse': r['purse'],
+                    'race_type': r['race_type'],
+                    'race_grade': (
+                        f'G{r["grade"]}' if r['grade'] else None
+                    ),
+                    'field_size': r['field_size'],
+                }
+                for r in rows
+            ],
+        }
+
     def insert_race(self, race_data: dict) -> str:
         """Insert race. Returns race_id."""
         row = self._write_returning(
@@ -166,6 +226,12 @@ class RaceRepository(BaseRepository):
                DO UPDATE SET
                  post_time = EXCLUDED.post_time,
                  field_size = EXCLUDED.field_size,
+                 race_name = COALESCE(
+                   EXCLUDED.race_name, races.race_name
+                 ),
+                 grade = COALESCE(
+                   EXCLUDED.grade, races.grade
+                 ),
                  track_condition = EXCLUDED.track_condition,
                  moisture_level = EXCLUDED.moisture_level,
                  track_variant = EXCLUDED.track_variant,

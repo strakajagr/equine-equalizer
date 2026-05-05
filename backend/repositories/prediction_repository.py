@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import date
+from psycopg2.extras import Json
 from .base_repository import BaseRepository
 from .transforms import (
     transform_prediction, transform_entry,
@@ -195,7 +196,7 @@ class PredictionRepository(BaseRepository):
                  recommended_bet_type, exotic_partners
                ) VALUES (
                  %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                 %s,%s,%s,%s,%s,%s
+                 %s,%s,%s,%s,%s,%s::uuid[]
                )
                ON CONFLICT (entry_id) DO UPDATE SET
                  win_probability = EXCLUDED.win_probability,
@@ -230,7 +231,7 @@ class PredictionRepository(BaseRepository):
                 prediction_data.get(
                     'morning_line_implied_prob'),
                 prediction_data.get('overlay_pct'),
-                prediction_data.get('feature_importance'),
+                Json(prediction_data.get('feature_importance') or {}),
                 prediction_data.get('recommended_bet_type'),
                 prediction_data.get('exotic_partners', [])
             )
