@@ -766,6 +766,32 @@ class HRNScraper(DataSourceInterface):
         if not results_table:
             return None
 
+        # Header-aware column resolution for win/place/show payouts.
+        # Bug #28 fix (Phase 5.3.1): HRN page structure changed circa
+        # 2026-04-30 (added icon column per surfaced manifestation;
+        # exact column count/position not manually verified per
+        # Q-T1 = unverified). Resolve target columns by <th> header
+        # substring match instead of fixed positional index, so the
+        # parser is structure-change-resilient.
+        # Forbidden Pattern target: positional column indexing in
+        # scrapers without column-header verification.
+        def _resolve_col(headers, *patterns):
+            """First header index whose text contains any pattern
+            (case-insensitive substring match). None if no match."""
+            for pat in patterns:
+                for i, h in enumerate(headers):
+                    if pat in h:
+                        return i
+            return None
+
+        result_headers = [
+            th.get_text(strip=True).lower()
+            for th in results_table.find_all('th')
+        ]
+        win_idx   = _resolve_col(result_headers, 'win $', 'win$', 'win pay', 'win')
+        place_idx = _resolve_col(result_headers, 'place $', 'place$', 'place pay', 'place')
+        show_idx  = _resolve_col(result_headers, 'show $', 'show$', 'show pay', 'show')
+
         results = []
         for i, row in enumerate(
             results_table.find_all('tr')[1:]
@@ -783,15 +809,15 @@ class HRNScraper(DataSourceInterface):
                 continue
 
             def parse_payout(idx):
-                if idx < len(cells):
-                    txt = cells[idx].get_text(
-                        strip=True
-                    ).replace('$', '').replace(',', '').strip()
-                    try:
-                        return float(txt)
-                    except ValueError:
-                        return None
-                return None
+                if idx is None or idx >= len(cells):
+                    return None
+                txt = cells[idx].get_text(
+                    strip=True
+                ).replace('$', '').replace(',', '').strip()
+                try:
+                    return float(txt)
+                except ValueError:
+                    return None
 
             results.append({
                 'horse_name':      horse_name,
@@ -799,9 +825,9 @@ class HRNScraper(DataSourceInterface):
                 'official_finish': i + 1,
                 'lengths_behind':  0.0,
                 'final_time':      None,
-                'win_payout':      parse_payout(1),
-                'place_payout':    parse_payout(2),
-                'show_payout':     parse_payout(3),
+                'win_payout':      parse_payout(win_idx),
+                'place_payout':    parse_payout(place_idx),
+                'show_payout':     parse_payout(show_idx),
                 'exacta_payout':   None,
                 'trifecta_payout': None,
             })
@@ -812,12 +838,20 @@ class HRNScraper(DataSourceInterface):
                 for th in table.find_all('th')
             ]
             if any('pool' in h for h in headers):
+                # Bug #28 fix (Phase 5.3.1): header-aware resolution
+                # for pool name + payout columns within this table.
+                # Pre-fix used positional cells[0]/cells[2]; subject
+                # to same off-by-one corruption as result-dict block.
+                pool_idx   = _resolve_col(headers, 'pool')
+                payout_idx = _resolve_col(headers, 'payout', 'payoff', 'pays', '$')
+                if pool_idx is None or payout_idx is None:
+                    break
                 for row in table.find_all('tr')[1:]:
                     cells = row.find_all('td')
-                    if len(cells) < 3:
+                    if pool_idx >= len(cells) or payout_idx >= len(cells):
                         continue
-                    pool = cells[0].get_text(strip=True).lower()
-                    payout_txt = cells[2].get_text(
+                    pool = cells[pool_idx].get_text(strip=True).lower()
+                    payout_txt = cells[payout_idx].get_text(
                         strip=True
                     ).replace('$', '').replace(',', '').strip()
                     try:
