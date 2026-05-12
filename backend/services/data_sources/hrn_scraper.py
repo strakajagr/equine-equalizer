@@ -24,6 +24,7 @@ HRN_TRACK_MAP = {
     'saratoga': 'SAR',
     'keeneland': 'KEE',
     'belmont-park': 'BEL',
+    'belmont-at-aqueduct': 'BEL',
     'belmont-at-the-big-a': 'BEL',
     'santa-anita-park': 'SA',
     'santa-anita': 'SA',
@@ -51,7 +52,12 @@ HRN_TRACK_NAMES = {
     'PIM': 'Pimlico Race Course',
 }
 
-# Reverse: track code → HRN slug for direct URL construction
+# Reverse: track code → HRN slug for direct URL construction.
+# Historical default for each code; the BEL entry is date-aware via
+# get_track_slug() below because the Belmont meet relocated to Aqueduct
+# (HRN slug `belmont-at-aqueduct`) on 2026-04-27. For dates < 2026-04-27
+# BEL races at Belmont Park (slug `belmont-park`); for dates >=
+# 2026-04-27 the meet is served under `belmont-at-aqueduct`.
 TRACK_SLUGS = {
     'CD':  'churchill-downs',
     'SAR': 'saratoga-race-course',
@@ -65,6 +71,27 @@ TRACK_SLUGS = {
     'AQU': 'aqueduct',
     'PIM': 'pimlico-race-course',
 }
+
+# BEL meet relocated to Aqueduct branded "Belmont at the Big A" on
+# 2026-04-27 (AQU's prior meet ended 2026-04-26 per `tracks` table
+# `last_race_date` substrate at 2026-05-12). Pre-relocation: BEL races
+# at Belmont Park (slug `belmont-park`). Post-relocation: HRN serves
+# the meet under `belmont-at-aqueduct`. All other tracks have static
+# slugs.
+BEL_AT_AQU_START = date(2026, 4, 27)
+
+
+def get_track_slug(track_code: str, race_date: date) -> str:
+    """Date-aware HRN URL slug for a track_code.
+
+    Required because BEL changed slug on BEL_AT_AQU_START (meet
+    physically relocated to Aqueduct). All TRACK_SLUGS callsites must
+    pass race_date; pre-relocation backfill of historical BEL data
+    still resolves to `belmont-park` correctly.
+    """
+    if track_code == 'BEL' and race_date >= BEL_AT_AQU_START:
+        return 'belmont-at-aqueduct'
+    return TRACK_SLUGS.get(track_code, '')
 
 # Surface normalization
 SURFACE_MAP = {
@@ -316,7 +343,7 @@ class HRNScraper(DataSourceInterface):
                 "will attempt qualifying tracks directly"
             )
             for code in QUALIFYING_TRACKS:
-                slug = TRACK_SLUGS.get(code)
+                slug = get_track_slug(code, race_date)
                 if slug:
                     tracks.append({
                         'track_code': code,
@@ -334,9 +361,9 @@ class HRNScraper(DataSourceInterface):
         Waits for JS to render the entry tables.
         """
         date_str = race_date.strftime('%Y-%m-%d')
-        slug = track.get('hrn_slug', TRACK_SLUGS.get(
-            track['track_code'], ''
-        ))
+        slug = track.get('hrn_slug') or get_track_slug(
+            track['track_code'], race_date
+        )
         url = f"{BASE_URL}/entries-results/{slug}/{date_str}"
 
         page = await context.new_page()
@@ -371,9 +398,9 @@ class HRNScraper(DataSourceInterface):
         self, context, track: dict, race_date: date
     ) -> list[dict]:
         date_str = race_date.strftime('%Y-%m-%d')
-        slug = track.get('hrn_slug', TRACK_SLUGS.get(
-            track['track_code'], ''
-        ))
+        slug = track.get('hrn_slug') or get_track_slug(
+            track['track_code'], race_date
+        )
         url = f"{BASE_URL}/entries-results/{slug}/{date_str}"
 
         page = await context.new_page()
@@ -784,13 +811,36 @@ class HRNScraper(DataSourceInterface):
                         return i
             return None
 
-        result_headers = [
-            th.get_text(strip=True).lower()
-            for th in results_table.find_all('th')
-        ]
-        win_idx   = _resolve_col(result_headers, 'win $', 'win$', 'win pay', 'win')
-        place_idx = _resolve_col(result_headers, 'place $', 'place$', 'place pay', 'place')
-        show_idx  = _resolve_col(result_headers, 'show $', 'show$', 'show pay', 'show')
+        # Q-T1 V2 fix: HRN runner-table header row uses
+        # <th colspan="2">Runner (Speed)</th> while data rows render
+        # 5 separate <td> cells (runner-name + an unmapped spacer +
+        # win + place + show). Without colspan parsing, _resolve_col
+        # returns header-row indices (0..3) but data rows are indexed
+        # 0..4 → off-by-one read: cells[1]='' (empty spacer) parses to
+        # None for every winner row. D1 Bug #28 header-aware fix
+        # produced functionally-identical indices to the original
+        # positional constants because both ignore colspan.
+        # Fix: parse colspan, build header→cell-start-index mapping.
+        result_headers = []
+        header_to_cell_start = []  # parallel array: data-cell start
+        cell_cursor = 0
+        for th in results_table.find_all('th'):
+            text = th.get_text(strip=True).lower()
+            try:
+                colspan = int(th.get('colspan', 1))
+            except (TypeError, ValueError):
+                colspan = 1
+            result_headers.append(text)
+            header_to_cell_start.append(cell_cursor)
+            cell_cursor += colspan
+
+        win_idx_h   = _resolve_col(result_headers, 'win $', 'win$', 'win pay', 'win')
+        place_idx_h = _resolve_col(result_headers, 'place $', 'place$', 'place pay', 'place')
+        show_idx_h  = _resolve_col(result_headers, 'show $', 'show$', 'show pay', 'show')
+
+        win_idx   = header_to_cell_start[win_idx_h]   if win_idx_h   is not None else None
+        place_idx = header_to_cell_start[place_idx_h] if place_idx_h is not None else None
+        show_idx  = header_to_cell_start[show_idx_h]  if show_idx_h  is not None else None
 
         results = []
         for i, row in enumerate(
