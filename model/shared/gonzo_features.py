@@ -551,11 +551,22 @@ def compute_gonzo_class_features(
         sum(1 for t in pp_tiers if t == today_tier)
     )
 
-    # C2 + C3: at or above today's tier
+    # C2 + C3: at or above today's tier.
+    # A.5.3 fix: filter extends `is not None` guard to also catch NaN.
+    # Per docstring at line 499-501, NaN finish_position values should be
+    # filtered at DB-load time in `_load_raw_pps` (WHERE finish_position IS
+    # NOT NULL AND finish_position < 90). Empirical A.5.2 evidence proves
+    # NaN still reaches this point in production runs (9 horses on rerun
+    # invocation 2026-05-12T02:33Z hit `ValueError: cannot convert float
+    # NaN to integer` at the int(f) callsites below). Root cause likely:
+    # pandas coercion of SQL-NULL/empty-string → NaN in numeric column.
+    # Defense-in-depth: filter NaN here regardless of upstream gap.
     at_or_above_finishes = [
         pp_finishes[i]
         for i, t in enumerate(pp_tiers)
-        if t >= today_tier and pp_finishes[i] is not None
+        if t >= today_tier
+        and pp_finishes[i] is not None
+        and not pd.isna(pp_finishes[i])
     ]
     if at_or_above_finishes:
         in_money = sum(1 for f in at_or_above_finishes if int(f) <= 3)
