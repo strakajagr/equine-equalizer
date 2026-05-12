@@ -2,15 +2,18 @@
 
 **Document:** BIBLE_STRUCTURE_SPEC
 **Phase:** 0 (Methodology) — Phase 0 deliverable 2 of 5
-**Status:** DRAFT v3 (pre-audit)
+**Status:** LOCKED v6 (2026-05-05)
 **Author:** CC (drafting under verification discipline; QB orchestrated and reviewed)
-**Date:** 2026-05-04
-**Locked:** [pending audit + Tony review + iteration cycles]
+**Date:** 2026-05-05
+**Locked:** 2026-05-05
 
 **Revision history:**
 - v1 (2026-05-04): initial CC draft. Companion verification log at `_audits/BIBLE_STRUCTURE_SPEC_v1_verification.md`.
 - v2 (2026-05-04): post-v1-audit surgical patch pass integrating Tony's five locked decisions (M-1 through M-5).
 - v3 (2026-05-04): post-v2-audit surgical patch pass integrating Tony's three locked decisions (Findings 1, 2, 3). v2's structure preserved; sections without v2-audit findings against them retained unchanged. Companion verification log at `_audits/BIBLE_STRUCTURE_SPEC_v3_verification.md` inherits v2's 25 claims with re-verified-2026-05-04 timestamps and adds 2 new claims (N9 DD § 19 brevity confirmation; N10 cross-reference integrity post-renumbering).
+- v4 (2026-05-05): post-convergence-test revision per Path A sequencing. The operating-model convergence test on Database & Schema Bible draft (`_audits/convergence_test_audit.md`) returned 21 material differences + 9 methodology gaps. G8 was closed in META_PLAN v7→v8 cycle (LOCKED). v4 closes the remaining 8 methodology gaps: G1 (cross-cutting Currently Open scope), G2 (superseded SQL constraint Deprecated qualification), G3 (W.N entry confined to bug fixes; discipline codifications routed to § 5), G4 (TOC framing — sections 5–8 mandatory, sections 1–4 recommended-strongly), G5 (convergence rule on discipline rule rosters), G6 (cross-reference syntax worked examples), G7 (CONDITIONAL tertiary state for conditional trigger evaluation), G9 (W.N bible-local + global Bug #N convention for cross-bible references). Tony locked decisions on G3/G5/G7/G9 architectural questions; G1/G2/G4/G6 implemented per audit-CC-recommended resolutions embedded as drafting-spec exact-text replacements. Companion verification log at `_audits/BIBLE_STRUCTURE_SPEC_v4_verification.md`. After v4 lock, the convergence test re-runs on the same Database & Schema Bible spec to validate gap closure.
+- v5 (2026-05-05): post-v4-audit surgical-cosmetic patch closing the single blocking-for-clean-lock finding (§ 11 Lock Status metadata block at lines 1142–1146 was missed during v4 drafting; front matter Status was correctly updated to v4 but § 11 metadata sub-fields still referenced v3). v4 audit returned 0 BLOCKER + 0 MATERIAL + 0 fabricated + 0 methodology-interpolation + 2 MINOR + 4 STYLE; cleanest substantive cycle of v3-v5 sequence. v5 fix is pure metadata pointer hygiene; no methodology touch; no content modification beyond § 11 + front matter Status/Locked + revision history + § 12.5 + § 13 v4→v5 changelog entry. Companion verification log at `_audits/BIBLE_STRUCTURE_SPEC_v5_verification.md` (V5-1 entry for the metadata fix; V4-1 through V4-11 inherited wholesale).
+- v6 (2026-05-05): post-convergence-test-re-run surgical-cosmetic patch closing 2 NEW methodology gaps surfaced by the v5/v8-substrate convergence test (`_audits/convergence_test_v5_audit.md`). Re-run verdict: CONVERGED-WITH-RESIDUAL — 18 material differences (down from 21 in original test); 8 PASS + 1 PARTIAL + 0 FAIL on the 9 original G1-G9 gap closures (G8 PARTIAL is drafter-compliance variance, not methodology ambiguity; banked for Phase 1 audit-CC checklist). v6 closes G-new-1 (candidate-roster numbering: numeric sub-section IDs per Tony's locked Option (a); embedded as § 5.7 closing-clause paragraph) and G-new-2 (matview enumeration scope: § 4.1 enumerates CREATE TABLE declarations only per Tony's locked Option (a); embedded as § 6.6 § 4.1 first-sentence qualification). Zero new methodology constructs; both closures embed Tony-locked decisions char-exact per drafting-spec. Companion verification log at `_audits/BIBLE_STRUCTURE_SPEC_v6_verification.md` (V6-1 entry for the 2 surgical embeds; V5-1 + V4-1 through V4-11 + 27 v3-inherited preserved wholesale).
 
 **Tier:** 3 per META_PLAN v6 § 4.1 + § 6.5. CC-drafted under QB spec; companion verification log required; CC-audited.
 
@@ -101,12 +104,13 @@ The `_bible` suffix asymmetry (Tony-ratified per v1 cycle): files in `/docs/bibl
 
 ### 3.3 Section ID convention
 
-Within each bible document, sections are numbered in dotted decimal form. Cross-bible references: `<bible_doc_name>:<section_id>`. Examples:
+Within each bible document, sections are numbered in dotted decimal form. Cross-bible references: `<bible_doc_name>:<section_id>`. Cross-bible references for cross-cutting bugs use a separate format: `<bible_doc_name>:#<bug-id>` where `<bug-id>` is the canonical global Bug #N (per § 5.5.1 below). Examples:
 - `feature_provenance_bible:4.1` — section 4.1
-- `data_pipeline_bible:8.W.7` — What Was Fixed entry W.7 in Data Pipeline Bible (§ 8 = canonical What Was Fixed position)
+- `data_pipeline_bible:8.W.7` — What Was Fixed entry W.7 in Data Pipeline Bible (§ 8 = canonical What Was Fixed position; W.N is bible-local per § 5.5)
 - `database_schema_bible:5.4` — sub-section numeric ID for a Forbidden Pattern (no letter prefix; see § 5.5)
+- `feature_provenance_bible:#15` — cross-cutting reference to Bug #15's canonical home (Feature Provenance Bible's W.N entry for Bug #15; per § 5.5.1 global Bug #N convention)
 
-Matches META_PLAN v6 § 7.11's commit message convention.
+Matches META_PLAN v8 § 7.11's commit message convention. The `#<bug-id>` cross-reference format closes G9 (W.N numbering instability across CC executions): bible-local W.N entries are stable within a bible's lifetime but not cross-bible-coordinated; the global Bug #N is the durable cross-bible reference per § 5.5.1.
 
 ---
 
@@ -278,7 +282,9 @@ The numbered sections inside each bible follow this **canonical** outline (manda
 
 When a bug spans multiple bibles, the canonical "What Was Fixed" entry lives in one bible (the one whose discipline most directly prevents recurrence). Other bibles reference by ID. **No duplication.**
 
-The canonical-home determination is made at the time the entry is created. The decision is recorded in the entry (the canonical home's W.N entry says "canonical; cross-referenced from <other bibles>"; the cross-referencing bibles' "Currently Open" or "Deprecated" sections cite the canonical W.N by `<bible>:8.W.<n>`).
+The canonical-home determination is made at the time the entry is created. The decision is recorded in the entry (the canonical home's W.N entry says "canonical; cross-referenced from <other bibles>"; the cross-referencing bibles' "Currently Open" or "Deprecated" sections cite the canonical home by `<bible>:#<bug-id>` per § 3.3 cross-reference syntax for cross-cutting bugs.
+
+**Cross-cutting bug Currently Open scope rule (closes G1):** When a cross-cutting bug is currently open at lock time, it appears in § 6 (Currently Open) of the canonical-home bible AND in § 6 of every bible whose discipline its symptoms touch, with cross-reference to the canonical home. The canonical-home bible's § 6 entry is the substantive description; non-canonical-home bibles' § 6 entries are one-line cross-references to the canonical home in `<bible>:#<bug-id>` format. Symptom-touch determination is at drafter discretion: if the bug's manifestation is documented in this bible's domain (e.g., Bug #28's NULL payout fields manifest in `database_schema_bible:4` table-level documentation of the `results` table), the bug appears in this bible's § 6 as a cross-reference. Once the bug is fixed and documented in the canonical home's § 8 W.N entry, non-canonical-home bibles' § 6 entries are removed (the W.N entry replaces them). Cross-cutting bug entries in `PHASE_5_BACKLOG.md` (per `TRIAGE_QUEUE_SPEC v1` format) cite the canonical home plus all bibles whose § 6 references the bug.
 
 **Tiebreaker deferral:** when "most directly prevents recurrence" is ambiguous (two QB sessions could plausibly assign the canonical home to different bibles), tiebreaker criteria are deferred to AUDIT_METHODOLOGY.md (Phase 0 deliverable 3). Until that document locks, QB surfaces ambiguous cases to Tony for explicit ratification per META_PLAN v6 § 8.3 decision-deferral discipline.
 
@@ -288,13 +294,25 @@ Every rule, pattern, decision in any bible carries a `Locked YYYY-MM-DD` parenth
 
 ### 5.5 Naming conventions inside each bible
 
-- **What Was Fixed entries** are numbered as `<section>.W.<n>` (e.g., `8.W.1`, `8.W.2` within section 8 of a given bible). The format follows META_PLAN v6 § 7.4 + Appendix A.3. The W.N letter-prefix convention is the **only** letter-prefix in EE bible numbering: What Was Fixed entries require cross-bible-trackable identifiers because cross-cutting bugs (per § 5.3 canonical-home rule) reference each other across bibles, and a grep over `git log` for `W.7` retrieves every commit related to that immune-memory entry across all bibles per META_PLAN v6 § 7.11 commit-message convention.
+- **What Was Fixed entries** are numbered as `<section>.W.<n>` (e.g., `8.W.1`, `8.W.2` within section 8 of a given bible). The format follows META_PLAN v8 § 7.4 + Appendix A.3. The W.N letter-prefix convention is the **only** letter-prefix in EE bible numbering. **W.N is bible-local, not cross-bible-stable (per § 5.5.1 G9 resolution):** within a bible, W.N entries are stable across the bible's re-drafts; across bibles, a `W.7` entry in `feature_provenance_bible` may number a different bug than a `W.7` entry in `data_pipeline_bible`. Cross-bible references to bugs use the canonical global Bug #N convention per § 5.5.1, NOT bible-local W.N section numbers. The W.N letter-prefix is preserved for in-bible bug-tracking forcing function (a grep over a single bible's contents for `W.7` retrieves entries within that bible per META_PLAN v8 § 7.11 commit-message convention).
 
 - **Forbidden Patterns**, **Common Mistakes**, and **Deprecated entries** use **sub-section numeric IDs** (e.g., a Forbidden Pattern at section 5 of the ML Layer Architecture Bible is `ml_layer_architecture_bible:5.4`, not `ml_layer_architecture_bible:5.F.4`). The format follows META_PLAN v6 § 7.5 + Appendix A.1 (Forbidden Patterns), § 7.6 (Common Mistakes), § 7.7 + Appendix A.4 (Deprecated). This matches the DD bible's existing convention: DD § 6.4 for a Forbidden Pattern, DD § 21.1 for a Deprecated entry.
 
 - **Cross-bible references** use the full path: `<bible_name>:<section_id>` (e.g., `feature_provenance_bible:8.W.7` for a What Was Fixed entry; `ml_layer_architecture_bible:5.4` for a Forbidden Pattern). Within a single bible, references can use just the local ID: `see § 5.4`, `see § 8.W.3`.
 
 **Why W.N is special and F./C./D. are not:** What Was Fixed entries are the bible's institutional immune memory. Cross-cutting bugs require trackable identifiers across bibles. A grep for `W.7` finds every commit, every cross-reference, every related entry in O(n) wall-clock time. Forbidden Patterns, Common Mistakes, and Deprecated entries do not carry the same forcing function — they don't cross bibles in the same way. Sub-section numeric IDs suffice and match DD convention.
+
+#### 5.5.1 Global Bug #N convention (closes G9)
+
+Bugs that surface during EE development are assigned a canonical global Bug #N at discovery time. The convention is monotonic and never reused: Bug #1, Bug #2, ..., Bug #28, Bug #29, ... Each Bug #N has exactly one canonical home in exactly one bible (per § 5.3 cross-cutting bug scope rule); references to the bug from other bibles use the `<bible>:#<bug-id>` format per § 3.3 cross-reference syntax.
+
+**Convention specifics (locked 2026-05-05 per v4 cycle):**
+- **Monotonic assignment:** Bug numbers are assigned in order of discovery, not in order of fix or in order of severity. Bug #28 was assigned because it was the 28th bug discovered, regardless of when it was fixed (or whether it has been fixed at lock time).
+- **Never reused:** when a bug is fixed and its W.N entry locked, the Bug #N is retired but never re-assigned. If a bug is determined to be a duplicate of an earlier Bug #M, the duplicate's Bug #N is closed without re-assignment.
+- **Cross-bible reference uses `#<bug-id>` not `W.<n>`:** because bible-local W.N is not cross-bible-stable (a fix lands as `8.W.3` in feature_provenance_bible AND as `8.W.5` in another bible), the cross-reference target is the global Bug #N, not the bible-local W.N. Example: `feature_provenance_bible:#15` references the canonical home of Bug #15, which is the bible-local W.N entry for Bug #15 in `feature_provenance_bible`.
+- **De facto convention is now explicit:** EE has used Bug #28, Bug #15, Bug #24 as global identifiers in operator-stated context and Phase 0 documents (per META_PLAN v8 § 1.2). This sub-rule makes the existing convention explicit rather than introducing a new one.
+
+The global Bug #N convention does not introduce a new letter-prefix. The pattern-completion check (per AUDIT_METHODOLOGY v2 § 5.5) applies to letter-prefixes; `#<bug-id>` is a cross-reference syntax extension, not a section-numbering letter-prefix. W.N remains the only ratified letter-prefix in EE bible numbering.
 
 ### 5.6 Canonical templates for shared content
 
@@ -306,10 +324,12 @@ The four discipline-rule entry types (What Was Fixed, Forbidden Patterns, Common
 8.W.<n>: <Bug name or short description> (fixed YYYY-MM-DD)
 ```
 
+**Scope (locked per v4 cycle, closes G3):** § 8 What Was Fixed entries are confined to **true bug-fix entries with mandatory Fix date**. § 8 is institutional immune memory ("we hit this bug, fixed it, here's what changed and when"); the Fix date is part of the value proposition. **Discipline codifications** (rules captured against future drift; e.g., "past_performances.race_id NULL acceptance") are NOT § 8 entries — they belong in § 5 (Discipline rules) per § 5.6.2 (Forbidden Pattern template) or § 5.6.3 (Common Mistakes template). Forward-looking entries that codify discipline for fixes that haven't happened yet (per META_PLAN v8 § 7.3 placeholder-resolution sub-rule's case (ii)) also belong in § 5, not § 8 — § 5 entries do not require a Fix date because they are rules, not fixes.
+
 **Mandatory fields:**
 - Entry ID (`8.W.<n>` format)
-- Bug name or short description
-- Fix date (YYYY-MM-DD)
+- Bug name or short description (with global Bug #N if assigned per § 5.5.1)
+- Fix date (YYYY-MM-DD) — **mandatory; entries without a knowable fix date belong in § 5, not § 8**
 - **Symptom:** how the bug manifested
 - **Root cause:** what the actual problem was
 - **Fix:** what was changed
@@ -346,21 +366,38 @@ kept in sync by manual cross-reference review. The discipline of "if you change
 a feature in one place, change it in the other" is procedurally enforced, not
 architecturally enforced.
 
-Conditional triggers evaluated:
+Conditional triggers evaluated (per § 5.6.1.2 tertiary-state notation, locked per v4 cycle):
   - if-fix-involved-migration: DOES NOT FIRE. Gonzo extraction was a code refactor,
     not a schema change. No migration linkage.
   - if-fix-invalidated-prior-content: DOES NOT FIRE. No prior bible content existed
     at extraction time (pre-Phase-0).
   - if-fix-produced-Forbidden-Pattern: FIRES. Cross-reference to candidate Forbidden
-    Pattern at feature_provenance_bible:5.X (placeholder; Phase 1 drafter assigns
+    Pattern at `feature_provenance_bible:5.X` (placeholder; Phase 1 drafter assigns
     actual numeric ID at draft time): "Adding feature engineering logic to either
     training or inference path without parallel update to the other."
-  - if-fix-touches-multiple-bibles: FIRES. The bug spans Feature Provenance Bible
-    (canonical home, per § 5.3) and is cross-referenced from
-    ml_layer_architecture_bible:8 and model_evaluation_retraining_bible:8 by ID.
+  - if-fix-touches-multiple-bibles: CONDITIONAL. The bug spans Feature Provenance
+    Bible (canonical home, per § 5.3) and is cross-referenced from
+    `ml_layer_architecture_bible:#15` and `model_evaluation_retraining_bible:#15`
+    by global Bug #N per § 5.5.1. The CONDITIONAL caveat: the cross-references are
+    descriptive of where Bug #15 manifests (calibration bypass at inference, retrain
+    discipline implications) but the canonical W.N entry — including Symptom, Root
+    cause, Fix, and Why — lives only in this bible (Feature Provenance Bible) per
+    the cross-cutting bug scope rule's no-duplication mandate.
 ```
 
 Phase 1 drafters use this worked example as the integration model: when drafting their bible's What Was Fixed entries, evaluate each conditional trigger explicitly with FIRES / DOES NOT FIRE notation, even when the trigger doesn't apply.
+
+##### 5.6.1.2 Tertiary-state notation for conditional trigger evaluation (closes G7)
+
+Conditional triggers in W.N entries (and other discipline-rule entries with conditional fields) are evaluated using three states, locked per v4 cycle:
+
+- **FIRES:** the trigger applies; the conditional field MUST be included with full content.
+- **DOES NOT FIRE:** the trigger does not apply; the conditional field is not relevant. The drafter writes "DOES NOT FIRE" with a brief reason (one phrase, not a full sentence).
+- **CONDITIONAL:** the trigger applies with an explicit caveat; the drafter MUST document the caveat in adjacent prose (the prose immediately following the trigger evaluation, not deferred to a separate section). The CONDITIONAL state is more semantically precise than "PARTIAL" or "FIRES (advisory)" — it names the case's distinguishing feature (a condition modifies trigger application) rather than describing discomfort with binary classification.
+
+**CONDITIONAL discipline:** mandatory adjacent-prose documentation of the caveat prevents the tertiary state from becoming an escape hatch. If a drafter cannot articulate the caveat in adjacent prose, the trigger is not CONDITIONAL — it's either FIRES (commit to inclusion) or DOES NOT FIRE (commit to exclusion). The audit-CC prophylactic check at AUDIT_METHODOLOGY v2 § 5.2 (methodology-interpolation) applies recursively here: a CONDITIONAL trigger without adjacent-prose caveat is a CC-introduced soft-classification that Tony hasn't ratified.
+
+**Worked examples in § 5.6.1.1 use the tertiary notation explicitly.** Phase 1 drafters use § 5.6.1.1 as the integration model for evaluating conditional triggers; if a trigger is CONDITIONAL, the drafter writes the caveat in adjacent prose at draft time, not at audit time.
 
 #### 5.6.2 Forbidden Pattern entry template (per META_PLAN v6 § 7.5 + Appendix A.1)
 
@@ -410,6 +447,29 @@ Deprecated entries live at sub-section numeric IDs within section 7 (Deprecated)
 - **If the deprecated thing has active readers** (e.g., legacy `predictions` table read by `prediction_router.py` and `dashboard_router.py`): enumerate readers per § 4.5 source-priority discipline
 - **If the deprecation is partial** (e.g., the thing exists but is read by only one path which is itself slated for removal): document the dependency chain
 - **If the deprecation produced a Forbidden Pattern** (e.g., "MUST NOT write to legacy `predictions` table"): cross-reference the Forbidden Pattern's section ID
+- **If the deprecated thing is a superseded SQL constraint or schema element** (e.g., migration 011 added `wr_predictions` UNIQUE constraint that superseded the migration 005 form): the prior form qualifies for a Deprecated entry IF the superseded form persists in the DB schema (verifiable via `\d <table>` or migration history). The Deprecated entry documents the prior form, the superseding migration, and the planned removal in `PHASE_5_BACKLOG.md`. If the superseded form has been physically dropped (DDL operation removed it), the Deprecated entry is NOT required — the migration history serves as immune memory. **Determination at drafter discretion with verification log entry:** the drafter records in the verification log whether the superseded form persists or has been physically dropped, with the verification command output (e.g., `psql ... \d wr_predictions` showing the current constraint state).
+
+### 5.7 Convergence rule on Discipline rule rosters (closes G5)
+
+§ 5 (Discipline rules) of each Phase 1 bible holds Forbidden Patterns and Common Mistakes for that bible's domain. The roster of rules (which rules belong, in what numeric order, with what scope) is determined per-bible by Phase 1 drafters from substrate analysis, NOT pre-specified by this document. Each bible's domain has different discipline needs; pre-specified minimum lists either over-constrain (forcing irrelevant rules) or under-constrain (omitting real ones).
+
+**Convergence rule (locked per v4 cycle):** Phase 1 drafters enumerate candidate rules from substrate (the bible's domain code, AWS infrastructure, prior audits, Phase 0 anti-pattern catalog at META_PLAN v8 § 9.1-9.13, operator-stated history). The candidate roster is surfaced to QB for ratification BEFORE § 5 of the bible locks. QB synthesizes the candidate roster against:
+- Cross-bible coherence (does this rule belong here, or in another bible whose discipline more directly enforces it per § 5.3 cross-cutting scope rule?)
+- Tony's prior ratifications (does Tony's locked language in META_PLAN v8 or the bible's own drafting spec name this rule? If yes, ratification is automatic; if no, QB surfaces to Tony.)
+- Substrate grounding (is the rule traceable to verifiable EE patterns? Per AUDIT_METHODOLOGY v2 § 5.1 verification-log precision, ungrounded rules are flagged.)
+
+**Workflow (one round trip per bible during § 5 drafting):**
+1. CC drafts § 5 with candidate roster (FORBIDDEN/CORRECT pairs per § 5.6.2; Common Mistakes per § 5.6.3).
+2. CC produces § 5 verification log delta enumerating each candidate rule's substrate evidence + provenance.
+3. QB reviews candidate roster + verification log; decides which to ratify, which to surface to Tony, which to drop.
+4. CC re-drafts § 5 to match ratified roster.
+5. § 5 locks; the rest of the bible can proceed to lock per its own cycle.
+
+**Provenance discriminator (mirrors methodology-interpolation grandfathering pattern per META_PLAN v8 § 6.1):** rules surfaced from existing locked Phase 0 documents (META_PLAN v8 § 9.X anti-patterns; BIBLE_STRUCTURE_SPEC v4 § 9.X if any) are grandfathered; CC-introduced rules require QB ratification.
+
+**Cycle cost:** small (one round trip per bible). Cross-bible roster convergence value: high (audit-CC catches roster drift via § 5.2 methodology-interpolation check; QB ratification before lock is cheaper than post-lock revision).
+
+**Candidate-roster numbering (locked per v6 cycle, closes G-new-1):** Candidate-roster entries pre-ratification use numeric sub-section IDs (`5.1`, `5.2`, ...) consistent with the ratified-entry convention per § 5.5. The "candidate" status is conveyed by the bible's § 5 header marker (`[candidate roster pending QB ratification per § 5.7]`) — not by a provisional letter-prefix. W.N remains the only ratified letter-prefix per § 5.5.1; provisional letter-prefixes (e.g., `5.A`, `5.B` for unratified candidates) are NOT authorized. QB ratification preserves the drafter-chosen numeric IDs where the candidate is ratified as-is; renumbering occurs only when QB drops, merges, or reorders candidates during ratification. Pattern-completion check (per AUDIT_METHODOLOGY v2 § 5.5) confirms compliance: numeric sub-section IDs for candidates do not introduce a new letter-prefix.
 
 ---
 
@@ -430,7 +490,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "what does EE look like at the runtime-context level, and how do I find which bible to read for X?" Audience: any reader who needs the system map or needs to navigate to a specific bible.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope of this bible
 2. Definitions
@@ -507,7 +567,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "how does data move from external source to DB to model to API?" Audience: anyone touching ingestion, scrapers, results-matching, retraining schedule.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope
 2. Definitions (HRN, NYRA, Equibase chart, "qualifying track")
@@ -577,7 +637,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "if I change feature X, what breaks?" Audience: feature-centric change-impact analysis.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope (this bible's slice of the ML system: feature × model traceability)
 2. Definitions (feature, latent factor, FE module, training-side vs inference-side)
@@ -653,7 +713,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "if I add a new ML layer, where does it plug in?" Audience: model-centric composition design.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope (model composition; not feature-engineering, not retraining-process)
 2. Definitions (model_type, style, specialist, calibration sidecar, per-pipeline prediction)
@@ -724,7 +784,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "is this model still working, when do I retrain it, what gates deployment?" Audience: process-centric operational discipline.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope (operational discipline for the model gallery; not composition, not feature-engineering)
 2. Definitions (success criterion, retrain trigger, calibration discipline, deployment gate, artifact version)
@@ -796,7 +856,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "what tables exist, what columns are canonical, how do migrations work, what JSONB conventions apply?" Audience: anyone touching schema, repos, or migrations.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope
 2. Definitions (table, materialized view, migration, JSONB shadow, canonical column)
@@ -806,7 +866,7 @@ For each of the seven Phase 1 bibles, this section provides:
    - 3.3 Schema bootstrap (`backend/database/schema/schema.sql`) vs migrations
 4. Schema and migration detail
    - 4.1 Per-table documentation
-     - 4.1.X.<table_name> — one subsection per table
+     - 4.1.X.<table_name> — one subsection per CREATE TABLE declaration; matviews documented at § 3 only (per § 2 Definitions table-vs-matview distinction; closes G-new-2)
    - 4.2 Migration discipline (per META_PLAN v6 § 7.12)
      - 4.2.1 Numbering format (grandfathered 001–011 + NNN_YYYYMMDD from 012+)
      - 4.2.2 The duplicate-005 case
@@ -869,7 +929,7 @@ For each of the seven Phase 1 bibles, this section provides:
 
 **Purpose:** answer "what HTTP routes exist, what does each Lambda dispatch to, how does the frontend consume them?" Audience: anyone touching the API surface or the React SPA.
 
-**Recommended TOC:**
+**TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):**
 
 1. Scope
 2. Definitions (Lambda-handler-as-router, axios client, route key, integration target)
@@ -945,7 +1005,22 @@ For each of the seven Phase 1 bibles, this section provides:
 
 ### 7.1 Cross-reference syntax
 
-Within a bible: `§ <section_id>` (e.g., `§ 4.5.10`). Between bibles: `<bible_name>:<section_id>` (e.g., `feature_provenance_bible:8.W.7`; `ml_layer_architecture_bible:5.4`). Matches META_PLAN v6 § 7.11.
+Within a bible: `§ <section_id>` (e.g., `§ 4.5.10`). Between bibles: `<bible_name>:<section_id>` (e.g., `feature_provenance_bible:8.W.7`; `ml_layer_architecture_bible:5.4`). For cross-cutting bug references: `<bible_name>:#<bug-id>` per § 3.3 + § 5.5.1. Matches META_PLAN v8 § 7.11.
+
+Phase 1 drafters use these formats consistently in cross-reference text. Per-bible templates' "Cross-references to other bibles" guidance includes the worked examples in § 7.1.1 below.
+
+#### 7.1.1 Cross-reference syntax worked examples (closes G6)
+
+The cross-reference formats are mechanical. Drafters use these examples as the integration model when authoring cross-references in Phase 1 bibles:
+
+- **Within-bible reference (numeric section):** `§ 4.5.10`
+- **Within-bible reference (W.N entry):** `§ 8.W.3`
+- **Cross-bible reference by section ID:** `feature_provenance_bible:5.4` (Forbidden Pattern in Feature Provenance Bible's § 5)
+- **Cross-bible reference by W.N entry:** `feature_provenance_bible:8.W.3` (What Was Fixed entry W.3 in Feature Provenance Bible; W.N is bible-local per § 5.5)
+- **Cross-bible reference by global Bug #N (cross-cutting bugs only):** `feature_provenance_bible:#15` (canonical home of Bug #15)
+- **Cross-reference TO `PHASE_5_BACKLOG.md`:** by phase number, e.g., `Phase 5.X.Y` (per META_PLAN v8 § 9.9)
+
+Drafters who introduce a new cross-reference format that doesn't match these examples surface for QB ratification before lock — pattern-completion of cross-reference vocabulary is subject to AUDIT_METHODOLOGY v2 § 5.5 pattern-completion check (cross-reference syntax extensions require explicit ratification).
 
 ### 7.2 Section identifier discipline (per META_PLAN v6 § 7.4 + § 7.5)
 
@@ -1068,11 +1143,11 @@ Cross-document audit cadence is a Phase 5 working-agreements decision per META_P
 
 ## 11. Lock Status
 
-**Document status:** DRAFT v3, pre-audit
-**Audit-CC pass:** pending (v3 audit pending after disk write)
-**Verification log:** `_audits/BIBLE_STRUCTURE_SPEC_v3_verification.md` — inherits 25 claims from v2 with re-verified-2026-05-04 timestamps; adds 2 new claims (N9 DD § 19 brevity, N10 cross-reference integrity post-renumbering)
-**Tony review:** pending (will see post-audit version per workflow discipline)
-**Locked:** [pending]
+**Document status:** LOCKED v6 (post-convergence-test-re-run surgical-cosmetic cycle closing G-new-1 + G-new-2)
+**Audit-CC pass:** v4 audit clean (0 BLOCKER + 0 MATERIAL + 0 fabricated + 0 methodology-interpolation; 2 MINOR + 4 STYLE non-blocking); v5 cycle closed § 11 metadata pointer; convergence test re-run on v5/v8 substrate produced CONVERGED-WITH-RESIDUAL verdict (18 material differences + 2 NEW methodology gaps + 8 PASS / 1 PARTIAL / 0 FAIL on G1-G9 closures); v6 cycle closes the 2 NEW gaps (G-new-1, G-new-2) per Tony's locked Option (a) decisions on both. Per audit-CC's pre-approval, v6 cycle skips re-audit since scope is pure surgical-cosmetic embed of audit-CC-recommended resolutions.
+**Verification log:** `_audits/BIBLE_STRUCTURE_SPEC_v6_verification.md` — 1 v6 entry (V6-1: 2 surgical embeds for G-new-1 + G-new-2 closures); inherits 1 V5-1 + 11 v4 (V4-1 through V4-11) + 27 v3-inherited (via v4) wholesale = 40 total claims.
+**Tony review:** post-v6 lock confirmation
+**Locked:** 2026-05-05
 
 **Phase 0 prerequisites carried over from META_PLAN v6 § 11:**
 - All 5 Phase 0 documents pass adversarial audit (Tony's threshold: < 5 MATERIAL findings AND zero fabricated-content findings AND zero methodology-interpolation findings)
@@ -1121,9 +1196,208 @@ The methodology-interpolation rule is operative; the discipline of self-surfacin
 
 (Inherited from v2 § 12.3 — list unchanged.) No iteration cap; no completeness criterion; no minimum section count, word count, or FORBIDDEN/CORRECT pair count; no prescribed cadence for cross-document audit; no severity thresholds beyond META_PLAN v6; no tiebreaker criteria for canonical-home determination; no new letter-prefix conventions.
 
+### 12.4 v4 surfacing notes (delta from v3)
+
+**Items resolved by Tony's v4 cycle decisions (architectural questions G3 / G5 / G7 / G9):**
+
+- **G3 (W.N for non-bug entries) — RESOLVED per Tony's Option (b).** § 8 confined to true bug-fix entries with mandatory Fix date. Discipline codifications routed to § 5 (Discipline rules). § 5.6.1 template scope clause added explicitly. The convergence test surfaced this when run2's 8.W.3 (past_performances.race_id NULL acceptance) violated the W.N template's mandatory Fix date field by carrying "locked 2026-05-04" instead.
+- **G5 (Convergence rule on Discipline rule rosters) — RESOLVED per Tony's Option (b).** Phase 1 drafters enumerate candidate rules from substrate; QB ratifies before § 5 locks. New § 5.7 codifies the workflow. Provenance discriminator (mirrors methodology-interpolation grandfathering pattern) prevents pattern-completion creep.
+- **G7 (Tertiary state) — RESOLVED with CONDITIONAL state authorized.** Three states for conditional trigger evaluation: FIRES, DOES NOT FIRE, CONDITIONAL. CONDITIONAL requires mandatory adjacent-prose caveat documentation. New § 5.6.1.2 codifies the notation. § 5.6.1.1 worked example updated to use CONDITIONAL where the cross-cutting case applies.
+- **G9 (W.N numbering convention) — RESOLVED with bible-local W.N + global Bug #N for cross-bible references.** New § 5.5.1 codifies the global Bug #N convention; § 3.3 cross-reference syntax extended with `<bible>:#<bug-id>` format. Existing de facto convention (Bug #28, Bug #15, Bug #24) made explicit.
+
+**Items resolved per audit-CC-recommended resolutions (G1 / G2 / G4 / G6 — direct, substrate-grounded, embedded as drafting-spec exact-text replacements):**
+
+- **G1 (Currently Open scope for cross-cutting bugs) — IMPLEMENTED.** § 5.3 extended with cross-cutting bug Currently Open scope rule. Non-canonical-home bibles list cross-cutting open bugs in their § 6 as one-line cross-references; canonical-home bible carries the substantive description. Once fixed, § 6 cross-references are removed (W.N entry replaces them).
+- **G2 (Superseded SQL constraint qualification) — IMPLEMENTED.** § 5.6.4 Deprecated entry template gets new conditional bullet: superseded form qualifies for Deprecated entry IF physically persisting in DB schema (verifiable). If physically dropped, migration history is sufficient immune memory. Drafter discretion with verification log entry.
+- **G4 (TOC framing tightening) — IMPLEMENTED.** All seven per-document templates' "Recommended TOC:" headers replaced with explicit "TOC (sections 5–8 mandatory per § 5.2; sections 1–4 recommended-strongly with drafter latitude per locality of reference):" framing. Aligns § 6.X templates with § 5.2's canonical 5/6/7/8 mandate while preserving drafter latitude for domain-specific § 1–4.
+- **G6 (Cross-reference syntax adoption) — IMPLEMENTED.** § 7.1 extended with `<bible>:#<bug-id>` format; new § 7.1.1 adds worked examples for each cross-reference type (within-bible numeric, within-bible W.N, cross-bible by section ID, cross-bible by W.N, cross-bible by global Bug #N, cross-reference to PHASE_5_BACKLOG.md by phase number).
+
+**METHODOLOGY-INTERPOLATION self-check (v4):**
+
+Per the methodology-interpolation rule (META_PLAN v8 § 6.1, with v6 expanded scope, grandfathering clause, and pattern-completion check), CC reviewed every new methodology construct introduced in v4 against authorization sources:
+
+- Tony-locked decisions (G3, G5, G7, G9): all 4 architectural-question resolutions trace directly to Tony's locked language in this cycle's drafting spec. Reproduced char-exact per spec-prescribed text. **Not interpolation.**
+- Audit-CC-recommended resolutions (G1, G2, G4, G6): all 4 implementations trace directly to drafting-spec embedded exact replacement text. The audit-CC recommendations were locked into the drafting spec as authorized; CC reproduced char-exact. **Not interpolation.**
+- "CONDITIONAL" tertiary-state name (G7): the name choice was Tony-locked in this cycle's drafting spec ("more semantically precise than 'PARTIAL' or 'FIRES (advisory)'"). Reproduced char-exact. **Not interpolation.**
+- "Global Bug #N convention" (G9): the convention itself was de facto in operator usage (Bug #28, Bug #15, Bug #24 cited in META_PLAN v8 + operator memory files). § 5.5.1 makes the existing convention explicit, not introducing a new one. **Not interpolation.** Surfaced for awareness: the codification step itself creates the formal rule even when the substrate convention pre-exists.
+
+**METHODOLOGY-INTERPOLATION rule pattern-completion check (v4):**
+
+The v4 cycle introduces ZERO new letter-prefixes (W.N remains the only ratified letter-prefix). The `#<bug-id>` cross-reference format is a syntax extension, not a letter-prefix. The pattern-completion check (AUDIT_METHODOLOGY v2 § 5.5) for letter-prefixes confirms compliance.
+
+Cross-reference syntax extensions (`<bible>:#<bug-id>`) are subject to AUDIT_METHODOLOGY v2 § 5.5 pattern-completion check; v4's extension is explicitly ratified per Tony's G9 locked decision; v4 documents this in § 7.1.1.
+
+**AUDIT_METHODOLOGY v3 cycle assessment (per drafting spec discipline 7):**
+
+Per QB's pre-drafting assessment (verified against AUDIT_METHODOLOGY v2 substrate read): **AUDIT_METHODOLOGY v3 cycle is NOT warranted.** v2's prophylactic checks (§ 4.1–§ 4.7 audit-CC adversarial scope; § 5.1–§ 5.7 prophylactic checks including methodology-interpolation, verification-log precision, and pattern-completion) remain operationally valid against v4. Version-references in AUDIT_METHODOLOGY (`BIBLE_STRUCTURE_SPEC v3`) update interpretively at each new lock cycle; these are document-version pointers, not load-bearing methodology constructs. The content of v2's checks (the rules themselves) does not depend on v3 vs v4 specifics. Surfaced for v4 audit-CC review. If audit-CC catches a coherence drift, AUDIT_METHODOLOGY v3 becomes part of the post-v4 sequence.
+
+**Net new methodology constructs introduced in v4: 8** (4 Tony-locked decisions + 4 audit-CC-recommended resolutions, all embedded with drafting-spec authorization; zero unauthorized constructs surfaced).
+
+**Items NOT addressed in v4 (preserved from v3 unchanged):**
+
+- All § 1, § 2, § 4, § 6.X (beyond TOC header replacement), § 8, § 9, § 10, § 11 content retained verbatim from v3.
+- v3 surfacing notes (§ 12.1, § 12.2, § 12.3) preserved verbatim.
+- v2→v3 changelog (§ 13) preserved verbatim; v3→v4 entry appended.
+
+### 12.5 v5 surfacing notes (delta from v4)
+
+**Items resolved by v4 audit's lock-after-one-MINOR-revision recommendation:**
+
+- **§ 11 Lock Status metadata pointer hygiene — IMPLEMENTED.** Front matter Status correctly updated to v4 in v4 cycle; § 11 Lock Status sub-fields (Document status, Audit-CC pass, Verification log, Tony review, Locked) still referenced v3 metadata. v5 surgical-cosmetic patch updates § 11 to v5 metadata reflecting the v4-clean-audit + v5-metadata-fix lock trajectory.
+
+**METHODOLOGY-INTERPOLATION self-check (v5):**
+
+Net new methodology constructs introduced in v5: 0. v5 modifies ONLY metadata pointers (§ 11 + front matter Status/Locked + revision history). Zero methodology touch. The pattern-completion check applies trivially: no new constructs, no new conventions, no new cross-reference vocabularies. Pure pointer hygiene.
+
+**METHODOLOGY-INTERPOLATION rule pattern-completion check (v5):**
+
+W.N remains the only ratified letter-prefix. `#<bug-id>` cross-reference syntax extension preserved per v4's G9 ratification. No new syntax extensions introduced.
+
+**Items NOT addressed in v5 (preserved from v4 unchanged):**
+
+- All § 1, § 2, § 3, § 4, § 5, § 6, § 7, § 8, § 9, § 10 content retained verbatim from v4.
+- v3 surfacing notes (§ 12.1, § 12.2, § 12.3) preserved verbatim.
+- v4 surfacing notes (§ 12.4) preserved verbatim.
+- v2→v3 changelog and v3→v4 changelog (§ 13) preserved verbatim; v4→v5 entry appended.
+- V4-11 mixed v6/v8 META_PLAN references — adjudicated by v4 audit as (a) acceptable surgical-patch discipline application; preserved as-is in v5. Future-cycle cleanup remains cheap if QB later prefers global sweep.
+
+**Net new methodology constructs introduced in v5: 0.**
+
+### 12.6 v6 surfacing notes (delta from v5)
+
+**Items resolved by Tony's v6 cycle decisions (architectural questions G-new-1 / G-new-2):**
+
+- **G-new-1 (Candidate-roster numbering convention) — RESOLVED per Tony's Option (a).** Candidate-roster entries pre-ratification use numeric sub-section IDs (`5.1`, `5.2`, ...) consistent with ratified-entry convention. Candidate status conveyed by § 5 header marker, not by provisional letter-prefix. W.N remains only ratified letter-prefix per § 5.5.1. New § 5.7 closing-clause paragraph codifies the rule. Closes the convergence test re-run's run3 (`5.A`–`5.I` letter-prefix) vs run4 (`5.1`–`5.8` numeric) divergence by ratifying numeric.
+- **G-new-2 (Matview as "table" for § 4.1 enumeration scope) — RESOLVED per Tony's Option (a).** § 6.6 § 4.1 enumerates CREATE TABLE declarations only; matviews documented at § 3 only per § 2 Definitions table-vs-matview distinction. § 6.6 § 4.1 first-sentence qualification clause added. Closes the convergence test re-run's run3 (matview at § 3 only) vs run4 (matview as 4.1.15 with deferral) divergence by ratifying run3's reading.
+
+**METHODOLOGY-INTERPOLATION self-check (v6):**
+
+Per the methodology-interpolation rule (META_PLAN v8 § 6.1, with v6 expanded scope, grandfathering clause, and pattern-completion check), CC reviewed every new methodology construct introduced in v6 against authorization sources:
+
+- **Tony-locked decisions (G-new-1, G-new-2):** both architectural-question resolutions trace directly to Tony's locked language in this cycle's drafting spec. Reproduced char-exact per spec-prescribed text. Not interpolation.
+- **"Numeric sub-section IDs for candidates" rule (G-new-1):** the rule was Tony-locked in this cycle's drafting spec. Reproduced char-exact. Not interpolation. The rule prevents pattern-completion drift (provisional letter-prefixes were the run3 surface for letter-prefix proliferation past W.N) by routing candidates to the existing ratified-entry convention.
+- **"CREATE TABLE declaration" enumeration scope (G-new-2):** the scope was Tony-locked in this cycle's drafting spec. Reproduced char-exact. Not interpolation. The scope rule honors § 2 Definitions' explicit table-vs-matview distinction.
+
+**METHODOLOGY-INTERPOLATION rule pattern-completion check (v6):**
+
+The v6 cycle introduces ZERO new letter-prefixes (W.N remains the only ratified letter-prefix). The G-new-1 closure explicitly forbids provisional letter-prefixes for candidate entries, reinforcing W.N exclusivity. Pattern-completion check (AUDIT_METHODOLOGY v2 § 5.5) for letter-prefixes confirms compliance.
+
+Cross-reference syntax extensions: NONE introduced in v6. `<bible>:#<bug-id>` syntax extension preserved per v4's G9 ratification. No new cross-reference vocabularies.
+
+**AUDIT_METHODOLOGY v3 cycle assessment (per drafting spec discipline):**
+
+Per QB's pre-drafting assessment: AUDIT_METHODOLOGY v3 cycle is NOT warranted at v6 lock. v2's prophylactic checks (§ 4.1–§ 4.7 audit-CC adversarial scope; § 5.1–§ 5.7 prophylactic checks) remain operationally valid against v6. The G8 compliance variance from the convergence test re-run is drafter-discipline drift on an unambiguous locked rule (META_PLAN v8 § 7.3 placeholder-resolution sub-rule); banked for Phase 1 audit-CC checklist as "verify every W.N entry's Fix date is YYYY-MM-DD form, not placeholder, when fix date is git log-resolvable." If pattern recurs across Phase 1 bibles, AUDIT_METHODOLOGY v3 cycle absorbs it.
+
+**Net new methodology constructs introduced in v6: 0.**
+
+(Both closures are spec-text clarifications of existing conventions: G-new-1 codifies "numeric for candidates" which is the natural application of § 5.5's existing numeric-sub-section-ID rule to pre-ratification entries; G-new-2 codifies "CREATE TABLE declaration only" which is the natural application of § 2 Definitions' existing table-vs-matview distinction to § 4.1 enumeration scope.)
+
+**Items NOT addressed in v6 (preserved from v5 unchanged):**
+
+- All § 1, § 2, § 3, § 4, § 5.1-5.6 content retained verbatim from v5.
+- § 5.7 content retained verbatim other than the new closing-clause paragraph (G-new-1 closure).
+- § 6.1-6.5 content retained verbatim from v5.
+- § 6.6 content retained verbatim other than the § 4.1 first-sentence qualification (G-new-2 closure).
+- § 6.7 content retained verbatim from v5.
+- § 7, § 8, § 9, § 10 content retained verbatim from v5.
+- v3/v4/v5 surfacing notes (§ 12.1-12.5) preserved verbatim.
+- v1→v2, v2→v3, v3→v4, v4→v5 changelog entries preserved verbatim; v5→v6 entry prepended.
+- V4-11 mixed v6/v8 META_PLAN references — adjudicated by v4 audit as (a) acceptable surgical-patch discipline application; preserved as-is in v6. Future-cycle cleanup remains cheap if QB later prefers global sweep.
+- G8 compliance variance from convergence test re-run — banked for Phase 1 audit-CC checklist; not closed in v6 spec.
+
+**Net new methodology constructs introduced in v6: 0.**
+
 ---
 
 ## 13. Changelog
+
+### v5 → v6
+
+**Methodology fixes (convergence test re-run findings — 2 NEW methodology gaps):**
+
+The convergence test re-run on v5/v8 substrate (`_audits/convergence_test_v5_audit.md`) produced verdict CONVERGED-WITH-RESIDUAL: 18 material differences (down from original test's 21), 8 PASS + 1 PARTIAL + 0 FAIL on the 9 original G1-G9 gap closures, and 2 NEW methodology gaps not closed by G1-G9. Tony locked Option (a) on both NEW gaps; v6 embeds the resolutions per the v3→v4 audit-CC-recommended-resolution model.
+
+- **G-new-1 — Candidate-roster numbering convention codified (§ 5.7 closing clause).** Candidate-roster entries pre-ratification use numeric sub-section IDs (`5.1`, `5.2`, ...) per the existing § 5.5 numeric-sub-section-ID rule. The "candidate" status is conveyed by the § 5 header marker, NOT by a provisional letter-prefix. W.N remains only ratified letter-prefix per § 5.5.1. Closes the convergence test re-run's run3 vs run4 divergence on letter-prefix vs numeric for candidates. Per Tony's locked Option (a).
+- **G-new-2 — Matview enumeration scope codified (§ 6.6 § 4.1 first-sentence qualification).** § 6.6 § 4.1 enumerates CREATE TABLE declarations only; matviews documented at § 3 only per § 2 Definitions table-vs-matview distinction. Closes the convergence test re-run's run3 (matview at § 3 only) vs run4 (matview as 4.1.15 with deferral) divergence by ratifying run3's reading. Per Tony's locked Option (a).
+
+**G8 compliance variance — banked for Phase 1 audit-CC checklist (no spec revision):**
+
+The convergence test re-run surfaced run3's failure to apply META_PLAN v8 § 7.3 placeholder-resolution sub-rule (run3 used "fixed 2026-05-XX" placeholder for migration 011 — a real fix whose date is git log-resolvable). Run4 ran `stat -c "%y %n"` and committed to "fixed 2026-05-01" per the locked rule. This is drafter-compliance variance on an unambiguous locked rule, NOT methodology ambiguity. No spec revision needed. Phase 1 audit-CC checklist gains: "verify every W.N entry's Fix date is YYYY-MM-DD form, not placeholder, when fix date is git log-resolvable; placeholders only for forward-looking discipline codifications." If pattern recurs across Phase 1 bibles, AUDIT_METHODOLOGY v3 cycle absorbs.
+
+**Methodology lessons recorded (v5 → v6):**
+
+The convergence test re-run on v5/v8 substrate validated the v3→v4 surgical-patch closure cycle's effectiveness: 8 of 9 original gaps closed at structural-equivalence level (the 1 PARTIAL is drafter-compliance, not methodology ambiguity). 17 of 21 original material differences resolved. The convergence test methodology itself is now empirically validated as a Phase 0 closure mechanism: it reliably catches both methodology gaps (closeable by spec revision) and drafter-discipline drift (closeable by audit-CC checklist), distinguishing the two. The v3→v4→v5→v6 trajectory establishes the integration model:
+
+- Architectural-decision gaps → Tony locks Option (a)/(b); CC embeds char-exact.
+- Audit-CC-recommended-resolution gaps → drafting spec embeds the recommendation char-exact; Tony's role is ratification by inclusion.
+- Drafter-compliance variance on unambiguous rules → bank for next-phase audit-CC checklist; no spec revision.
+
+The pattern is generalizable to Phase 1 bible audit cycles: when audit-CC findings differentiate between architectural-decision-class and clarification-class issues, route the former to Tony and embed the latter directly per audit-CC's recommendation.
+
+**Path A sequencing complete:**
+
+v6 is the third Phase 0 revision triggered by the convergence test (META_PLAN v7→v8 closed G8; BIBLE_STRUCTURE_SPEC v3→v4 closed G1-G7+G9; v4→v5 closed metadata-pointer oversight; v5→v6 closes G-new-1 + G-new-2). Per audit-CC's pre-approval, v6 skips re-audit since scope is pure surgical-cosmetic embed of audit-CC-recommended resolutions. After v6 lock, Phase 0 closes. Phase 1 begins per BIBLE_STRUCTURE_SPEC v6 § 8.2 (Architecture Overview first; Database & Schema Bible second — run3 and run4 from convergence test re-run are NOT Phase 1 lock-targets directly, but serve as substrate-grounded reference content QB and Tony decide how to use at Database & Schema Bible Phase 1 cycle).
+
+**Retained from v5 unchanged:**
+
+All § 1 through § 5.6 content, § 5.7 (other than the new closing-clause paragraph for G-new-1), § 6.1–§ 6.5, § 6.6 (other than the § 4.1 first-sentence qualification for G-new-2), § 6.7, § 7 through § 10, § 11 (other than the metadata block update for v6 lock), § 12.1 through § 12.5 (with new § 12.6 surfacing notes added), § 13 v4→v5 + v3→v4 + v2→v3 + v1→v2 entries (with new v5→v6 entry prepended). Front matter (other than Status update + v6 revision history entry; Locked field unchanged at 2026-05-05). Verification log inherits v5's V5-1 + v4's V4-1 through V4-11 + v3-inherited (via v4) wholesale; v6 adds 1 new entry (V6-1: 2 surgical embeds for G-new-1 + G-new-2 closures).
+
+### v4 → v5
+
+**MINOR fix (v4 audit finding):**
+
+The v4 audit returned 0 BLOCKER + 0 MATERIAL + 0 fabricated + 0 methodology-interpolation + 2 MINOR + 4 STYLE — cleanest substantive cycle of v3-v5 sequence. The single blocking-for-clean-lock finding was a missed metadata pointer update at § 11 Lock Status block (lines 1142–1146 in v4). Front matter Status was correctly updated to "DRAFT v4 (pre-audit)" in v4 drafting; § 11 sub-fields (Document status, Audit-CC pass, Verification log, Tony review, Locked) still referenced v3 metadata.
+
+**v5 surgical-cosmetic patch:**
+
+- § 11 Lock Status block updated to v5 metadata reflecting v4-clean-audit + v5-metadata-fix lock trajectory.
+- Front matter Status updated from "DRAFT v4 (pre-audit)" to "LOCKED v5 (2026-05-05)".
+- Front matter Locked field updated from "[pending audit + Tony review + iteration cycles]" to "2026-05-05".
+- Revision history v5 entry appended naming the surgical-cosmetic scope + 1-cycle close per v4 audit-CC's recommendation.
+- § 12.5 v5 surfacing notes added (zero net new methodology constructs).
+
+**Methodology lessons recorded (v4 → v5):**
+
+The v4 cycle's surgical-patch discipline was applied with high fidelity to all 9 fix categories (A-I; 12/12 verbatim reproductions char-exact; 0 unauthorized changes). The single metadata-pointer miss (§ 11) reflects a pattern: when surgical-patch focus is on content fix categories, peripheral metadata blocks are vulnerable to oversight. Banked for AUDIT_METHODOLOGY.md as a future prophylactic check candidate: "When any front matter or status block in the audited document references version metadata, verify ALL such blocks are updated coherently." Not warranted as AUDIT_METHODOLOGY v3 cycle trigger at this lock; the lesson is empirical and Phase 1 audits will surface real friction if the pattern recurs.
+
+**Path A sequencing complete:**
+
+v5 is the second of two Phase 0 revisions triggered by the convergence test, with v4 closing 8 methodology gaps (G1-G7+G9) and v5 closing the v4-cycle metadata-pointer oversight. After v5 lock (this cycle), the convergence test re-runs on the same Database & Schema Bible spec to validate that all gaps are closed. If gaps re-surface, escalate per META_PLAN v8 § 5.3 "Iteration escalation" rule. If clean, Phase 0 closes; Phase 1 begins per BIBLE_STRUCTURE_SPEC v5 § 8.2 (Architecture Overview first).
+
+**Retained from v4 unchanged:**
+
+All § 1 through § 10 content, § 11 (other than the metadata pointer hygiene update at lines 1142–1146), § 12.1 through § 12.4 (with new § 12.5 surfacing notes added), § 13 v3→v4 + v2→v3 + v1→v2 entries (with new v4→v5 entry prepended). Front matter (other than Status + Locked field updates + v5 revision history entry). Verification log inherits v4's 11 new entries + v3's 27 inherited entries wholesale; v5 adds 1 new entry (V5-1: § 11 metadata fix verification).
+
+### v3 → v4
+
+**MATERIAL fixes (convergence test audit findings — 8 of 9 methodology gaps; G8 closed in META_PLAN v7→v8):**
+
+The operating-model convergence test on the Database & Schema Bible draft (`_audits/convergence_test_audit.md`) returned 21 material differences + 9 methodology gaps. G8 (placeholder convention scope) was closed in the META_PLAN v7→v8 cycle (LOCKED). The remaining 8 gaps were routed to BIBLE_STRUCTURE_SPEC v4 per Path A sequencing:
+
+- **G1 — Cross-cutting bug Currently Open scope clarified.** § 5.3 extended with explicit rule: cross-cutting open bugs appear in § 6 of canonical-home bible (substantive description) AND in § 6 of every bible whose discipline its symptoms touch (one-line cross-reference in `<bible>:#<bug-id>` format). When fixed, non-canonical-home § 6 references are removed; the W.N entry replaces them. Closes run1-vs-run2 divergence on Bug #28 cross-reference inclusion.
+- **G2 — Superseded SQL constraint Deprecated qualification clarified.** § 5.6.4 Deprecated entry template gets new conditional bullet: superseded SQL constraints qualify for Deprecated entry IF physically persisting in the DB schema; otherwise migration history is sufficient immune memory. Drafter discretion with verification log entry. Closes run1-vs-run2 divergence on pre-011 wr_predictions UNIQUE inclusion.
+- **G3 — § 8 W.N entry confined to true bug-fix entries.** § 5.6.1 template scope clause added: § 8 entries require mandatory Fix date; discipline codifications routed to § 5 (Discipline rules). Closes run2's 8.W.3 (past_performances.race_id NULL acceptance) violation of W.N template's Fix date mandate. Per Tony's locked Option (b) on the G3 architectural question.
+- **G4 — § 6.X "Recommended TOC" tightened to "sections 5–8 mandatory; sections 1–4 recommended-strongly with drafter latitude."** All seven per-document templates' "Recommended TOC:" headers replaced uniformly. Aligns § 6.X with § 5.2's canonical 5/6/7/8 mandate while preserving drafter latitude for domain-specific § 1–4 reorganization. Closes run1-vs-run2 divergence on § 4 framing.
+- **G5 — Convergence rule on Discipline rule rosters added (§ 5.7).** Phase 1 drafters enumerate candidate § 5 rules from substrate; QB ratifies before § 5 locks. Workflow specified (one round trip per bible). Provenance discriminator (mirrors methodology-interpolation grandfathering pattern) prevents pattern-completion creep. Per Tony's locked Option (b). Closes run1-vs-run2 divergence on rule rosters (4 rules vs 7 rules; only 1 overlapped).
+- **G6 — § 7.1 cross-reference syntax + new § 7.1.1 worked examples.** § 7.1 extended with `<bible>:#<bug-id>` format; new § 7.1.1 codifies worked examples for each cross-reference type. Phase 1 drafters see canonical syntax at drafter touchpoint. Closes run1-vs-run2 divergence on cross-reference format adoption (snake_case .md vs Title Case prose; neither matched § 7.1's spec).
+- **G7 — Tertiary state CONDITIONAL authorized for conditional trigger evaluation.** § 5.6.1.1 worked example updated to use CONDITIONAL where the cross-cutting case applies; new § 5.6.1.2 codifies the three states (FIRES, DOES NOT FIRE, CONDITIONAL) with mandatory adjacent-prose caveat for CONDITIONAL. Per Tony's locked decision. Closes run1's "PARTIAL" / run2's "FIRES (advisory)" divergence by ratifying a single tertiary state with tight semantics.
+- **G9 — Bible-local W.N + global Bug #N for cross-bible references.** § 3.3 cross-reference syntax extended with `<bible>:#<bug-id>` format for cross-cutting bugs; § 5.5 W.N scope clarified as bible-local; new § 5.5.1 codifies global Bug #N convention (monotonic assignment, never reused, de facto convention now explicit). Per Tony's locked decision. Closes run1's W.N renumbering instability by routing cross-bible references to the durable global Bug #N.
+
+**Methodology lessons recorded (v3 → v4):**
+
+The convergence test (META_PLAN v8 § 5.3) caught 9 methodology gaps that single-drafter audit cycles could not have caught. Each gap surfaced because two CC sessions interpreted the same v3 spec differently. The lesson: structural-equivalence drift between drafters is detectable only by adversarial cross-CC comparison; per-document audit cycles validate within-drafter coherence but not cross-drafter convergence.
+
+The v4 cycle's 8-gap closure scope is heavier than typical surgical-patch cycles (META_PLAN v7→v8 closed 4; META_PLAN v6→v7 closed 1). The drafting spec's resolution of routing 4 architectural questions to Tony for locked decisions and 4 audit-CC recommendations to drafting-spec embedded exact-text replacements is the integration model: when convergence-test gaps land at architectural-decision level, Tony locks; when at recommendation-level (substrate-grounded, narrow), audit-CC's recommendation embeds as drafting-spec exact text.
+
+**Banked for AUDIT_METHODOLOGY.md (potential v3 cycle if drift surfaces):** the convergence test pattern (operating-model convergence test on a Phase 1 spec; audit-CC enumerates material differences and methodology gaps; gap closures route through subsequent Phase 0 revision cycles) is now empirically validated. AUDIT_METHODOLOGY v3 cycle is NOT warranted at this lock per QB assessment (v2's prophylactic checks remain operationally valid; version-references update interpretively). If audit-CC catches a coherence drift, AUDIT_METHODOLOGY v3 becomes part of the post-v4 sequence.
+
+**Path A sequencing note:**
+
+v4 is the second of two Phase 0 revisions triggered by the convergence test (after META_PLAN v7→v8 closed G8; v4 closes G1, G2, G3, G4, G5, G6, G7, G9). After v4 lock, the convergence test re-runs on the same Database & Schema Bible spec to validate that all gaps are closed. If gaps re-surface, escalate per META_PLAN v8 § 5.3 "Iteration escalation" rule.
+
+**Retained from v3 unchanged:**
+
+Front matter (revised for v4 metadata + revision history v4 entry), § 1, § 2, § 3.1, § 3.2 (§ 3.3 modified per v4 requirement A), § 4, § 5.1, § 5.2, § 5.3 (other than the modified second paragraph + new cross-cutting Currently Open scope rule), § 5.4, § 5.5 (other than the modified first bullet + new § 5.5.1), § 5.6.1 template (other than the new Scope clause + Mandatory fields update), § 5.6.1.1 worked example (other than the modified Conditional triggers block + new § 5.6.1.2), § 5.6.2, § 5.6.3, § 5.6.4 (other than the new conditional bullet for SQL constraints), § 6.1–§ 6.7 content (other than the uniform "Recommended TOC:" header replacement), § 7.1 (other than the modified syntax + new § 7.1.1), § 7.2–§ 7.6, § 8, § 9, § 10, § 11, § 12.1–§ 12.3 (with new § 12.4 surfacing notes added). § 13 v2→v3 entry preserved verbatim. Verification log inherits v3's claims with re-verified-2026-05-05 timestamps and adds new v4 claims per v4 fix categories.
 
 ### v2 → v3
 

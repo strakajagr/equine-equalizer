@@ -2,10 +2,10 @@
 
 **Document:** META_PLAN
 **Phase:** 0 (Methodology)
-**Status:** DRAFT v6 (pre-audit)
-**Author:** CC (drafted under verification discipline; QB orchestrated and reviewed)
-**Date:** 2026-05-04
-**Locked:** [pending audit + Tony review + iteration cycles]
+**Status:** LOCKED v9 (2026-05-05)
+**Author:** CC (drafting under verification discipline; QB orchestrated and reviewed)
+**Date:** 2026-05-05
+**Locked:** 2026-05-05
 
 **Revision history:**
 - v1 (2026-05-03): initial QB draft
@@ -14,6 +14,9 @@
 - v4 (2026-05-04): post-v3-audit revision. v3 audit returned 1 BLOCKER (A.4 "4 references including the import" → "4 instantiations" inflation) and 6 MATERIALs (methodology coherence). v4 is a localized fix pass plus the verification-log-precision lesson the BLOCKER taught.
 - v5 (2026-05-04): post-v4-audit revision. v4 audit returned 0 BLOCKERs and 4 MATERIALs (precision-rule scope, Tier-migration mechanics, Layer 1 physical form, Bug #28 stable-known). v5 is a localized patch pass plus one substantive addition (§ 3.2.1 — the Phase 1 ML re-architecture forcing function locked at META_PLAN level). v4's audit also surfaced a methodology-interpolation pattern (Finding H); v5 corrects v4's instance and operates under the rule going forward.
 - v6 (2026-05-04): post-v5-audit revision. v5 audit returned 0 BLOCKERs, 0 fabricated-content findings, and 3 MATERIALs — but one MATERIAL was a methodology-interpolation finding (M-1: § 5.3 / § 3.1 "3 consecutive iterations" iteration cap, CC-introduced in v3 cycle without Tony's explicit ratification). Per Tony's bar, methodology-interpolation findings fail the lock regardless of count. v6 is a surgical patch pass: M-1 cadence-neutralized; M-2 methodology-interpolation rule scope expanded with named patterns + catch-all clause; M-3 § 3.2.1 "merge" language tightened to require physically separate documents; § 6.1 grandfathering clause added making the "explicitly ratified" boundary computable; expanded MINORs #5 (exacta payout claim) and #6 (ECS task families enumeration). Companion verification log at `_audits/META_PLAN_v6_verification.md`.
+- v7 (2026-05-05): post-convergence-test revision addressing G8 from `_audits/convergence_test_audit.md`. The operating-model convergence test on Database & Schema Bible (run1 vs run2) returned 21 material differences + 9 methodology gaps. G8 was the single methodology gap routed to META_PLAN: the Appendix A `YYYY-MM-XX` placeholder convention is interpreted differently between conservative-uses-placeholder and commit-to-actual-date drafters when knowable real dates exist from git log. Per Tony's locked direction (Path A revision), v7 is a surgical patch: § 7.3 sub-rule added requiring `git log` resolution for real fixes with knowable dates; Appendix A lead paragraph scope-clarified to explicitly bound the placeholder convention to worked examples + forward-looking entries; § 12 multi-cycle changelog with v6→v7 entry. All other sections retained from v6 verbatim. Companion verification log at `_audits/META_PLAN_v7_verification.md`. The remaining 8 methodology gaps (G1–G7, G9) are routed to BIBLE_STRUCTURE_SPEC v4, which follows v7 lock per Path A sequencing.
+- v8 (2026-05-05): post-v7-audit revision per `_audits/META_PLAN_v7_audit.md`. v7 audit returned 0 BLOCKER, 1 MATERIAL (F-F methodology-interpolation finding: § 12.1 second methodology-lesson paragraph asserted a methodology-pattern generalization beyond drafting-spec authorization), 0 fabricated, 6 MINOR/STYLE. Per Tony's bar (methodology-interpolation findings fail the lock regardless of count), v7 could not lock. Per Tony's locked Option 2 directive, v8 closes 1 MATERIAL + 3 MINOR/STYLE = 4 findings. F-F: paragraph deleted (no relabel; resolution chosen over relabel to eliminate ambiguity). A2: § 12 intro paragraph replaced with explicit-descriptive framing of v8's actual organization. A3: "surgical-patch discipline" terminology promotion struck; replaced with plain-language descriptive bullet. Q3.A2: normative "future Phase 0 cycles should treat" softened to descriptive past-tense referencing v6 § 5.4. Three remaining MINOR/STYLE findings (R3 G8 placeholder normalization, X7 BIBLE_STRUCTURE_SPEC v4 forward reference, X8 v4 MINOR-pass close paraphrase) flagged STYLE/acceptable in v7 audit; no remediation required. v8 introduces zero new methodology constructs (pure deletion + spec-prescribed replacements). All other sections retained from v7 verbatim. Companion verification log at `_audits/META_PLAN_v8_verification.md`. BIBLE_STRUCTURE_SPEC v4 follows v8 lock per Path A sequencing.
+- v9 (2026-05-05): post-Phase-0-closure surgical correction triggered by Phase 1 Architecture Overview v1 verification. Architecture Overview v1 verification log Claim A.8 REFUTED the inherited Aurora cluster ARN claim — live AWS verification returned `DBClusterNotFoundFault` for the cited cluster identifier. Substrate reality (Architecture Overview v1 verification log Claim V1-11): EE uses standalone RDS PostgreSQL 16.6 instance `equine-db` (db.t4g.micro, endpoint `equine-db.cgtuh834bttd.us-east-1.rds.amazonaws.com:5432`, `DBClusterIdentifier=None`) — not an Aurora cluster. Source of inherited error traced to cross-project contamination from `fantasy-baseball-serverless` Aurora cluster ARN bleed into EE_CURRENT_STATE_DUMP.md (Tier 6). Per META_PLAN v8 § 4.5 source-priority, Tier 1 (live AWS state) governs over Tier 6. v9 corrects three Aurora references in body (§ 2.3 in-scope artifact bullet, § 7.12 Migration testing paragraph, § 9.2 anti-pattern illustrative example) and updates metadata hygiene (front matter Status + Locked fields, § 11 Lock Status block — all carrying drift from prior cycles where Phase 0 closure metadata never propagated to disk). All other sections retained from v8 verbatim. v9 introduces zero new methodology constructs (pure correction + metadata hygiene). Companion verification log at `_audits/META_PLAN_v9_verification.md`. Methodology lesson banked for AUDIT_METHODOLOGY future cycle: Tier 6 verification mandate includes cross-project contamination check, not just freshness check.
 
 ---
 
@@ -89,7 +92,7 @@ The full EE footprint is in scope for the bible. Inventory below verified agains
 - **S3 buckets (4):** `equine-frontend`, `equine-model-artifacts`, `equine-processed-data`, `equine-raw-data`
 - **API Gateway v2:** id `gb5qlfy10h`, 41 routes (verified live)
 - **ECR repositories:** `equine-training`, `equine-nyra-workouts`, `equine-equibase-acquisition`, plus `cdk-hnb659fds-container-assets-584812014683-us-east-1` (CDK-managed, currently 5 images — INACTIVE Lambda images have been culled)
-- **Aurora Serverless cluster** (one)
+- **RDS PostgreSQL instance** `equine-db` (one; standalone instance, not part of an RDS cluster — `DBClusterIdentifier=None`. Engine `postgres` 16.6, `db.t4g.micro`, endpoint `equine-db.cgtuh834bttd.us-east-1.rds.amazonaws.com:5432`. Verified live 2026-05-05 per Architecture Overview v1 verification log Claim V1-11. Inherited Aurora cluster ARN claim REFUTED 2026-05-05 per Architecture Overview v1 verification log Claim A.8.)
 - **Secrets Manager (3 entries):** `equine-equalizer/db-credentials`, `equine-equalizer/2captcha-api-key`, `equine-equalizer/brightdata-api-key` (the latter two have zero code consumers per `grep -r 2captcha\|brightdata`)
 - **SNS:** `equine-equalizer-alerts` (1 topic)
 - **Database:** 14 tables + 1 materialized view (`trainer_stats`) — verified by counting unique CREATE TABLE statements across `schema.sql` and migrations 001–011. Includes the migration runner mechanism (`backend/database/migrations/migrate.py`, tracking by filename in `schema_migrations` table).
@@ -693,6 +696,12 @@ Correct: [what new code must do]
 
 When a rule changes, the new date supersedes the old. The history is preserved in git, and the bible itself shows the audit trail of when each rule was last validated.
 
+**Placeholder-resolution sub-rule (locked 2026-05-05 per v7 cycle):**
+
+> Phase 1 drafters MUST resolve the date placeholder via `git log` of the relevant primary source (migration file, code commit, etc.) before locking the bible document containing a W.N entry for a real fix. Placeholder (`YYYY-MM-XX`) is reserved for Appendix A's worked-example documents (Phase 0 methodology) and any other entries where the fix has not actually happened yet (forward-looking discipline codification). For real bug fixes where git log can resolve the date, the drafter MUST resolve and use the actual date.
+
+Rationale: this sub-rule discharges a methodology gap (G8) surfaced by the operating-model convergence test on the Database & Schema Bible draft (`_audits/convergence_test_audit.md`). Two CC sessions given the same Phase 1 spec interpreted Appendix A's placeholder convention differently — one used `fixed 2026-05-XX` for migration 011's `wr_predictions` UNIQUE fix (a real fix whose date is knowable from `git log` of `011_wr_predictions_unique_fix.sql`), the other resolved to `fixed 2026-05-01`. Both choices were defensible against v6's existing language, which established the placeholder convention only for Appendix A worked examples (entries that don't yet have real dates because the bible entries don't yet exist). The convention did NOT specify what Phase 1 drafters do when writing W.N entries for fixes whose real dates ARE knowable. The sub-rule closes the divergence by making `git log` resolution mandatory whenever the fix has actually happened and the date is knowable from a primary source. The placeholder convention remains operative for the two cases it was designed for: (i) Appendix A's worked examples, where the bible entry does not yet exist; and (ii) forward-looking entries that codify discipline for fixes that haven't happened yet (the discipline locks now; the W.N entry's "fixed" date does not exist until the fix lands). Cross-reference: Appendix A lead paragraph carries the same scope-bound clarification.
+
 ### 7.4 What Was Fixed — Do Not Revert
 
 Each bible document includes a "What Was Fixed — Do Not Revert" section scoped to that document's domain. (Divergence from DD: DD has one consolidated "What Was Fixed" section in its single bible file; EE's multi-file structure means each bible document carries its own immune memory for the bugs in its scope. Divergence is intentional.)
@@ -896,7 +905,7 @@ For non-reversible migrations, the down block reads:
 -- 2. <step>
 ```
 
-**Migration testing:** non-production database first. **"Non-production" definition:** local Postgres instance OR a dedicated dev Aurora cluster (when one exists; one does NOT currently exist for EE). Until a dev Aurora exists, migrations are tested against local Postgres only, which means Aurora-specific behaviors (JSONB serialization quirks, IAM auth) cannot be caught pre-deploy. Phase 5 should add a dev Aurora cluster as a triage-queue item; until then, the rule has reduced enforcement, and Tony should treat untested-against-Aurora as elevated risk.
+**Migration testing:** non-production database first. **"Non-production" definition:** local Postgres instance matching production engine version (PostgreSQL 16.6) OR a dedicated dev RDS PostgreSQL instance (when one exists; one does NOT currently exist for EE). Until a dev RDS instance exists, migrations are tested against local Postgres only. Production engine is standalone RDS PostgreSQL 16.6 (`equine-db` instance, not Aurora — corrected v9 per Architecture Overview v1 verification log Claim A.8 REFUTATION + Claim V1-11 substrate). Phase 5 should add a dev RDS instance as a triage-queue item; until then, the rule has reduced enforcement, and Tony should treat untested-against-RDS as elevated risk.
 
 **Migration commit discipline:** schema migration file + bible entry + code that uses the schema all in same commit (or same PR when PR workflow is adopted; see § 7.13).
 
@@ -1064,7 +1073,7 @@ The bible documents what is, not what should be. Aspirations belong in Phase 4 g
 
 ### 9.2 Tutorials and explanations
 
-The bible is a reference, not a learning resource. It does not explain why XGBoost is a gradient-boosted decision tree. It does not explain Aurora Serverless. It assumes a reader who already knows the technology and needs to know what THIS system does with it.
+The bible is a reference, not a learning resource. It does not explain why XGBoost is a gradient-boosted decision tree. It does not explain RDS PostgreSQL. It assumes a reader who already knows the technology and needs to know what THIS system does with it.
 
 ### 9.3 Marketing language
 
@@ -1164,11 +1173,11 @@ Resolved in v3: `PHASE_5_BACKLOG.md` is created at Phase 0 exit with Bug #28 as 
 
 ## 11. Lock Status
 
-**Document status:** DRAFT v6, pre-audit
-**Audit-CC pass:** pending (v6 audit pending after disk write)
-**Verification log:** `_audits/META_PLAN_v6_verification.md` — re-verified counts; ECS task families enumerated; Bug #28 exacta-status claim re-grounded against operator memory file's verbatim symptom statement
-**Tony review:** pending (will see post-audit version per workflow discipline)
-**Locked:** [pending]
+**Document status:** LOCKED v9 (post-Phase-0-closure surgical correction)
+**Audit-CC pass:** v8 audit closed 2026-05-05 (per `_audits/META_PLAN_v8_verification.md`); v9 surgical-cosmetic patch skips re-audit per BIBLE_STRUCTURE_SPEC v5/v6 surgical-cosmetic pattern
+**Verification log:** `_audits/META_PLAN_v9_verification.md` — Aurora claim REFUTATION verified per Architecture Overview v1 verification log Claim A.8 + V1-11; metadata hygiene drift corrected; v6→v7→v8→v9 trajectory documented
+**Tony review:** complete (Path C ratified 2026-05-05)
+**Locked:** 2026-05-05
 
 **Phase 0 exit prerequisites (per § 3.1):**
 - [ ] All 5 Phase 0 documents pass adversarial audit (Tony's threshold: < 5 MATERIAL findings AND zero fabricated-content findings AND zero methodology-interpolation findings)
@@ -1181,7 +1190,114 @@ Resolved in v3: `PHASE_5_BACKLOG.md` is created at Phase 0 exit with Bug #28 as 
 
 ---
 
-## 12. v5 → v6 Changelog
+## 12. Changelog
+
+This section carries the changelog across multiple cycles. In v9's organization, § 12.1 holds the v8→v9 changelog, § 12.2 holds the v7→v8 changelog, § 12.3 holds the v6→v7 changelog, and § 12.4 holds the v5→v6 changelog (preserved verbatim from v6's § 12). Earlier-than-v5→v6 changelog content lives in git history at the corresponding version commits.
+
+### 12.1 v8 → v9 Changelog
+
+**Surgical correction (Phase 1 verification surfaced Phase 0 substrate error):**
+
+- **Aurora cluster ARN claim REFUTED — replaced with standalone RDS PostgreSQL substrate.** META_PLAN v8 inherited from earlier cycles' verification logs (via wholesale v6→v7→v8 inheritance) the claim that EE uses an Aurora Serverless cluster with ARN `arn:aws:rds:us-east-1:584812014683:cluster:equinedatabasestack-equinedatabase648a3917-y8mww81ea82f`. Architecture Overview v1 verification log Claim A.8 ran `aws rds describe-db-clusters --db-cluster-identifier equinedatabasestack-equinedatabase648a3917-y8mww81ea82f` 2026-05-05; live AWS returned `DBClusterNotFoundFault`. Architecture Overview v1 verification log Claim V1-11 ran `aws rds describe-db-instances --db-instance-identifier equine-db` 2026-05-05; live AWS returned standalone PostgreSQL 16.6 instance `equine-db` (`DBClusterIdentifier=None`). Source of the inherited error traced to cross-project contamination — `EE_CURRENT_STATE_DUMP.md` (Tier 6) likely incorporated the Aurora cluster ARN from the adjacent `fantasy-baseball-serverless` Aurora cluster (a different project). Per § 4.5 source-priority hierarchy, Tier 1 (live AWS state) governs over Tier 6 (dump-derived claim). v9 corrects three body locations: § 2.3 in-scope artifact bullet (`Aurora Serverless cluster (one)` → `RDS PostgreSQL instance equine-db (one; standalone instance ...)`), § 7.12 Migration testing paragraph (`dev Aurora cluster` / `Aurora-specific behaviors` references replaced with `dev RDS PostgreSQL instance` / standalone RDS framing), § 9.2 illustrative example (`It does not explain Aurora Serverless.` → `It does not explain RDS PostgreSQL.`).
+
+**Metadata hygiene drift corrected (drift origin: Phase 0 closure metadata never propagated to disk in v7 + v8 cycles):**
+
+- **Front matter Status field** updated from `DRAFT v8 (pre-audit)` to `LOCKED v9 (2026-05-05)`.
+- **Front matter Locked field** updated from `[pending audit + Tony review + iteration cycles]` to `2026-05-05`.
+- **§ 11 Lock Status block 5 sub-fields** updated to reflect v9 metadata + v6→v7→v8→v9 trajectory + Phase 0 closure context. § 11's Phase 0 exit prerequisites checklist (immediately following the 5 sub-fields) preserved unchanged — those prerequisites are Phase 0 exit semantics, not v9 metadata hygiene.
+
+**Methodology lessons banked (for future AUDIT_METHODOLOGY cycle, when warranted):**
+
+- **Lesson 1 — Tier 6 verification mandate includes cross-project contamination check, not just freshness check.** The Aurora ARN inherited from `EE_CURRENT_STATE_DUMP.md` was not stale EE state; it was content from a different project (`fantasy-baseball-serverless`). Verification protocols against Tier 6 must check for cross-project bleed, not only stale-EE-state.
+- **Lesson 2 — Phase 1 verification surfaces Phase 0 substrate errors; surgical correction to Phase 0 documents is the expected response, not Phase 0 re-lock.** The v9 cycle is the canonical pattern: Phase 1 audit-CC catches an inherited claim that doesn't hold against live state; QB triages as substrate error; Phase 0 document receives surgical patch (this cycle) rather than full re-audit.
+- **Lessons 3–6 — QB drafting and synthesis discipline (cluster).** Four QB-side errors surfaced in the Architecture Overview v1 cycle (deliverable numbering arithmetic, broken cross-reference to META_PLAN § 7.10, FRAMEWORK_GAP reframing assertion, upstream-correction synthesis error) all trace to the same root failure: QB asserted from synthesis when substrate verification was required. Cluster as `QB drafting and synthesis discipline` for AUDIT_METHODOLOGY codification: (3) drafting specs cite primary verification log claim IDs, not paraphrased restatements; (4) QB triage of FRAMEWORK_GAP markers requires substrate verification before ratification; (5) EventBridge documentation cites `list-targets-by-rule` output per rule, not `list-rules` output alone; (6) QB synthesis of audit findings into upstream-correction scope requires substrate verification of the upstream claim, not propagation of audit-CC's downstream finding.
+
+**Verification log v9 deltas:**
+
+- New entry V9-1 (9 sub-entries, A through I): each Target's substrate citation, char-exact replacement verification, and bash-grep confirmation of removal/insertion. Decomposition: 8 patch targets (A through H) + 1 structural sub-section renumbering (I) = 9 sub-entries total.
+- All other entries inherited from v8 verification log; not re-verified during v9 (this cycle covers only the changed content).
+
+**Retained from v8 unchanged:**
+
+- All v7-added § 7.3 placeholder-resolution sub-rule + rationale paragraph.
+- All v7-added Appendix A scope-clarification paragraph.
+- All v8-added § 12 intro paragraph re-instantiated for v9 organization (Target H).
+- All v8-added § 12.1 (renumbered to v9 § 12.2) v7→v8 changelog content.
+- All v7 § 12.2 (renumbered to v9 § 12.3) v6→v7 changelog content.
+- All v6 § 12 (renumbered to v9 § 12.4) v5→v6 changelog content.
+- All other sections (§ 1, § 2.1, § 2.2, § 2.3 except the corrected Aurora bullet, § 2.4, § 3, § 4, § 5, § 6, § 7.1, § 7.2, § 7.3, § 7.4–§ 7.11, § 7.12 except the corrected Migration testing paragraph, § 7.13, § 7.14, § 8, § 9.1, § 9.2 except the corrected illustrative-example sentence, § 9.3–§ 9.13, § 10, § 11 except the corrected 5 sub-fields, Appendix A.1–A.7) retained verbatim. v9 is a surgical-cosmetic patch, not a substantive revision.
+
+**Path forward note:**
+
+v9 closes the Phase 0 substrate correction triggered by Architecture Overview v1 verification. After v9 lock, the next QB deliverable is Architecture Overview v2 drafting spec, which inherits corrected META_PLAN v9 substrate + applies the 8 MATERIAL corrections + 10 MINOR fixes from the Architecture Overview v1 audit + applies the 6 active methodology lessons (lessons 1–2 already operative; lessons 3–6 now banked for AUDIT_METHODOLOGY codification but operative as discipline starting v2 spec).
+
+### 12.2 v7 → v8 Changelog
+
+**MATERIAL fix (v7 audit finding):**
+
+- **F-F — § 12.1 second methodology-lesson paragraph deleted.** The v7 audit (`_audits/META_PLAN_v7_audit.md`) flagged a CC-prescribed methodology-pattern generalization in v7 § 12.1's "Methodology lesson recorded (v6 → v7)" subsection. The flagged paragraph asserted that v7's surgical-patch shape is a pattern "robust across cycles" and that "precise audit findings produce precise revisions" — a generalization claim about methodology cycle shape that Tony had not ratified. Per v6 § 6.1's catch-all clause ("or other CC-prescribed methodology constructs that Tony has not explicitly ratified"), audit-CC classified this as MATERIAL methodology-interpolation. Per Tony's bar, methodology-interpolation findings fail the lock regardless of count. Per Tony's locked F-F resolution: the paragraph is deleted entirely (not relabeled). Deletion eliminates the drafter-authored prose surface from re-evaluation in future audits. After deletion, "Methodology lesson recorded (v6 → v7)" contains exactly one paragraph (the spec-authorized lesson about the convergence test surfacing methodology gaps that audit cycles alone cannot).
+
+**MINOR/STYLE fixes (v7 audit findings):**
+
+- **A2 — § 12 intro paragraph tightened to descriptive framing.** v7's intro paragraph contained "Most-recent cycle first; prior cycles preserved verbatim for audit-trail continuity" — readable as forward-looking discipline by future-cycle drafters. Replaced with explicit-descriptive framing naming v8's actual organization (§ 12.1 / § 12.2 / § 12.3). The replacement describes what v8 did without prescribing for future cycles.
+- **A3 — "surgical-patch discipline" terminology promotion struck.** v7 § 12.1's "Verification log v7 deltas" subsection's final bullet contained an em-dashed clause defining "surgical-patch discipline" as "only changed content gets new verification entries" — a CC-introduced sub-rule about verification-log behavior in surgical-patch cycles, beyond v6's grandfathered "surgical patch" descriptive vocabulary. Replaced the em-dashed clause with plain-language descriptive framing ("this cycle covers only the changed content"). Removes the terminology promotion without changing the operational meaning.
+- **Q3.A2 — normative-"should" softened to descriptive past-tense with v6 § 5.4 cross-reference.** v7 § 12.1's first methodology-lesson paragraph closed with "future Phase 0 cycles should treat the convergence test as load-bearing, not optional" — a normative restatement of v6 § 5.4's existing locked rule. Replaced with "the convergence test is load-bearing per v6 § 5.4, not optional — the v7 cycle treated it as such." References the existing locked rule explicitly; describes v7's actual treatment without prescribing for future cycles.
+
+**MINOR/STYLE findings NOT addressed in v8 (v7 audit flagged STYLE/acceptable; no remediation required):**
+
+- **R3** — G8 placeholder normalization (`YYYY-XX-XX` in convergence_test_audit.md → `YYYY-MM-XX` in v7's revision history). Surfaced in v7 verification log V7-3; defensible because (a) v7's reference is paraphrase-shaped, not a verbatim quote, and (b) the substitution aligns with Tony's locked sub-rule's strict form. STYLE (acceptable).
+- **X7** — Forward reference to BIBLE_STRUCTURE_SPEC v4 (which does not yet exist). Acceptable per Path A sequencing (v4 cycle follows v8 lock). STYLE (acceptable).
+- **X8** — "v4's MINOR-pass" close paraphrase of v4's revision-history "localized fix pass" framing. Inside the (now-deleted) F-F paragraph in v7; the F-F deletion in v8 incidentally removes this paraphrase too. Closed by F-F deletion as a side-effect.
+
+**Verification log v8 deltas:**
+
+- New entry: F-F paragraph deletion verified (the verbatim paragraph is no longer present in § 12.2; "Methodology lesson recorded (v6 → v7)" subsection now contains exactly one paragraph).
+- New entry: A2 § 12 intro paragraph replacement verified (new text matches drafting-spec embedded language; original "Most-recent cycle first" language removed).
+- New entry: A3 § 12.2 verification log bullet replacement verified ("surgical-patch discipline" terminology removed; new descriptive language present).
+- New entry: Q3.A2 § 12.2 normative-"should" sentence replacement verified ("future Phase 0 cycles should treat" removed; new descriptive sentence with v6 § 5.4 cross-reference present).
+- New entry: § 12 sub-section renumbering verified (v7's § 12.1 v6→v7 renumbered to § 12.2; v7's § 12.2 v5→v6 renumbered to § 12.3; new § 12.1 holds v7→v8 changelog).
+- All other entries inherited from v7 verification log; not re-verified during v8 (this cycle covers only the changed content).
+
+**Retained from v7 unchanged:**
+
+- All v7-added § 7.3 placeholder-resolution sub-rule + rationale paragraph.
+- All v7-added Appendix A scope-clarification paragraph.
+- All v7 § 12.2 (renumbered from v7 § 12.1) v6→v7 changelog content beyond the F-F / A3 / Q3.A2 fixes.
+- All v7 § 12.3 (renumbered from v7 § 12.2) v5→v6 changelog content (preserved verbatim from v6's § 12).
+- All other sections (§ 1, § 2, § 3, § 4, § 5, § 6, § 7.1, § 7.2, § 7.4–§ 7.14, § 8, § 9, § 10, § 11, Appendix A.1–A.7) retained verbatim. v8 is a surgical patch, not a substantive revision.
+
+**Path A sequencing note:**
+
+v8 is the second of two Phase 0 revisions triggered by the convergence test (after v7 closed G8; v8 closes the v7-audit findings F-F + A2 + A3 + Q3.A2). After v8 lock, BIBLE_STRUCTURE_SPEC v4 cycle addresses the remaining 8 methodology gaps (G1, G2, G3, G4, G5, G6, G7, G9) per Path A. Once v8 and v4 lock, the convergence test re-runs on the same Database & Schema Bible spec to validate that all gaps are closed. If gaps re-surface, escalate per § 5.3 "Iteration escalation" rule.
+
+### 12.3 v6 → v7 Changelog
+
+**MATERIAL fix (convergence test audit finding):**
+
+- **G8 — Appendix A placeholder convention scope clarified + § 7.3 sub-rule added.** The operating-model convergence test on the Database & Schema Bible draft (per § 5.3 step 3 of v6) produced two structurally non-equivalent outputs from two CC sessions executing the same Phase 1 spec. Audit-CC enumerated 21 material differences and 9 methodology gaps in `_audits/convergence_test_audit.md`. G8 was the single methodology gap routed to META_PLAN (the remaining 8 gaps — G1, G2, G3, G4, G5, G6, G7, G9 — are routed to BIBLE_STRUCTURE_SPEC v4 per Path A sequencing). G8's symptom: run1 used `fixed 2026-05-XX` for migration 011's `wr_predictions` UNIQUE fix (a real fix whose date is knowable from `git log` as 2026-05-01); run2 used `fixed 2026-05-01`. Both choices were defensible against v6's language, which established the placeholder convention only for Appendix A worked examples and did not specify Phase 1 drafter behavior when writing W.N entries for fixes whose real dates are knowable. v7 closes the divergence with two coupled changes: (a) § 7.3 receives a placeholder-resolution sub-rule mandating `git log` resolution for real fixes with knowable dates; (b) Appendix A's lead paragraph receives a scope-clarification clause that explicitly bounds the placeholder convention to (i) Appendix A's worked-example documents and (ii) forward-looking entries codifying discipline for fixes that haven't happened yet. The two changes are coupled — § 7.3 sets the methodology rule; Appendix A's note explains where the placeholder convention does and does not apply.
+
+**Methodology lesson recorded (v6 → v7):**
+
+The convergence test surfaced a methodology gap that audit cycles alone could not have surfaced. Per-document audit cycles (META_PLAN v6 audit, BIBLE_STRUCTURE_SPEC v3 audit, etc.) are adversarial against a single drafter's content; they do not test for **silent drift between drafters given the same spec**. The convergence test (per § 5.3) is structurally distinct adversarial discipline: it pits two CC sessions' interpretations against each other and routes their differences through audit-CC. G8 surfaced only because two drafters interpreted the placeholder convention differently — neither interpretation would have failed a single-drafter audit. The lesson is that the convergence test is NOT redundant with per-document audits; it is the only mechanism that catches drafter-interpretation drift. v7's surgical patch closes G8 specifically; the broader methodology lesson is that the convergence test is load-bearing per v6 § 5.4, not optional — the v7 cycle treated it as such.
+
+**Verification log v7 deltas:**
+
+- New entry: § 7.3 sub-rule text matches Tony's locked language verbatim.
+- New entry: Appendix A lead-paragraph scope clarification preserves the original two claims char-exact while adding the scope-bound clause.
+- New entry: § 12.2 (this section) cross-reference to `_audits/convergence_test_audit.md` resolves; G8 finding text matches the audit document.
+- All other entries inherited from v6 verification log; not re-verified during v7 (this cycle covers only the changed content).
+
+**Retained from v6 unchanged:**
+
+- All § 7.3 content prior to the new sub-rule (the bulk discipline, the example-structure block, and the rule-supersession paragraph).
+- All Appendix A content beyond the lead-paragraph scope-clarification clause (A.1 through A.7 worked examples).
+- All other sections (§ 1, § 2, § 3, § 4, § 5, § 6, § 7.1, § 7.2, § 7.4–§ 7.14, § 8, § 9, § 10, § 11) retained verbatim. v7 is a surgical patch, not a substantive revision.
+
+**Path A sequencing note:**
+
+v7 is the first of two Phase 0 revisions triggered by the convergence test. After v7 lock, BIBLE_STRUCTURE_SPEC v4 cycle addresses the remaining 8 methodology gaps (G1, G2, G3, G4, G5, G6, G7, G9) per Path A. Once both revisions land and lock, the convergence test re-runs on the same Database & Schema Bible spec to validate that the gaps are closed. If gaps re-surface, escalate per § 5.3 "Iteration escalation" rule.
+
+### 12.4 v5 → v6 Changelog
 
 **MATERIAL fixes (v5 audit findings):**
 
@@ -1229,6 +1345,8 @@ A related lesson: v6 also surfaced an audit-CC characterization error (v5 audit'
 These are the bible content patterns Phase 1 will produce. **Every example uses verified EE patterns.** Verification entries are in `_audits/META_PLAN_v6_verification.md`.
 
 Note on placeholders: where a real bible entry would carry a date and a Phase 5 backlog reference, this document uses `Locked 2026-05-XX` and `Phase 5.X.Y` because real Phase 5 numbering does not yet exist (PHASE_5_BACKLOG.md is created at Phase 0 exit). The pattern is real; the specific identifiers are placeholders that get filled when the entry actually lives in a bible document.
+
+**Scope of the placeholder convention (clarified per v7 cycle, 2026-05-05):** the `YYYY-MM-XX` / `Phase 5.X.Y` placeholders in this Appendix apply only to (i) Appendix A's worked-example documents (this Phase 0 methodology document) and (ii) forward-looking entries in Phase 1 bibles that codify discipline for fixes that haven't happened yet — i.e., the rule locks now but the W.N "fixed" date does not exist until the fix lands. The convention does NOT apply to real bug-fix entries in Phase 1 bibles whose dates are knowable from `git log` of the relevant primary source. For those, § 7.3's placeholder-resolution sub-rule applies: Phase 1 drafters MUST resolve the date via `git log` and use the actual date before locking the bible. See § 7.3 for the full sub-rule and rationale.
 
 ### A.1: FORBIDDEN/CORRECT — Model Registry Multi-Active-Row Reality
 

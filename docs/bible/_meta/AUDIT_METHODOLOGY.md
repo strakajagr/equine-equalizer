@@ -2,20 +2,23 @@
 
 **Document:** AUDIT_METHODOLOGY
 **Phase:** 0 (Methodology) — Phase 0 deliverable 3 of 5
-**Status:** DRAFT v2 (pre-audit)
+**Status:** LOCKED v3 (2026-05-08)
 **Author:** CC (drafting under verification discipline; QB orchestrated and reviewed)
-**Date:** 2026-05-04
-**Locked:** [pending audit + Tony review + iteration cycles]
+**Date:** 2026-05-08
+**Locked:** 2026-05-08 (Tony ratification chain: Q1–Q8 + R1–R8 + R8.a + R8.b + R9–R12 + 11 finding ratifications + L1–L6)
+**Audit completion:** SP-A3 2026-05-08; 11 findings delivered (2 BLOCKER, 4 MATERIAL, 5 MINOR/STYLE); 10 surgical patches + 1 wontfix-with-parenthetical applied at SP-A4
 
 **Revision history:**
 - v1 (2026-05-04): initial CC draft. Companion verification log at `_audits/AUDIT_METHODOLOGY_v1_verification.md`.
 - v2 (2026-05-04): post-v1-audit surgical patch pass integrating Tony's three locked decisions (Q1: Option B addressing MATERIALs + tightly coupled MINORs; Q2a: Option (a) verbatim from source for § 4.6 quote attributions; Q2b: verification log delta with Claim 42 confirming verbatim accuracy). Companion verification log at `_audits/AUDIT_METHODOLOGY_v2_verification.md` inherits v1's 41 claims with re-verified-2026-05-04 timestamps and adds 1 new claim (Claim 42 — verbatim attribution of v2 audit Q2.2 + Tony's Q4 in § 4.6).
+- v2-patched (2026-05-05): four lessons banked in § 4 (Lessons § 4.8 / § 4.9 / § 4.10 / § 4.11) emerged from the Database & Schema Bible v1 cycle (drafting + audit + Tony ratifications 2026-05-05). Lessons cover: § 4.8 QB substrate findings during spec authorship require Tony ratification; § 4.9 QB review pass is light surface only; § 4.10 verbatim-paste discipline for V1-N entries; § 4.11 grep predictions against bootstrap-mirror file unions. Each lesson follows the existing four-element structure (abstract rule + worked example + cross-references + audit-CC prophylactic check template). Banked at next-sequential slots per the file's § 4.X = Lesson X convention; the patch-spec referenced "Lesson 11/12/13" as labels but the file's slot numbering starts continuation at § 4.8. Substrate observation surfaced in `database_schema_bible_v1_verification.md` Section I V1-patch-10.
+- v3 (2026-05-08): AUDIT_METHODOLOGY meta-cycle (post-Phase-1 dispatch sequence 4 of 4). 21 promotion-queue items + 3 awareness-item dispositions integrated. Cycle ratifications captured Q1–Q8 + R1–R8 + R8.a + R8.b by Tony 2026-05-08. New content: § 4.12–§ 4.24 (13 new lessons); § 5.8–§ 5.9 (2 new audit-CC prophylactic checks); § 12 (new section — 5 QB Self-Audit Checks); § 8.4–§ 8.5 (queue item 21 Reconciliation Strategies + Candidate #6 Standardization, landed under § 8 Open Questions per R8 substrate-grounded landing); § 10 changelog v3 entry; revision-history block per spec § 8 metadata-bundle requirement targeting § 10 (R8.b); end-of-document footer. Phase 0 anchor versions updated from META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 to META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 throughout. Three-element metadata bundle initialized at v1-draft authorship (header status field above; revision-history block here; end-of-document footer below). Operational precedent banking (v3 authorship, 2026-05-08): Lesson § 4.12 bounded-authorization discipline confirmed operating cleanly at drafting CC + audit CC + patch CC tiers across six post-Phase-0 cycle classes (Database & Schema, Data Pipeline, parallel cohort, API & Frontend, UC-1, PHASE_5_BACKLOG additions). Positive operational evidence; no methodology amendment required.
 
-**Tier:** 3 per META_PLAN v6 § 4.1 + § 6.5. CC-drafted under QB spec; companion verification log required; CC-audited.
+**Tier:** 3 per META_PLAN v9 § 4.1 + § 6.5. CC-drafted under QB spec; companion verification log required; CC-audited.
 
-**Anchored on:** META_PLAN v6 (locked 2026-05-04) and BIBLE_STRUCTURE_SPEC v3 (locked 2026-05-04). Section references throughout this document point to v6 / v3 § numbers.
+**Anchored on:** META_PLAN v9 (locked 2026-05-05, current Phase 0 lock) and BIBLE_STRUCTURE_SPEC v6 (locked 2026-05-05, current Phase 0 lock). Section references throughout this document point to v9 / v6 § numbers. Historical worked examples in § 4 cite specific past versions (META_PLAN v3 audit, BIBLE_STRUCTURE_SPEC v1 audit, etc.) when referencing the specific cycle in which a lesson originated; those historical citations are immutable. Lock dates substrate-verified at patch CC tier 2026-05-08 against META_PLAN v9 + BIBLE_STRUCTURE_SPEC v6 Status fields.
 
-**Methodology-interpolation rule (operative per META_PLAN v6 § 6.1, with v6's expanded scope and grandfathering clause; pattern-completion check operative per BIBLE_STRUCTURE_SPEC v1 audit lesson):** This draft does not invent binary tests, cadence rules, completeness criteria, scoring rubrics, severity thresholds, iteration caps, percentage criteria, procedural sequencing rules, or other CC-prescribed methodology constructs Tony has not explicitly ratified. Pattern-completion interpolation check operative; v1 surfacing notes in § 11.
+**Methodology-interpolation rule (operative per META_PLAN v9 § 6.1, with v9's expanded scope and grandfathering clause; pattern-completion check operative per BIBLE_STRUCTURE_SPEC v1 audit lesson):** This draft does not invent binary tests, cadence rules, completeness criteria, scoring rubrics, severity thresholds, iteration caps, percentage criteria, procedural sequencing rules, or other CC-prescribed methodology constructs Tony has not explicitly ratified. Pattern-completion interpolation check operative; v1 surfacing notes in § 11.
 
 ---
 
@@ -27,15 +30,15 @@ AUDIT_METHODOLOGY.md is the third Phase 0 methodology deliverable. Its job is to
 
 Phase 0's audit cycle pattern emerged organically across those nine cycles: the v3 BLOCKER taught the verification-log-precision rule; the v3 / v4 / v5 / v6 cycles taught the methodology-interpolation rule with progressive scope expansion and grandfathering; the BIBLE_STRUCTURE_SPEC v1 / v2 cycles taught the pattern-completion check and the TOC contradiction class. AUDIT_METHODOLOGY codifies these lessons so that fresh Phase 1 audit-CCs apply them from cycle 1 rather than re-discovering them across multiple cycles.
 
-The document is load-bearing for Phase 1 in the same way that META_PLAN v6 is load-bearing for Phase 0: a Phase 1 audit-CC handed only the six adversarial questions (META_PLAN v6 § 6.2) without the prophylactic checks below would re-introduce class-of-failure patterns Phase 0 already paid for.
+The document is load-bearing for Phase 1 in the same way that META_PLAN v9 is load-bearing for Phase 0: a Phase 1 audit-CC handed only the six adversarial questions (META_PLAN v9 § 6.2) without the prophylactic checks below would re-introduce class-of-failure patterns Phase 0 already paid for.
 
 ### 1.2 Why now
 
-Phase 1 begins after all five Phase 0 documents lock. Phase 1 produces seven bible documents (per BIBLE_STRUCTURE_SPEC v3 § 4.1) under Tier 3 discipline; each goes through its own audit cycle; multiple CC sessions may execute in parallel. AUDIT_METHODOLOGY ensures consistent audit discipline across those parallel cycles.
+Phase 1 begins after all five Phase 0 documents lock. Phase 1 produces seven bible documents (per BIBLE_STRUCTURE_SPEC v6 § 4.1) under Tier 3 discipline; each goes through its own audit cycle; multiple CC sessions may execute in parallel. AUDIT_METHODOLOGY ensures consistent audit discipline across those parallel cycles.
 
 ### 1.3 The Phase 0 audit cycle as worked example
 
-Per Tony's locked Q1 in this document's drafting spec, AUDIT_METHODOLOGY is scoped to Phase 1 audits only. Phase 0 audit cycles have empirically converged across nine cycles; their lessons are codified and internalized. Phase 2-4 audit methodologies operate against different criteria, source material, and convergence definitions; they live where they're operational, defined when those phases begin. If they want to inherit Phase 0's audit cycle pattern, they reference META_PLAN v6 and BIBLE_STRUCTURE_SPEC v3 directly as worked examples.
+Per Tony's locked Q1 in this document's drafting spec, AUDIT_METHODOLOGY is scoped to Phase 1 audits only. Phase 0 audit cycles have empirically converged across nine cycles; their lessons are codified and internalized. Phase 2-4 audit methodologies operate against different criteria, source material, and convergence definitions; they live where they're operational, defined when those phases begin. If they want to inherit Phase 0's audit cycle pattern, they reference META_PLAN v9 and BIBLE_STRUCTURE_SPEC v6 directly as worked examples.
 
 This document treats Phase 0's nine audit cycles as the empirical substrate from which Phase 1 audit-CC discipline is derived. Worked examples in § 4 reference specific Phase 0 cycle findings; those references serve a pedagogical purpose, not an authority one.
 
@@ -45,26 +48,27 @@ This document treats Phase 0's nine audit cycles as the empirical substrate from
 
 ### 2.1 What this document specifies
 
-- **Phase 1 per-bible audit cycle** — the audit cycle for each individual Phase 1 bible (per META_PLAN v6 § 3.1's locked workflow + BIBLE_STRUCTURE_SPEC v3 § 8.3's per-bible cycle, as applied to Phase 1 documents).
-- **Phase 1 cross-document consistency audit** — the audit per META_PLAN v6 § 3.3 that runs after all individual bibles lock, verifying internal consistency across the corpus.
-- **Audit-CC prophylactic check templates** — seven prophylactic checks derived from the empirically grounded Phase 0 lessons, each with abstract rule statement, worked example, cross-references to origin sections, and check template form for paste-ready integration into Phase 1 audit prompts.
-- **Phase 1 audit-CC prompt template** — paste-ready structure incorporating all seven prophylactic checks plus the six adversarial questions from META_PLAN v6 § 6.2.
-- **Cross-document consistency audit prompt template** — paste-ready structure for the cross-document audit per META_PLAN v6 § 3.3, addressing the three cross-document questions.
+- **Phase 1 per-bible audit cycle** — the audit cycle for each individual Phase 1 bible (per META_PLAN v9 § 3.1's locked workflow + BIBLE_STRUCTURE_SPEC v6 § 8.3's per-bible cycle, as applied to Phase 1 documents).
+- **Phase 1 cross-document consistency audit** — the audit per META_PLAN v9 § 3.3 that runs after all individual bibles lock, verifying internal consistency across the corpus.
+- **Audit-CC prophylactic check templates** — prophylactic checks derived from the empirically grounded Phase 0 lessons plus this cycle's two new audit-CC checks (§ 5.8–§ 5.9), each with abstract rule statement, worked example, cross-references to origin sections, and check template form for paste-ready integration into Phase 1 audit prompts.
+- **QB Self-Audit Checks** — five QB-tier self-audit checks codified in § 12, applying to QB's own meta-cycle authorship discipline (estimation calibration, self-describing authorization redundancy detection, paste-prompt transit-truncation discipline, within-message placeholder discipline, meta-document state claim substrate verification).
+- **Phase 1 audit-CC prompt template** — paste-ready structure incorporating all seven prophylactic checks plus the six adversarial questions from META_PLAN v9 § 6.2.
+- **Cross-document consistency audit prompt template** — paste-ready structure for the cross-document audit per META_PLAN v9 § 3.3, addressing the three cross-document questions.
 
 ### 2.2 What this document does NOT specify
 
 - **Phase 0 audit methodology** — already empirically settled across the nine cycles documented above; not re-codified here.
-- **Phase 2 adversarial bible audit methodology** — Phase 2 operates against the locked corpus (not against drafts), with different criteria (does the bible match the code?). Phase 2 methodology is deferred to Phase 2 entry. If Phase 2 wants to inherit Phase 0's audit cycle pattern, it references this document and META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 directly.
+- **Phase 2 adversarial bible audit methodology** — Phase 2 operates against the locked corpus (not against drafts), with different criteria (does the bible match the code?). Phase 2 methodology is deferred to Phase 2 entry. If Phase 2 wants to inherit Phase 0's audit cycle pattern, it references this document and META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 directly.
 - **Phase 3 predictive concept inventory audit methodology** — deferred to Phase 3 entry.
 - **Phase 4 gap analysis audit methodology** — deferred to Phase 4 entry.
-- **What bible content goes where** — that's BIBLE_STRUCTURE_SPEC v3.
+- **What bible content goes where** — that's BIBLE_STRUCTURE_SPEC v6.
 - **What success looks like for each phase** — that's CONVERGENCE_CRITERIA.md (Phase 0 deliverable 4).
 - **Format for findings discovered during audit** — that's TRIAGE_QUEUE_SPEC.md (Phase 0 deliverable 5).
-- **New methodology constructs not present in META_PLAN v6 or BIBLE_STRUCTURE_SPEC v3** — per the methodology-interpolation rule (§ 4.2 below), this document codifies methodology already locked in those documents; it does not extend or generalize them.
+- **New methodology constructs not present in META_PLAN v9 or BIBLE_STRUCTURE_SPEC v6** — per the methodology-interpolation rule (§ 4.2 below), this document codifies methodology already locked in those documents; it does not extend or generalize them.
 
 ### 2.3 Authority chain
 
-Per META_PLAN v6 § 4.1, AUDIT_METHODOLOGY is Tier 3; CC drafts under QB spec with companion verification log; audit-CC verifies. Per Tony's locked Q1 in this document's drafting spec, scope is Phase 1 audits only — both per-bible and cross-document. Per Tony's locked Q2, each methodology lesson is presented with an abstract rule statement, at least one worked example from Phase 0 cycles, cross-references to origin sections, and an audit-CC prophylactic check template.
+Per META_PLAN v9 § 4.1, AUDIT_METHODOLOGY is Tier 3; CC drafts under QB spec with companion verification log; audit-CC verifies. Per Tony's locked Q1 in this document's drafting spec, scope is Phase 1 audits only — both per-bible and cross-document. Per Tony's locked Q2, each methodology lesson is presented with an abstract rule statement, at least one worked example from Phase 0 cycles, cross-references to origin sections, and an audit-CC prophylactic check template.
 
 ---
 
@@ -72,14 +76,14 @@ Per META_PLAN v6 § 4.1, AUDIT_METHODOLOGY is Tier 3; CC drafts under QB spec wi
 
 ### 3.1 Per-bible audit cycle
 
-The per-bible audit cycle for each of the seven Phase 1 bibles (per BIBLE_STRUCTURE_SPEC v3 § 4.1) follows META_PLAN v6 § 3.1's locked Phase 0 per-deliverable cycle, with the per-document drafting authority determined per META_PLAN v6 § 6.5 (all Phase 1 bibles are Tier 3 per § 4.1 + § 6.5). BIBLE_STRUCTURE_SPEC v3 § 8.3 restates the cycle for Phase 1; the steps below cite both authorities.
+The per-bible audit cycle for each of the seven Phase 1 bibles (per BIBLE_STRUCTURE_SPEC v6 § 4.1) follows META_PLAN v9 § 3.1's locked Phase 0 per-deliverable cycle, with the per-document drafting authority determined per META_PLAN v9 § 6.5 (all Phase 1 bibles are Tier 3 per § 4.1 + § 6.5). BIBLE_STRUCTURE_SPEC v6 § 8.3 restates the cycle for Phase 1; the steps below cite both authorities.
 
-**Steps (per META_PLAN v6 § 3.1 + BIBLE_STRUCTURE_SPEC v3 § 8.3):**
+**Steps (per META_PLAN v9 § 3.1 + BIBLE_STRUCTURE_SPEC v6 § 8.3):**
 
-1. QB writes Phase 1 spec (target questions, format, depth bar, source-priority rules per META_PLAN v6 § 4.5, output location, explicit verification discipline including the methodology-interpolation rule per META_PLAN v6 § 6.1 and the verification-log precision rule per META_PLAN v6 § 6.5).
-2. CC drafts the bible AND produces the companion verification log. Every factual claim about EE has a verification entry. **Per META_PLAN v6 § 6.5 hard rule, Tier 3 drafts that omit a companion verification log are rejected by QB without audit; the verification log is not optional.**
+1. QB writes Phase 1 spec (target questions, format, depth bar, source-priority rules per META_PLAN v9 § 4.5, output location, explicit verification discipline including the methodology-interpolation rule per META_PLAN v9 § 6.1 and the verification-log precision rule per META_PLAN v9 § 6.5).
+2. CC drafts the bible AND produces the companion verification log. Every factual claim about EE has a verification entry. **Per META_PLAN v9 § 6.5 hard rule, Tier 3 drafts that omit a companion verification log are rejected by QB without audit; the verification log is not optional.**
 3. QB reads draft fully (synthesizing). QB skims verification log to spot-check entries.
-4. QB writes audit-CC prompt incorporating: the six adversarial questions per META_PLAN v6 § 6.2, the prophylactic checks per § 5 of this document, the verification-against-live-system mandate, and the regression check for prior-cycle findings if vN ≥ 2.
+4. QB writes audit-CC prompt incorporating: the six adversarial questions per META_PLAN v9 § 6.2, the prophylactic checks per § 5 of this document, the verification-against-live-system mandate, and the regression check for prior-cycle findings if vN ≥ 2.
 5. QB runs audit-CC fresh.
 6. Audit findings return; QB synthesizes.
 7. If routine: QB re-specs/re-drafts, re-runs, repeats steps 3-6.
@@ -87,28 +91,28 @@ The per-bible audit cycle for each of the seven Phase 1 bibles (per BIBLE_STRUCT
 9. Repeat until audit clean per § 3.5's threshold.
 10. Bible locks.
 
-**Edge cases inherited from META_PLAN v6 § 3.1 (each operative for Phase 1 audits):**
+**Edge cases inherited from META_PLAN v9 § 3.1 (each operative for Phase 1 audits):**
 
 - **CC↔audit-CC disagreement.** Default: audit-CC wins. If QB judges the audit-CC finding itself questionable, QB may run a third fresh CC session to adjudicate (last resort).
 - **Audit-CC error.** Audit-CCs can be wrong. When verification contradicts an audit-CC finding, QB surfaces both: the original audit finding AND the contrary verification, and Tony decides whether the audit-CC needs the methodology refined or whether the draft missed something.
 - **Tony's locked decision based on a wrong premise.** When verification surfaces that a Tony-locked decision was based on a premise that turns out to be false, CC does NOT silently revise — CC surfaces the contradiction to QB → Tony with the verified facts. Tony ratifies the reframing or holds the original. (Pattern invoked twice in Phase 0 cycles; codified as Lesson 6 in § 4.6.)
 - **CC methodology-interpolation pattern.** CC has a recurring failure mode of extending Tony's locked answers with adjacent policy CC believes follows from the answer. The methodology-interpolation rule (§ 4.2) governs.
-- **Post-lock revision.** If a Phase 1 bible locks, then weeks later a finding contradicts locked content, the procedure per META_PLAN v6 § 3.1 applies: QB surfaces to Tony; default is revise the locked document and trigger re-audit + dependent-document re-validation.
+- **Post-lock revision.** If a Phase 1 bible locks, then weeks later a finding contradicts locked content, the procedure per META_PLAN v9 § 3.1 applies: QB surfaces to Tony; default is revise the locked document and trigger re-audit + dependent-document re-validation.
 - **Audit findings with downstream consequences.** When audit-CC surfaces a fact that contradicts not just the audited document but the upstream substrate, the procedure is: revise the audited document to use the verified fact, flag the substrate inaccuracy for downstream correction, note the discrepancy in the document's revision history.
 
-**Phase 1 drafting order (recommended per BIBLE_STRUCTURE_SPEC v3 § 8.2):** Architecture Overview first; Database & Schema second; Data Pipeline third; the three ML bibles in parallel; API & Frontend last. Recommended, not mandatory.
+**Phase 1 drafting order (recommended per BIBLE_STRUCTURE_SPEC v6 § 8.2):** Architecture Overview first; Database & Schema second; Data Pipeline third; the three ML bibles in parallel; API & Frontend last. Recommended, not mandatory.
 
 ### 3.2 Cross-document consistency audit
 
-After all seven Phase 1 bibles lock individually, a cross-document consistency audit runs per META_PLAN v6 § 3.3. The cross-document audit is governed by three additional questions appended to the six adversarial questions of META_PLAN v6 § 6.2:
+After all seven Phase 1 bibles lock individually, a cross-document consistency audit runs per META_PLAN v9 § 3.3. The cross-document audit is governed by three additional questions appended to the six adversarial questions of META_PLAN v9 § 6.2:
 
 1. Does the bible say something the code does not do?
 2. Does the code do something the bible does not say?
 3. Where do bible documents contradict each other across files?
 
-Note: questions 1 and 2 are framed at META_PLAN v6 § 3.3 in Phase-2 language ("the bible" treated as the locked corpus); for Phase 1's cross-document audit (which runs after individual Phase 1 bibles lock but before the Phase 2 adversarial bible audit per META_PLAN v6 § 3.3's separate scope), these three questions are scoped to **internal cross-document consistency** rather than full code-vs-bible reconciliation. Code-vs-bible reconciliation at full Phase 2 scope is deferred to Phase 2.
+Note: questions 1 and 2 are framed at META_PLAN v9 § 3.3 in Phase-2 language ("the bible" treated as the locked corpus); for Phase 1's cross-document audit (which runs after individual Phase 1 bibles lock but before the Phase 2 adversarial bible audit per META_PLAN v9 § 3.3's separate scope), these three questions are scoped to **internal cross-document consistency** rather than full code-vs-bible reconciliation. Code-vs-bible reconciliation at full Phase 2 scope is deferred to Phase 2.
 
-**Cross-document audit deliverable structure (per META_PLAN v6 § 3.3):**
+**Cross-document audit deliverable structure (per META_PLAN v9 § 3.3):**
 
 - One cross-document audit report at `/docs/bible/_audit/cross_document_audit.md`.
 - Per-bible audit reports already exist at `/docs/bible/_audit/<bible_doc_name>_audit.md` from individual cycles.
@@ -116,13 +120,13 @@ Note: questions 1 and 2 are framed at META_PLAN v6 § 3.3 in Phase-2 language ("
 
 **Cross-document audit threshold:** the same threshold as per-bible audits (§ 3.5 below). Findings that surface cross-document contradictions are MATERIAL by their nature when they require a bible to revise; MINOR when they're style or convention drift.
 
-**Per-bible re-revision trigger:** per META_PLAN v6 § 3.3, "if a per-document audit returns >5 MATERIAL findings, that document goes back to Phase 1 revision before the cross-document audit runs." Cross-document audit does not run until all individual bibles meet Tony's threshold.
+**Per-bible re-revision trigger:** per META_PLAN v9 § 3.3, "if a per-document audit returns >5 MATERIAL findings, that document goes back to Phase 1 revision before the cross-document audit runs." Cross-document audit does not run until all individual bibles meet Tony's threshold.
 
 ### 3.3 Audit-CC paste-ready prompt structure
 
-Audit prompts must be paste-ready per META_PLAN v6 § 8.4. The Phase 1 audit-CC prompt template is in § 6 below; the cross-document audit-CC prompt template is in § 7. Both extend META_PLAN v6 Appendix A.6's working example.
+Audit prompts must be paste-ready per META_PLAN v9 § 8.4. The Phase 1 audit-CC prompt template is in § 6 below; the cross-document audit-CC prompt template is in § 7. Both extend META_PLAN v9 Appendix A.6's working example.
 
-Each prompt's structure (standardized per META_PLAN v6 § 8.4):
+Each prompt's structure (standardized per META_PLAN v9 § 8.4):
 
 - Project context (what EE is, what this document is, where it sits in the phase sequence)
 - The roles in this project (Tony, QB, CC)
@@ -131,7 +135,7 @@ Each prompt's structure (standardized per META_PLAN v6 § 8.4):
 - Verification discipline (HARD RULE: live state preferred over dump; precision rule applied broadly; no fabrication)
 - The draft (path on disk or inline)
 - Companion verification log (if Tier 3; instruction to spot-check)
-- Adversarial task: six adversarial questions per META_PLAN v6 § 6.2 plus document-type-specific adversarial checks
+- Adversarial task: six adversarial questions per META_PLAN v9 § 6.2 plus document-type-specific adversarial checks
 - Prophylactic checks per § 5 of this document
 - Regression check (for vN ≥ 2)
 - Output format (standardized findings structure)
@@ -141,13 +145,13 @@ Each prompt's structure (standardized per META_PLAN v6 § 8.4):
 
 ### 3.4 Verification log requirements for Phase 1 bibles
 
-Every Phase 1 bible draft is Tier 3 per BIBLE_STRUCTURE_SPEC v3 § 4.1; therefore every Phase 1 bible draft has a companion verification log per META_PLAN v6 § 6.5. The verification log:
+Every Phase 1 bible draft is Tier 3 per BIBLE_STRUCTURE_SPEC v6 § 4.1; therefore every Phase 1 bible draft has a companion verification log per META_PLAN v9 § 6.5. The verification log:
 
-- Lives at `/docs/bible/_audit/<bible_doc_name>_v<N>_verification.md` per BIBLE_STRUCTURE_SPEC v3 § 5.1's front matter pattern.
+- Lives at `/docs/bible/_audit/<bible_doc_name>_v<N>_verification.md` per BIBLE_STRUCTURE_SPEC v6 § 5.1's front matter pattern.
 - Has one entry per concrete factual claim about EE.
-- Distinguishes inherited claims (already verified in META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 verification logs) from new claims (introduced by this Phase 1 bible).
-- Applies the verification-log precision rule per META_PLAN v6 § 6.5 (counts decomposed; definitions vs uses vs imports distinguished; aggregable counts explicitly aggregated). The full lesson is captured as Lesson 1 in § 4.1 below.
-- Includes operator-verified external source quotes verbatim where applicable per META_PLAN v6 verification log Claim 15c pattern. The full lesson is captured as Lesson 4 in § 4.4 below.
+- Distinguishes inherited claims (already verified in META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 verification logs) from new claims (introduced by this Phase 1 bible).
+- Applies the verification-log precision rule per META_PLAN v9 § 6.5 (counts decomposed; definitions vs uses vs imports distinguished; aggregable counts explicitly aggregated). The full lesson is captured as Lesson 1 in § 4.1 below.
+- Includes operator-verified external source quotes verbatim where applicable per META_PLAN v9 verification log Claim 15c pattern. The full lesson is captured as Lesson 4 in § 4.4 below.
 
 The audit-CC reads both the draft and the verification log; verifies a sample of verification claims against live state; reports any verification-log entries that don't hold up.
 
@@ -159,11 +163,11 @@ A Phase 1 bible locks when its audit returns:
 - **zero fabricated-content findings** AND
 - **zero methodology-interpolation findings (post-grandfathering)**
 
-This threshold is inherited verbatim from META_PLAN v6 § 11 (Lock Status), where it has been operative across nine Phase 0 audit cycles. Per Tony's hard rule (per META_PLAN v6 § 6.1 + audit history): methodology-interpolation findings fail the lock regardless of count.
+This threshold is inherited verbatim from META_PLAN v9 § 11 (Lock Status), where it has been operative across nine Phase 0 audit cycles. Per Tony's hard rule (per META_PLAN v9 § 6.1 + audit history): methodology-interpolation findings fail the lock regardless of count.
 
-**MATERIAL/MINOR distinction (per META_PLAN v6 Appendix A.6):** "A 'missing example' is probably MINOR. A 'the maintenance protocol has an enforcement gap' is probably MATERIAL. A 'CC-interpolated binary test that Tony hasn't ratified' is MATERIAL by its nature per the methodology-interpolation rule."
+**MATERIAL/MINOR distinction (per META_PLAN v9 Appendix A.6):** "A 'missing example' is probably MINOR. A 'the maintenance protocol has an enforcement gap' is probably MATERIAL. A 'CC-interpolated binary test that Tony hasn't ratified' is MATERIAL by its nature per the methodology-interpolation rule."
 
-**Audit-CC must apply the distinction honestly.** Per META_PLAN v6 Appendix A.6: "Tony has explicitly cautioned against threshold-gaming. The operator values surfacing problems over reassurance." If an audit-CC finds few flaws, the bar is wrong — re-read more skeptically.
+**Audit-CC must apply the distinction honestly.** Per META_PLAN v9 Appendix A.6: "Tony has explicitly cautioned against threshold-gaming. The operator values surfacing problems over reassurance." If an audit-CC finds few flaws, the bar is wrong — re-read more skeptically.
 
 **No new flagging thresholds are introduced by this document.** Each prophylactic check below states what to look for, how to recognize the pattern, and how to flag — but the threshold for flagging is delegated to Tony's existing < 5 MATERIAL threshold or to the methodology-interpolation rule's lock-blocker classification.
 
@@ -171,7 +175,11 @@ This threshold is inherited verbatim from META_PLAN v6 § 11 (Lock Status), wher
 
 ## 4. Methodology Lessons Catalog
 
-The seven lessons below appear in the empirical sequence of their introduction across Phase 0 cycles. Order is preserved to document the discipline's evolution. Each lesson has the same four required structural elements (per Tony's locked drafting requirements): abstract rule statement, worked example from Phase 0 cycles, cross-references to origin META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 sections, and an audit-CC prophylactic check template.
+The lessons below appear in the empirical sequence of their introduction across Phase 0 cycles + post-Phase-0 cycles. Order is preserved to document the discipline's evolution. Each lesson has the same four required structural elements (per Tony's locked drafting requirements): abstract rule statement, worked example from cycle history, cross-references to origin sections (META_PLAN / BIBLE_STRUCTURE_SPEC / cycle-specific origin documents), and an audit-CC prophylactic check template.
+
+§ 4.1–§ 4.7: original seven lessons codified in v1 (empirically grounded across Phase 0 cycles).
+§ 4.8–§ 4.11: four lessons banked at v2-patched (Database & Schema Bible v1 cycle, 2026-05-05).
+§ 4.12–§ 4.24: thirteen lessons banked at v3 (AUDIT_METHODOLOGY meta-cycle, 2026-05-08).
 
 ### 4.1 Verification-log precision rule
 
@@ -201,16 +209,16 @@ The v3 audit caught the inflation as the BLOCKER F1 finding: A.4 said "4 instant
 
 The v3 phrasing allowed a downstream reader to compress "4 references including the import" into "4 instantiations" by judgment. The v4 phrasing makes the components explicit; no compression is possible without altering the count visibly.
 
-The v5 cycle locked broad-sweep scope (per Tony's locked decision in v5 cycle): the rule applies broadly. v5 applied it to working-tree status counts (74 untracked + 29 modified = 103 per META_PLAN v6 verification log Claim 22), model registry counts (88 = 45 active + 43 inactive per Claim 7), EventBridge rules (13 = 10 ENABLED + 3 DISABLED), and Lambda counts (8 = 5 Active + 3 INACTIVE). The v6 cycle extended to ECS task families enumerated by name (5 named in META_PLAN v6 § 2.3 per Claim 20).
+The v5 cycle locked broad-sweep scope (per Tony's locked decision in v5 cycle): the rule applies broadly. v5 applied it to working-tree status counts (74 untracked + 29 modified = 103 per META_PLAN v9 verification log Claim 22), model registry counts (88 = 45 active + 43 inactive per Claim 7), EventBridge rules (13 = 10 ENABLED + 3 DISABLED), and Lambda counts (8 = 5 Active + 3 INACTIVE). The v6 cycle extended to ECS task families enumerated by name (5 named in META_PLAN v9 § 2.3 per Claim 20).
 
 #### Cross-references
 
-- **Rule statement:** META_PLAN v6 § 6.5 ("Verification log precision rule").
-- **Decomposition examples in main doc:** META_PLAN v6 § 1.1 (working-tree state), § 1.3 (registry / Lambda / EventBridge), § 2.3 (ECS task families), § 9.13 (registry multi-active-row), Appendix A.4 (legacy `predictions` references).
+- **Rule statement:** META_PLAN v9 § 6.5 ("Verification log precision rule").
+- **Decomposition examples in main doc:** META_PLAN v9 § 1.1 (working-tree state — content preserved at this anchor across v6→v9), § 1.3 (registry / Lambda / EventBridge), § 2.3 (ECS task families), § 9.13 (registry multi-active-row), Appendix A.4 (legacy `predictions` references).
 - **BLOCKER finding:** META_PLAN v3 audit (severity table, F1).
 - **Rule introduction:** META_PLAN v4 (per § 6.5's rule body and the v4 changelog).
-- **Broad-sweep ratification:** META_PLAN v5 cycle (per Tony's locked decision; v6 § 6.5 carries the locked language).
-- **v6 application to enumeration:** META_PLAN v6 § 12 (MINOR #6 — ECS task families fully enumerated).
+- **Broad-sweep ratification:** META_PLAN v5 cycle (per Tony's locked decision; v9 § 6.5 carries the locked language inherited from v6).
+- **v6 application to enumeration:** META_PLAN v9 § 12.4 ("Methodology lesson recorded (v5 → v6)" subsection within v5→v6 changelog; MINOR #6 — ECS task families fully enumerated).
 
 #### Audit-CC prophylactic check template
 
@@ -263,11 +271,11 @@ The v5 catch demonstrated three properties of the rule:
 
 #### Cross-references
 
-- **Rule statement with named patterns + catch-all:** META_PLAN v6 § 6.1 (CC role definition).
-- **Grandfathering clause:** META_PLAN v6 § 6.1 (the "Grandfathering clause" paragraph).
+- **Rule statement with named patterns + catch-all:** META_PLAN v9 § 6.1 (CC role definition).
+- **Grandfathering clause:** META_PLAN v9 § 6.1 (the "Grandfathering clause" paragraph).
 - **v3 catch and resolution:** META_PLAN v3 audit (severity table #3); META_PLAN v4 changelog (drop confirmed in v3 finding regression check).
 - **v4 catch and resolution:** META_PLAN v4 audit (Question 1 finding 3 / Question 3 finding 3 / Severity table #5); META_PLAN v5 (replacement with descriptive prose, per v5 changelog).
-- **v5 catch and resolution:** META_PLAN v5 audit M-1 finding (Methodology-interpolation rule self-application section); META_PLAN v6 § 12 (M-1 cadence-neutralized).
+- **v5 catch and resolution:** META_PLAN v5 audit M-1 finding (Methodology-interpolation rule self-application section); META_PLAN v9 § 12.4 (M-1 cadence-neutralized in v5→v6 changelog).
 - **v6 clean lock:** META_PLAN v6 audit (Methodology-interpolation findings: ZERO post-grandfathering).
 
 #### Audit-CC prophylactic check template
@@ -275,12 +283,12 @@ The v5 catch demonstrated three properties of the rule:
 For any methodology construct in the audited document, verify it traces back to one of:
 
 1. Tony's locked instructions in a drafting spec for this document, OR
-2. META_PLAN v6 or earlier locked Phase 0 documents (with content authored by Tony or by QB and ratified by Tony), OR
-3. Operator-stated rationale per source-priority tier 5 (META_PLAN v6 § 4.5).
+2. META_PLAN v9 or earlier locked Phase 0 documents (with content authored by Tony or by QB and ratified by Tony), OR
+3. Operator-stated rationale per source-priority tier 5 (META_PLAN v9 § 4.5).
 
 If the construct does not trace to one of those three, flag as **methodology-interpolation finding**.
 
-Methodology-interpolation findings are MATERIAL by their nature per the methodology-interpolation rule (META_PLAN v6 § 6.1) and **lock-blockers regardless of count** per Tony's hard rule.
+Methodology-interpolation findings are MATERIAL by their nature per the methodology-interpolation rule (META_PLAN v9 § 6.1) and **lock-blockers regardless of count** per Tony's hard rule.
 
 **How to recognize the pattern:**
 
@@ -312,7 +320,7 @@ The methodology-interpolation rule landed in v5 cycle. The v3-cycle "3 consecuti
 
 The v5 audit's M-1 finding caught the v3-cycle iteration cap. The catch was explicit retroactive sweep: the v5 audit's "Methodology-interpolation rule self-application" section covered v1-v4 CC-introduced content for instances of the pattern (binary tests, cadence rules, completeness criteria, scoring rubrics — the rule's named patterns at v5). The v3-cycle iteration cap was caught because the sweep was scoped to cover prior cycles' CC-introduced content; it would not have been caught by a sweep scoped only to v5-cycle drafting compliance.
 
-Key observation from the v5 → v6 transition (per META_PLAN v6 changelog "Methodology lesson recorded (v5 → v6)"):
+Key observation from the v5 → v6 transition (per META_PLAN v9 § 12.4 "Methodology lesson recorded (v5 → v6)" within v5→v6 changelog):
 
 > The v5 audit's M-1 finding revealed that methodology rules introduced mid-cycle do not enforce their own retroactive application. The audit must explicitly include retroactive sweep in its scope when a new rule lands. This becomes a discipline that AUDIT_METHODOLOGY.md (Phase 0 doc 3) must codify: when a new methodology rule is introduced in cycle N, the audit-CC spec for cycle N+1 explicitly includes "sweep prior content for instances of this pattern" as a required adversarial check. The rule itself doesn't enforce its own retroactive application — the audit spec does.
 
@@ -321,9 +329,9 @@ The v6 audit applied the rule retroactively + verified the v5-introduced rule's 
 #### Cross-references
 
 - **The v5 audit's catch:** META_PLAN v5 audit M-1 finding ("Methodology-interpolation rule self-application" section).
-- **The grandfathering clause that bounds the sweep:** META_PLAN v6 § 6.1 (per Tony's locked v6 spec language).
+- **The grandfathering clause that bounds the sweep:** META_PLAN v9 § 6.1 (per Tony's locked v6 spec language preserved through v9).
 - **v6's verification of correct sweep application:** META_PLAN v6 audit (Methodology-interpolation rule self-application section + Grandfathering clause check section).
-- **v6 changelog's banking the lesson for AUDIT_METHODOLOGY:** META_PLAN v6 § 12 ("Methodology lesson recorded (v5 → v6)" subsection).
+- **v6 changelog's banking the lesson for AUDIT_METHODOLOGY:** META_PLAN v9 § 12.4 ("Methodology lesson recorded (v5 → v6)" subsection within v5→v6 changelog).
 
 #### Audit-CC prophylactic check template
 
@@ -362,8 +370,8 @@ The v6 audit's verdict (per the verification log Claim 15c entry): "the v5 audit
 
 #### Cross-references
 
-- **Edge case enumeration:** META_PLAN v6 § 3.1 ("Audit-CC error" + "Tony's locked decision based on a wrong premise" patterns).
-- **Bug #28 case study with the verbatim quote:** META_PLAN v6 § 8.1 (the "provisional stable-known classification" paragraph quoting "Place, show, and exacta payouts still populate").
+- **Edge case enumeration:** META_PLAN v9 § 3.1 ("Audit-CC error" + "Tony's locked decision based on a wrong premise" patterns).
+- **Bug #28 case study with the verbatim quote:** META_PLAN v9 § 8.1 (the "provisional stable-known classification" paragraph quoting "Place, show, and exacta payouts still populate").
 - **Verbatim source verification log entry:** META_PLAN v6 verification log Claim 15c (the operator-verified external source).
 - **v6 audit's operator-verified-source check section:** META_PLAN v6 audit (Operator-verified external source check section).
 - **v6 spec's authorization of the contingency:** META_PLAN v6 verification log Claim 15c (citing Tony's v6 spec: "If the memory file makes statements about exacta status that contradict this softening, flag in the verification log").
@@ -401,24 +409,24 @@ The lesson emerged from BIBLE_STRUCTURE_SPEC v1 → v2 cycle.
 
 The audit's grep over META_PLAN v6 returned zero F./C./D. hits; only W.N is ratified. META_PLAN v6 Appendix A.1 (Forbidden Pattern worked example) labels its example as `6.4 ...` using a sub-section numeric ID, NOT `F.N`. META_PLAN v6 Appendix A.4 (Deprecated) labels its example `21.1 ...`, NOT `D.N`. META_PLAN v6 § 9.1-9.13 anti-patterns use `9.X` numeric subsections, NOT `C.N`.
 
-**v2 cycle:** Per Tony's Option B in the v1 cycle response, BIBLE_STRUCTURE_SPEC v2 dropped the F.N / C.N / D.N extensions and used sub-section numeric IDs throughout (matching DD bible's existing convention). W.N was retained as the only letter-prefix because the cross-bible bug-tracking forcing function (per META_PLAN v6 § 7.11 commit-message convention; a grep over `git log` for `W.7` retrieves every commit related to that immune-memory entry across all bibles) justifies the asymmetry.
+**v2 cycle:** Per Tony's Option B in the v1 cycle response, BIBLE_STRUCTURE_SPEC v2 dropped the F.N / C.N / D.N extensions and used sub-section numeric IDs throughout (matching DD bible's existing convention). W.N was retained as the only letter-prefix because the cross-bible bug-tracking forcing function (per META_PLAN v9 § 7.11 commit-message convention; a grep over `git log` for `W.7` retrieves every commit related to that immune-memory entry across all bibles) justifies the asymmetry.
 
-**v3 cycle:** BIBLE_STRUCTURE_SPEC v3 § 5.5 carries the locked convention: "The W.N letter-prefix convention is the **only** letter-prefix in EE bible numbering: What Was Fixed entries require cross-bible-trackable identifiers because cross-cutting bugs (per § 5.3 canonical-home rule) reference each other across bibles, and a grep over `git log` for `W.7` retrieves every commit related to that immune-memory entry across all bibles per META_PLAN v6 § 7.11 commit-message convention."
+**v3 cycle:** BIBLE_STRUCTURE_SPEC v3 § 5.5 carries the locked convention: "The W.N letter-prefix convention is the **only** letter-prefix in EE bible numbering: What Was Fixed entries require cross-bible-trackable identifiers because cross-cutting bugs (per § 5.3 canonical-home rule) reference each other across bibles, and a grep over `git log` for `W.7` retrieves every commit related to that immune-memory entry across all bibles per META_PLAN v9 § 7.11 commit-message convention." (Convention preserved through BIBLE_STRUCTURE_SPEC v6 § 5.5.)
 
 #### Cross-references
 
 - **v1 catch:** BIBLE_STRUCTURE_SPEC v1 audit (severity table #5; Methodology-interpolation rule self-application section).
 - **Tony's Option B resolution:** BIBLE_STRUCTURE_SPEC v1 audit (Recommendation #5 with both Option A and Option B); BIBLE_STRUCTURE_SPEC v2 changelog ("M-1 — F.N / C.N / D.N naming convention extension dropped per Tony's Option B").
 - **v2 post-Option-B convention:** BIBLE_STRUCTURE_SPEC v2 § 5.5.
-- **v3 locked convention:** BIBLE_STRUCTURE_SPEC v3 § 5.5 and § 7.2.
-- **v3 changelog banking the lesson for AUDIT_METHODOLOGY:** BIBLE_STRUCTURE_SPEC v3 § 13 (v1 → v2 changelog "Methodology-interpolation finding resolved" subsection: "Pattern-completion interpolation lesson banked for AUDIT_METHODOLOGY.md").
+- **v3 locked convention preserved through v6:** BIBLE_STRUCTURE_SPEC v6 § 5.5 and § 7.2.
+- **v3 changelog banking the lesson for AUDIT_METHODOLOGY:** BIBLE_STRUCTURE_SPEC v3 § 13 (v1 → v2 changelog "Methodology-interpolation finding resolved" subsection: "Pattern-completion interpolation lesson banked for AUDIT_METHODOLOGY.md") — historical citation; content carried forward through v6.
 
 #### Audit-CC prophylactic check template
 
 For any letter-prefix or numeric-prefix convention introduced or referenced in the audited document:
 
 1. **Grep for letter-prefix patterns.** Search for `[A-Z]\.[0-9]` or `[A-Z]\.<n>` patterns within the document's section numbering and cross-reference syntax. Enumerate each unique prefix.
-2. **For each prefix found, verify the prefix is named in META_PLAN v6, BIBLE_STRUCTURE_SPEC v3, or a Tony-locked drafting spec for this document.** Independently — pattern parallelism does NOT satisfy ratification. If W.N is ratified, that does NOT ratify F.N or C.N or D.N.
+2. **For each prefix found, verify the prefix is named in META_PLAN v9, BIBLE_STRUCTURE_SPEC v6, or a Tony-locked drafting spec for this document.** Independently — pattern parallelism does NOT satisfy ratification. If W.N is ratified, that does NOT ratify F.N or C.N or D.N.
 3. **For each unratified prefix, flag as methodology-interpolation finding.** The flagging severity is METHODOLOGY-INTERPOLATION (lock-blocker per Tony's hard rule).
 
 The check applies to:
@@ -462,7 +470,7 @@ Tony's Q4 (verbatim, v2 audit lines 237-241):
 > - Document in v3 § 7 that the `.gitignore` was established at Phase 0 baseline along with rationale
 > - Deploy artifacts have no business in commits — they're cached infrastructure identifiers, not source state
 
-v3 verification revealed the artifacts were already covered. The current `.gitignore` already excluded `.frontend-bucket`, `.cf-distribution-id`, `cdk-outputs.json`, and `frontend/.env.production` (per META_PLAN v6 § 7.14 verbatim). v3 § 7.14 surfaced the contradiction in the verification log (Claim 11) and reframed the prerequisite: dropped the "add to gitignore" step (already done); kept the "audit deploy scripts for any uncovered artifacts" step. Tony ratified the reframing in the v4 cycle.
+v3 verification revealed the artifacts were already covered. The current `.gitignore` already excluded `.frontend-bucket`, `.cf-distribution-id`, `cdk-outputs.json`, and `frontend/.env.production` (per META_PLAN v9 § 7.14 verbatim). v3 § 7.14 surfaced the contradiction in the verification log (Claim 11) and reframed the prerequisite: dropped the "add to gitignore" step (already done); kept the "audit deploy scripts for any uncovered artifacts" step. Tony ratified the reframing in the v4 cycle.
 
 **Invocation 2: v6 cycle — Bug #28 exacta payout claim.**
 
@@ -470,14 +478,14 @@ Tony's MINOR #5 in the v6 cycle was based on v5 audit's claim that the operator 
 
 v6 verification (with the operator memory file's verbatim quote provided in the v6 audit-CC prompt's OPERATOR-VERIFIED EXTERNAL SOURCE block) revealed the memory file's symptom statement explicitly reads "Place, show, and exacta payouts still populate." v6 § 8.1 applied a reframing faithful to the source: kept the place/show/exacta still-populate claim AND added the DD-pool-extraction nuance the memory file does flag ("DD pool extraction at hrn_scraper.py:814 likely has the same root cause" — distinct from `daily_double_payout` already accounted for in the result-dict). v6 verification log Claim 15c surfaced the contradiction explicitly. The v6 audit's "Operator-verified external source check" section verified the reframing was faithful to the source.
 
-Per META_PLAN v6 changelog ("Methodology lesson recorded (v5 → v6)"): "The 'Tony's locked decision based on a wrong premise' edge case in § 3.1 has been invoked twice now (Q4 in v3, MINOR #5 in v6). The pattern is robust: when verification contradicts a Tony-locked decision, surface to QB → Tony rather than silently complying. v6 surfaces; the resulting reframing is faithful to the verified source."
+Per META_PLAN v9 § 12.4 ("Methodology lesson recorded (v5 → v6)" within v5→v6 changelog): "The 'Tony's locked decision based on a wrong premise' edge case in § 3.1 has been invoked twice now (Q4 in v3, MINOR #5 in v6). The pattern is robust: when verification contradicts a Tony-locked decision, surface to QB → Tony rather than silently complying. v6 surfaces; the resulting reframing is faithful to the verified source."
 
 #### Cross-references
 
-- **Edge case enumeration:** META_PLAN v6 § 3.1 ("Tony's locked decision based on a wrong premise" pattern).
-- **v3 invocation (gitignore):** META_PLAN v3 verification log Claim 11; META_PLAN v3 audit (additional adversarial finding "D. v3 reframing of Tony's Q4"); META_PLAN v6 § 7.14 (post-reframing locked content).
-- **v6 invocation (exacta):** META_PLAN v6 verification log Claim 15c; META_PLAN v6 § 8.1 (post-reframing locked content); META_PLAN v6 audit (Operator-verified external source check section).
-- **v6 changelog's pattern recognition:** META_PLAN v6 § 12 ("Methodology lesson recorded (v5 → v6)").
+- **Edge case enumeration:** META_PLAN v9 § 3.1 ("Tony's locked decision based on a wrong premise" pattern).
+- **v3 invocation (gitignore):** META_PLAN v3 verification log Claim 11; META_PLAN v3 audit (additional adversarial finding "D. v3 reframing of Tony's Q4"); META_PLAN v9 § 7.14 (post-reframing locked content).
+- **v6 invocation (exacta):** META_PLAN v6 verification log Claim 15c; META_PLAN v9 § 8.1 (post-reframing locked content); META_PLAN v6 audit (Operator-verified external source check section).
+- **v6 changelog's pattern recognition:** META_PLAN v9 § 12.4 ("Methodology lesson recorded (v5 → v6)" within v5→v6 changelog).
 
 #### Audit-CC prophylactic check template
 
@@ -521,17 +529,17 @@ v2 per-document templates had three deviations: § 6.3 feature_provenance, § 6.
 
 The v2 audit's catch (Question 4 / severity table MATERIAL #1): "§ 5.2 recommended TOC vs § 6.X actual TOCs Discipline-rules-section deviation. Same contradiction class as v1's 'What Was Fixed at 8 vs 18' — load-bearing because § 5.6.2's example assumes section 5 across all bibles, but § 6.X TOCs use varying numbers."
 
-**v3 resolution:** Per Tony's Option I in the v3 cycle, all seven per-document templates were renumbered to match § 5.2's canonical 5/6/7/8 ordering. v3 § 5.2 strengthened the language: "**mandatory for sections 5–8** (per Tony's v3-cycle Finding 1 ratification); domain-specific sections at positions 1–4 may be reorganized per locality of reference." Future drafters of new bibles must conform.
+**v3 resolution:** Per Tony's Option I in the v3 cycle, all seven per-document templates were renumbered to match § 5.2's canonical 5/6/7/8 ordering. v3 § 5.2 strengthened the language: "**mandatory for sections 5–8** (per Tony's v3-cycle Finding 1 ratification); domain-specific sections at positions 1–4 may be reorganized per locality of reference." Future drafters of new bibles must conform. Convention preserved through BIBLE_STRUCTURE_SPEC v6 § 5.2.
 
-The v2 audit's banking statement (per the v2 → v3 changelog "Methodology lessons recorded" subsection): "When shared templates reference per-document sections by number, audit-CC's prophylactic check should include: 'verify all per-document templates use the same canonical section numbering for the referenced positions; deviations break shared-template cross-references.' This is a special case of the broader contradiction-detection question (META_PLAN v6 § 6.2 Q4) but worth naming explicitly given the recurrence across both v1 and v2 audits."
+The v2 audit's banking statement (per the v2 → v3 changelog "Methodology lessons recorded" subsection): "When shared templates reference per-document sections by number, audit-CC's prophylactic check should include: 'verify all per-document templates use the same canonical section numbering for the referenced positions; deviations break shared-template cross-references.' This is a special case of the broader contradiction-detection question (META_PLAN v9 § 6.2 Q4) but worth naming explicitly given the recurrence across both v1 and v2 audits."
 
 #### Cross-references
 
 - **v1 catch (8-vs-18):** BIBLE_STRUCTURE_SPEC v1 audit (Question 4 finding 1; severity table #4).
 - **v1 → v2 resolution:** BIBLE_STRUCTURE_SPEC v2 changelog (M-2: What Was Fixed positioned at section 8).
 - **v2 catch (5-vs-7):** BIBLE_STRUCTURE_SPEC v2 audit (Question 4 finding 1; severity table MATERIAL #1).
-- **v2 → v3 resolution + lesson banking:** BIBLE_STRUCTURE_SPEC v3 § 5.2 (canonical 5/6/7/8 mandate); BIBLE_STRUCTURE_SPEC v3 § 13 (v2 → v3 changelog "Methodology lessons recorded" subsection).
-- **v3 locked canonical mandate:** BIBLE_STRUCTURE_SPEC v3 § 5.2 + § 5.6 (canonical templates depending on stable numbering); BIBLE_STRUCTURE_SPEC v3 § 6.1-§ 6.7 (all seven per-document templates conforming).
+- **v2 → v3 resolution + lesson banking:** BIBLE_STRUCTURE_SPEC v3 § 5.2 (canonical 5/6/7/8 mandate, preserved at BIBLE_STRUCTURE_SPEC v6 § 5.2); BIBLE_STRUCTURE_SPEC v3 § 13 (v2 → v3 changelog "Methodology lessons recorded" subsection — historical citation).
+- **v3 locked canonical mandate:** BIBLE_STRUCTURE_SPEC v6 § 5.2 + § 5.6 (canonical templates depending on stable numbering); BIBLE_STRUCTURE_SPEC v6 § 6.1-§ 6.7 (all seven per-document templates conforming).
 - **v3 audit confirmation:** BIBLE_STRUCTURE_SPEC v3 audit (Cross-reference integrity check section + regression check confirming all 7 templates verified at canonical 5/6/7/8 ordering).
 
 #### Audit-CC prophylactic check template
@@ -547,13 +555,640 @@ Flag as MATERIAL if:
 - A shared-template cross-reference fails to resolve in any per-document template.
 - Renumbering broke a prior cross-reference that was resolving correctly.
 
-The check is mechanical: for the seven Phase 1 bibles, grep each bible's actual draft for canonical section headers (e.g., `^### 5.* Discipline rules`, `^### 6.* Currently Open`, `^### 7.* Deprecated`, `^### 8.* What Was Fixed`); verify all seven drafts have the same absolute positions for these four sections. (The mechanical grep target is the bible drafts at `/docs/bible/<bible>.md`, not BIBLE_STRUCTURE_SPEC v3's per-document templates at v3 § 6.X — those templates are the spec the drafts should conform to.)
+The check is mechanical: for the seven Phase 1 bibles, grep each bible's actual draft for canonical section headers (e.g., `^### 5.* Discipline rules`, `^### 6.* Currently Open`, `^### 7.* Deprecated`, `^### 8.* What Was Fixed`); verify all seven drafts have the same absolute positions for these four sections. (The mechanical grep target is the bible drafts at `/docs/bible/<bible>.md`, not BIBLE_STRUCTURE_SPEC v6's per-document templates at v6 § 6.X — those templates are the spec the drafts should conform to.)
+
+### 4.8 QB substrate findings during spec authorship require Tony ratification before spec corrections
+
+#### Abstract rule
+
+When QB encounters substrate gaps or contradictions during drafting-spec authorship (e.g., a referenced upstream document's claim is contradicted by primary-source verification), QB does NOT silently correct the spec. QB surfaces the finding to Tony with verified facts and proposed reframings; Tony ratifies the correction or holds the original. The spec then carries the ratified resolution.
+
+The pattern protects against silent QB-side compliance with upstream errors AND against silent QB-side correction of upstream content that may be intentional. Substrate verification surfaces the candidate; Tony's ratification governs the resolution.
+
+The pattern is a specific application of Lesson 6 (Lesson 4.6: "Tony's locked decision based on a wrong premise") to the QB drafting-spec authorship phase: QB substrate findings during spec authorship route the same way as audit-CC findings against locked content — through Tony ratification, not silent correction.
+
+#### Worked example
+
+The lesson emerged from the Database & Schema Bible v1 drafting cycle (2026-05-05).
+
+QB authoring the v1 drafting spec encountered two substrate gaps in upstream documents:
+
+- The QB handoff Section 8.3 cited "META_PLAN v9 § 9.10 + § 9.11 govern JSONB conventions." QB substrate verification (direct read of v9 § 9.10 + § 9.11) refuted this — § 9.10 is "current bug list in narrative form" anti-pattern; § 9.11 is the FE-drift anti-pattern. Neither addresses JSONB.
+- The QB handoff Section 8.3 cited `model_versions.metadata` as a JSONB column. QB substrate verification (direct read of schema.sql + all 12 migrations) refuted this — `metadata` is not a column.
+
+Per this lesson, QB did NOT silently correct the handoff. QB:
+1. Banked both substrate findings in the drafting spec's § 10 (Handoff cross-reference corrections section).
+2. Authored the spec content to cite correct upstream sections (schema.sql + canonical.py + § 5.2 directly for JSONB; the V1-6 substrate-grounded refutation entry for the metadata claim).
+3. Surfaced the handoff cross-reference inaccuracies as QB-side findings with explicit "Banked here for transparency; spec content corrects them; future handoff-document cycles can incorporate the corrections" language.
+
+The Database & Schema Bible v1 cycle's H1 + H3 self-audit log entries record the substrate-grounded refutation discipline; the v1-cycle drafting CC's verification log V1-6 entry carries the substrate-cited refutation forward.
+
+#### Cross-references
+
+- **Origin cycle:** Database & Schema Bible v1 drafting (2026-05-05).
+- **Banking location:** Database & Schema Bible v1 drafting spec § 10 (Handoff cross-reference corrections section).
+- **Substrate-grounded refutation entry:** Database & Schema Bible v1 verification log V1-6.
+- **H1 / H3 self-audit log:** Database & Schema Bible v1 drafting spec § 6 H1 / H3 entries (cross-reference accuracy + substrate-grounded reframing self-audits).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's drafting spec or the bible itself:
+
+1. **Identify any QB substrate findings against upstream documents** (statements in the spec or bible that contradict an upstream source's claims).
+2. **Verify the QB substrate finding's resolution traces to Tony ratification, not silent correction.** Look for: "Banked at § X.Y for transparency; spec content corrects the cite" or "Tony ratified the reframing on YYYY-MM-DD" or equivalent ratification markers.
+3. **Flag as MATERIAL if** a QB-introduced spec correction contradicts an upstream document's claim AND there is no Tony-ratification marker; AND the correction was not surfaced to Tony for explicit ratification.
+
+The check is bidirectional: applies to QB-corrects-upstream patterns AND QB-extends-upstream patterns.
+
+### 4.9 QB review pass is light surface review only; substrate verification is audit-CC's job
+
+#### Abstract rule
+
+QB's review pass on a CC-drafted Tier 3 deliverable is a light surface review (synthesizing) rather than a substrate verification. QB reads the draft fully to check structural coherence, ratification compliance, and spec adherence. QB skims the verification log to spot-check entries for obvious anomalies. QB does NOT independently re-run every verification command; that is audit-CC's adversarial job.
+
+The two roles are deliberately separated:
+
+- **QB review pass:** light surface — sufficient to catch egregious drift but not designed to catch fabricated verification log entries that pass surface inspection.
+- **Audit-CC adversarial pass:** independent re-verification — designed to catch fabricated entries by re-running every command and comparing actual output to claimed output.
+
+The lesson protects against the failure mode where QB performs deeper review than the role specifies, then accepts a deliverable as audit-clean by mistake. QB's lighter touch is by design; audit-CC's adversarial pass is what catches fabrication.
+
+#### Worked example
+
+The lesson emerged from the Database & Schema Bible v1 audit cycle (2026-05-05).
+
+The drafting CC's V1-8 verification log entry asserted: "Same date applies to 8.W.2 (migration 002 fix): `git log --format=\"%cs %h %s\" -- backend/database/migrations/002_fix_race_type_length.sql | tail -1` returns the same `2026-05-04 87dec36 Pre-bible baseline commit ...` entry."
+
+QB's review pass on the verification log spot-checked V1-N entries for anomalies but did not re-run every `git log` command. The V1-8 parity assertion passed QB's surface review. Audit-CC's adversarial pass re-ran the command and surfaced the DRIFT: migration 002 actually returns `2026-03-15 d93c4c4 Fix post_time TIMESTAMPTZ, race_type length, and connection isolation`. The drafting CC either did not run the command for migration 002 or summarized the output without verbatim paste; the V1-8 parity assertion was fabricated and passed QB review without catching the fabrication.
+
+This case demonstrates the role separation worked as designed:
+
+- QB review pass: surfaced no anomaly (the assertion was internally consistent and the substrate-finding language was plausible).
+- Audit-CC adversarial pass: caught the BLOCKER finding by independently re-running the command.
+
+The lesson banks: QB review pass is sized correctly when audit-CC catches fabrication that QB does not. If QB review pass started catching fabrication, that would suggest audit-CC's adversarial scope is mis-sized (audit-CC is the role designed for this catch).
+
+#### Cross-references
+
+- **Origin cycle:** Database & Schema Bible v1 audit cycle (2026-05-05).
+- **D-3.1 BLOCKER finding:** `database_schema_bible_v1_audit.md` § B (V1-8 DRIFT) + § D-3.1 (no-fabrication BLOCKER).
+- **Role separation:** META_PLAN v9 § 6.5 (Tier 3 workflow): "QB reads draft fully (synthesizing). QB skims verification log to spot-check entries. ... CC audits. Audit-CC reads both the draft and the verification log; verifies a sample of verification claims against live state."
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's verification log:
+
+1. **Re-run every V1-N verification command independently.** Do not trust the verification log's reported output; treat it as a claim to verify.
+2. **For each command, compare actual output to claimed output.** DRIFT findings emerge from the comparison.
+3. **For commands that cannot run from the audit-CC sandbox (e.g., live API, AWS state), surface as UNVERIFIABLE-FROM-WORKING-TREE rather than asserting PASS by default.**
+
+The check is mechanical: per V1-N entry, re-run + compare. The role's value is the independence — audit-CC has no investment in V1-N entries returning the values they reported.
+
+### 4.10 Verbatim-paste discipline for V1-N entries
+
+#### Abstract rule
+
+Drafting CC must paste verbatim command output for every V1-N entry in a Tier 3 verification log. Verbatim paste means: raw `grep` / `git log` / `sed` / `wc` / `diff` / `WebFetch` output as it appears on stdout, with no summarization, no paraphrasing, no "returns the expected output" assertions in place of the actual output.
+
+Summarization of command output is treated as fabrication-class risk: the drafting CC may report a verification command's "expected" output without actually running the command, and the summarization passes light review because it is plausible. Audit-CC catches it on adversarial re-run; but the verbatim-paste discipline prevents the fabrication from entering the verification log in the first place.
+
+The rule is a specific extension of the verification-log-precision rule (Lesson 1, § 4.1) to the substrate of the verification command itself: counts must be decomposed; AND command outputs must be pasted verbatim, not summarized.
+
+The rule's scope is explicitly CC-tier (V1-N verification log entries authored by drafting CC). The QB-tier sibling discipline — verbatim-paste of substrate quotation in QB chat output — is codified separately at § 4.19.
+
+#### Worked example
+
+The lesson emerged from the Database & Schema Bible v1 audit cycle (2026-05-05) — same case as Lesson § 4.9.
+
+The drafting CC's V1-8 verification log entry asserted that migration 002's `git log` returned the same baseline-commit date as migration 011. The assertion was a summarization ("returns the same ... entry") rather than a verbatim paste. Had the drafting CC pasted the verbatim output of `git log --format="%cs %h %s" -- backend/database/migrations/002_fix_race_type_length.sql`, the actual output (`2026-03-15 d93c4c4 Fix post_time TIMESTAMPTZ, race_type length, and connection isolation`) would have been visible in the verification log; the parity assertion against migration 011's baseline-commit date would have been visibly contradicted by the verbatim text.
+
+The summarization-without-verbatim-paste pattern enabled the fabrication. Audit-CC caught the BLOCKER on adversarial re-run; the verbatim-paste discipline (banked here as Lesson § 4.10) prevents future drafting CCs from making the same error class.
+
+The discipline integrates with existing META_PLAN v9 § 6.5 (verification log precision rule) + § 8.6 (no-fabrication rule); explicit lesson-level codification reinforces the discipline across remaining 5 Phase 1 bibles.
+
+Forward rule for drafting specs:
+
+> Drafting specs MUST require CC to paste verbatim command output (raw `grep` / `git log` / `sed` / `wc` / `diff` / `WebFetch` / `cat` output as it appears on stdout) for every V1-N entry. Summarization of command output is treated as fabrication-class risk.
+
+#### Cross-references
+
+- **Origin cycle:** Database & Schema Bible v1 audit cycle (2026-05-05).
+- **D-3.1 BLOCKER finding:** `database_schema_bible_v1_audit.md` § D-3.1.
+- **v1-patched V1-8 rewrite:** `database_schema_bible_v1_verification.md` Section C V1-8 (rewritten with verbatim per-migration sweep) + Section I V1-patch-1 (verbatim sweep + decomposition).
+- **Existing META_PLAN coverage:** v9 § 6.5 (verification log precision rule) + § 8.6 (no-fabrication rule). This lesson reinforces the discipline at the substrate level (verbatim command output) where v9 covered the surface level (decomposed counts + no-fabrication).
+- **QB-tier sibling:** § 4.19 (QB-tier paste-verbatim discipline reinforcement — substrate quotation in QB chat output).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's verification log:
+
+1. **For each V1-N entry, verify the verification command's output is pasted verbatim** (not summarized). Look for: raw multi-line `grep` output with line numbers; raw `git log` output with commit hashes and messages; raw `wc` / `diff` exit codes; etc.
+2. **Flag as MATERIAL** if a V1-N entry asserts a command's output without pasting the verbatim text. ("Returns the expected output" / "matches the prediction" / "confirms the claim" without raw output is the pattern to flag.)
+3. **Flag as fabricated content (BLOCKER)** if the asserted output, when re-run, differs from the verbatim actual output. Lesson § 4.9 (audit-CC adversarial pass) catches this class.
+
+The check is mechanical: per V1-N entry, look for verbatim raw command output. Absence of verbatim paste is a signal to re-run the command and compare.
+
+### 4.11 V1-N grep predictions against `schema.sql` + `migrations/*.sql` must account for byte-identity edge cases
+
+#### Abstract rule
+
+Drafting specs that prescribe `grep` against `schema.sql` plus `migrations/*.sql` for V1-N substrate verification predictions must account for the possibility that some files in the union are byte-identical mirrors. Specifically: if `schema.sql` and `001_initial_schema.sql` (or analogous bootstrap-mirror pairs) are byte-identical, the union's grep returns 2x the count of distinct declarations rather than 1x.
+
+The lesson is narrow but recurrent: every Tier 3 drafting spec that prescribes a grep across multiple files containing potentially-overlapping content should distinguish between (a) the count of distinct domain entities and (b) the count of grep matches on disk. Predictions should explicitly enumerate both.
+
+#### Worked example
+
+The lesson emerged from the Database & Schema Bible v1 cycle (2026-05-05).
+
+The v1 drafting spec V1-1 verification command was:
+
+```
+grep -hE "^CREATE TABLE" backend/database/schema/schema.sql backend/database/migrations/*.sql | grep -v "schema_migrations" | wc -l
+```
+
+The spec predicted "expected: 14 plus possibly the `IF NOT EXISTS` patterns; verify count and decompose explicitly per Check 9."
+
+Independent re-run during drafting verification (V1-1 + V1-1a in the verification log) returned **25 statements** (11 in schema.sql + 11 mirrored in 001_initial_schema.sql + 3 in 005_three_prediction_tables.sql). Audit-CC re-ran and confirmed 25.
+
+The discrepancy: the v1 spec did not anticipate that `schema.sql` and `001_initial_schema.sql` were byte-identical (`diff` returns empty exit 0; both files 415 lines). The 14-distinct-domain-table claim still holds (the union is 14 names), but the grep yields 25 statements due to the bootstrap-mirror pair.
+
+The drafting CC surfaced the gap as FRAMEWORK_GAP F.1 in the v1 verification log Section F with substrate-cited candidate reframing per Lesson 4. Tony ratified F.1 on 2026-05-05; bible content stands; this lesson is banked here for future drafting specs that prescribe similar grep verifications.
+
+Forward rule for drafting specs:
+
+> When prescribing a grep across `schema.sql` plus `migrations/*.sql` (or analogous unions where bootstrap-mirror pairs may exist), the V1-N prediction enumerates BOTH the count of distinct declarations AND the count of grep matches on disk. Both numbers are reported; the relationship between them (1:1, 2:1 due to mirror, etc.) is documented.
+
+#### Cross-references
+
+- **Origin cycle:** Database & Schema Bible v1 cycle (2026-05-05).
+- **F.1 surfacing:** `database_schema_bible_v1_verification.md` Section F F.1.
+- **Tony ratification:** Tony's Q1 2026-05-05 (bible content stands; lesson banked here).
+- **Drafting-spec grep prediction:** `database_schema_bible_v1_drafting_spec.md` § 7 (V1-1 prediction).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's drafting spec for V1-N grep predictions:
+
+1. **For each V1-N grep that targets a union of files (e.g., `schema.sql` + `migrations/*.sql`), verify the prediction enumerates both distinct-entity count and on-disk-match count.**
+2. **Flag as MINOR if the prediction enumerates only one count without distinguishing.** The drafting CC should surface the byte-identity case as FRAMEWORK_GAP if it surfaces during substrate verification.
+3. **Flag as MATERIAL if the prediction's expected output is contradicted by independent re-run AND the drafting CC did not surface the discrepancy as FRAMEWORK_GAP.**
+
+The check applies to grep / wc / awk predictions across file unions; it does not apply to single-file commands.
+
+### 4.12 Low-cost substrate verification at row-authorship (execute, don't defer)
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When drafting CC (or any CC tier authoring substrate-grounded content) encounters a row-by-row authorship task where the substrate verification cost for an individual row is low relative to the cost of deferring to a later audit cycle, drafting CC executes the verification at row-authorship rather than deferring. "Low-cost" means the verification is a single grep, single file read, single git log, or analogous O(1) command — work that can be performed inline during authorship without disrupting flow. "High-cost" means full multi-file re-runs, full database queries, or other operations whose cost warrants defer-to-audit-CC scope.
+
+The discipline is bounded-authorization compatible: drafting CC executes substrate verification only within its authorized read scope. The lesson does not expand authorization; it changes execution timing within already-authorized scope from "defer until audit" to "execute at row-authorship."
+
+The lesson protects against the pattern where drafting CC accumulates ungrounded rows in a draft and relies on audit-CC to catch substrate gaps retroactively. Audit-CC is the adversarial-detection role; row-authorship verification is the prevention role. Both are required. When drafting CC defers low-cost verifications, audit-CC catches preventable errors and the cycle's finding count inflates with errors that should never have entered the draft.
+
+The discipline is operative across all bounded-authorization tiers (drafting CC, audit CC, patch CC) per Lesson § 4.12 itself — see § 12.5 QB Self-Audit Check 5 generalization for QB-tier substrate verification mandate at meta-document state claims.
+
+#### Worked example
+
+The lesson emerged across the Phase 1 Cohort cycles (Architecture Overview, Database & Schema, Data Pipeline, Feature Provenance, ML Layer Architecture, Model Evaluation & Retraining, API & Frontend) and was banked at the parallel-cohort handoff (2026-05-08). Across multiple cycles, per-row substrate questions ("does this column exist? does this file path resolve? does this function signature match the latest signature?") were observably resolvable at row-authorship time via single-command verification but were observed deferred to audit-CC re-run. The pattern surfaced enough times to be banked as a discipline at the parallel-cohort handoff: drafting CC executes, doesn't defer.
+
+The discipline contrasts with high-cost cases where defer-to-audit-CC is appropriate (e.g., full live-AWS state re-verification, full database query against live tables) — those genuinely warrant audit-CC's adversarial scope.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **Related:** § 4.9 (QB review pass is light surface review only); § 4.10 (verbatim-paste discipline for V1-N entries); § 12.5 (QB Self-Audit Check 5 — meta-document state claim substrate verification, parallel discipline at QB tier).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's verification log:
+
+1. **Identify rows in the bible that depend on low-cost-verifiable substrate** (single grep, single file read, single git log, single function-signature lookup).
+2. **Verify the corresponding V1-N entry executed the verification at row-authorship** rather than asserting "verified by audit-CC re-run" or deferring with placeholder language.
+3. **Flag as MINOR if** row-authorship verification was deferred without substrate-cost justification (i.e., the verification was low-cost and could have been executed inline).
+4. **Flag as MATERIAL if** the deferred verification surfaces a substrate gap (the row's claim doesn't hold) that drafting CC could have caught at authorship.
+
+The check is bounded by the four-element-structure verification: where § 4.X embedded checks already cover substrate verification, this check adds the timing dimension (when, not whether).
+
+### 4.13 Inheritance read-scope discipline
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When CC (drafting CC, audit CC, patch CC) is dispatched with a bounded read scope on Phase 0 locked documents, the operational read pattern is: TOC + targeted-section reads on Phase 0 locks suffice when load-bearing content is consulted. Full sequential read of every Phase 0 lock is neither required by spec nor efficient. The pattern is: read TOC; identify load-bearing sections per the dispatch's substrate-citation needs; read those sections targeted; do not exhaustively read the rest of the document.
+
+The discipline applies symmetrically: CC must read load-bearing content (rather than skim) when it is consulted, but does not read non-load-bearing content speculatively.
+
+The discipline integrates with the bounded-authorization clause (per Lesson § 4.12 codification): out-of-scope substrate is not read at all; in-scope substrate is read targeted, not exhaustively.
+
+#### Worked example
+
+The lesson emerged across the Phase 1 Cohort cycles (parallel-cohort handoff, 2026-05-08). Across drafting-CC cycles for the seven Phase 1 bibles, drafting CC sessions that exhaustively read every Phase 0 lock (META_PLAN, BIBLE_STRUCTURE_SPEC, AUDIT_METHODOLOGY, CONVERGENCE_CRITERIA, TRIAGE_QUEUE_SPEC) consumed substrate-read context for content the cycle's authorship work did not reference; sessions that read TOC + targeted sections covered load-bearing content with substantially less read-budget consumption and produced equivalent draft quality.
+
+The discipline was banked at the parallel-cohort handoff with the principle: TOC + targeted-section reads on Phase 0 locks suffice when load-bearing content is consulted. Sessions that consult content not flagged as load-bearing should still read targeted; speculative full-document reads are an audit-CC anti-pattern when scoped to content the audit does not require.
+
+The lesson is narrow but cumulative — across many cycles it materially affects context budget, and across many parallel cycles it materially affects total CC context-window pressure.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **Related:** § 4.12 (low-cost substrate verification at row-authorship — both lessons govern targeted vs exhaustive substrate engagement).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's drafting cycle:
+
+1. **Identify the substrate-read scope authorized in the drafting spec.** The spec's substrate-authorization clause names which Phase 0 locks (and which other documents) drafting CC was authorized to read.
+2. **Verify drafting CC's reads were targeted to load-bearing content.** Look for evidence that drafting CC read TOC + specific sections, rather than full sequential reads. Read patterns are observable in drafting CC's interim reports (citation patterns, section references made).
+3. **Flag as STYLE if** drafting CC exhaustively read in-scope substrate that the cycle's authorship work did not consult. (Not a methodology violation; an efficiency observation.)
+4. **Flag as MATERIAL if** drafting CC read out-of-scope substrate (content not authorized in the drafting spec). This is a bounded-authorization violation, distinct from inheritance read-scope discipline.
+
+The check is bounded by what audit-CC can observe in interim reports and verification logs; full read-pattern reconstruction is not always possible.
+
+### 4.14 Intra-document section reference convention (prefix-explicit for cross-bible; unprefixed permitted intra-document)
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+Section references within a bible (intra-document) may use unprefixed form: `§ 5.4` resolves to "this document's § 5.4." Section references across bibles (cross-bible) must use prefix-explicit form: `bible_name:5.4` or `BIBLE_STRUCTURE_SPEC v6 § 5.4` (with version anchor when citing locked authority).
+
+The convention prevents ambiguity: a Phase 1 bible's body that says "per § 5.4" without prefix should always resolve to the same bible's § 5.4; cross-bible references require explicit naming so the reference target is unambiguous regardless of where the reading session has scrolled to.
+
+The convention is operative across the corpus; per-document templates and shared templates both follow it.
+
+#### Worked example
+
+The lesson emerged across multiple Phase 1 Cohort cycles where ambiguous mid-document references ("per § 5.4" in a context where multiple bibles were under discussion) caused audit-CC and patch-CC to pause and resolve. The discipline was banked at the parallel-cohort handoff: prefix-explicit for cross-bible (the dominant case in cross-cutting content); unprefixed permitted for intra-document (the dominant case in single-bible body content).
+
+The convention pairs with the W.N letter-prefix convention (per § 4.5 and BIBLE_STRUCTURE_SPEC v6 § 5.5): cross-bible bug references already require `bible_name:8.W.<n>` form; the broader rule generalizes the cross-bible-prefix mandate to all section references that cross document boundaries.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **W.N letter-prefix convention (cross-bible bug-tracking forcing function):** BIBLE_STRUCTURE_SPEC v6 § 5.5; META_PLAN v9 § 7.11.
+- **Related:** § 4.5 (Pattern-completion interpolation pattern — the W.N convention's authorization scope).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's body content and cross-references:
+
+1. **Grep all section references in the bible body for unprefixed forms** (`§ <n>.<n>` or analogous).
+2. **For each unprefixed reference, verify the target section exists in the same bible** (intra-document resolution).
+3. **For each cross-bible reference, verify it uses prefix-explicit form** (`bible_name:<n>.<n>` or `BIBLE_NAME v<N> § <n>.<n>`).
+4. **Flag as MINOR if** an intra-document reference is incorrectly prefix-explicit (style inconsistency, not a load-bearing failure).
+5. **Flag as MATERIAL if** a cross-bible reference uses unprefixed form (audit-CC cannot trivially resolve to the correct target document; readers face same ambiguity).
+
+The check is mechanical for the intra-document-resolution direction; the cross-bible-reference direction requires audit-CC to verify against the seven-bible corpus enumeration.
+
+### 4.15 Composite-row treatment for orphan classes (per BIBLE_STRUCTURE_SPEC v6 § 5.6.1.2 tertiary-state notation; CONDITIONAL discipline applied at row-level rather than W.N-trigger-level)
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When a bible's per-document content includes a small number of rows that don't fit cleanly into the document's primary class taxonomy ("orphan rows"), the rows receive composite-row treatment: explicit classification + provenance + scope-statement for audit traceability, rather than being silently absorbed into a misleading parent class. The pattern parallels BIBLE_STRUCTURE_SPEC v6 § 5.6.1.2's tertiary-state notation CONDITIONAL discipline (where a trigger that applies with an explicit caveat requires the drafter to document the caveat in adjacent prose, rather than escape-hatching to a soft classification).
+
+Orphan rows are common at the boundaries of taxonomies (e.g., a feature whose category is "experimental, not yet classified"); composite-row treatment surfaces the orphan status rather than forcing fit. The discipline trades a small amount of structural irregularity for explicit auditability.
+
+#### Worked example
+
+The lesson emerged from FP cycle (Feature Provenance Bible). FP's row F-81 was an ORPHAN composite — a feature row that did not fit the bible's primary Speed (4) + Trajectory (7) + Class (3) decomposition for the 14 Gonzo Sauce features. Rather than silently mapping F-81 to one of the existing classes, FP's drafting CC authored F-81 with an explicit composite-row structure: `Class: ORPHAN | Provenance: <cycle citation> | Scope: <explicit narrowing>`. Audit-CC could trace the orphan status; future cycles can re-classify or maintain orphan status with full provenance.
+
+The pattern is BIBLE_STRUCTURE_SPEC v6 § 5.6.1.2's tertiary-state CONDITIONAL discipline applied at row-level rather than W.N-trigger-level: where § 5.6.1.2's CONDITIONAL state mandates adjacent-prose documentation of the caveat to prevent the tertiary state from becoming an escape hatch, composite-row treatment mandates explicit classification + provenance + scope-statement to prevent the orphan-row pattern from becoming a soft-classification escape hatch.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08); FP cycle (F-81 ORPHAN composite).
+- **Tertiary-state notation parallel:** BIBLE_STRUCTURE_SPEC v6 § 5.6.1.2 (CONDITIONAL state's adjacent-prose mandate parallels composite-row's explicit-classification + provenance + scope-statement mandate).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible whose primary class taxonomy is being applied at row level:
+
+1. **Identify rows that fall outside the primary class taxonomy.** Compare each row's classification to the bible's stated class enumeration.
+2. **For orphan rows, verify composite-row treatment is applied** — explicit classification (e.g., `ORPHAN`), provenance (which cycle introduced or surfaced the orphan status), and scope-statement (what makes this row orphan rather than fitting an existing class).
+3. **Flag as MATERIAL if** an orphan row is silently mapped to an established class without composite-row treatment, particularly if the misclassification affects downstream cross-references.
+4. **Flag as MINOR if** an orphan row carries composite-row treatment without all three elements (classification + provenance + scope-statement).
+
+### 4.16 Lock-CC three-element metadata bundle (header status field + revision history block + end-of-document footer)
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When a Phase 1 (or Phase 0) document reaches lock-CC tier, lock-CC ensures the document carries a three-element metadata bundle:
+
+1. **Header status field** at top of document: Status (LOCKED / DRAFT vN), Authorship date, Owner ratification, Lock state transitions.
+2. **Revision history block** post-header: chronological record of vN transitions with date, scope of change, ratification owner per version.
+3. **End-of-document footer**: Lock-state confirmation, Authorship CC tier (drafting CC), Audit CC tier, Patch CC tier (if patch dispatched), Lock CC tier, Ratification owner.
+
+The three-element bundle ensures every locked document carries authoritative metadata in three load-bearing locations, enabling readers to identify version-state, history, and lock status from any of three vantage points without cross-document lookup.
+
+The bundle is initialized at v1-draft authorship per § 4.18 (drafting-CC paste-prompts must mandate metadata-bundle initialization at v1-draft authorship), but lock-CC is responsible for finalizing the three elements at lock tier — populating audit/patch/lock CC tier fields, transitioning Lock state from DRAFT to LOCKED, finalizing revision-history entry for the lock cycle.
+
+The bundle is metadata, not content — see § 4.17 for the locked-document-content preservation rule (drafting-time historical context preserved; metadata transitions permitted).
+
+#### Worked example
+
+The lesson emerged across the Phase 1 Cohort cycles. Three patterns were observed across the seven Phase 1 bible cycles: FP (Feature Provenance) cycle had a rich metadata bundle from drafting CC's v1 authorship; MLA (ML Layer Architecture) cycle had a minimal bundle requiring lock-CC supplementation; MER (Model Evaluation & Retraining) cycle had a hybrid bundle. The variance indicated standardization was needed; the parallel-cohort handoff banked the standardization mandate.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **v1-draft mandate sibling:** § 4.18 (drafting-CC paste-prompts must mandate metadata-bundle initialization at v1-draft authorship).
+- **Locked-content preservation sibling:** § 4.17 (locked bibles preserve drafting-time historical context in narrative sections).
+- **Inaugural application:** AUDIT_METHODOLOGY v3 itself initializes the three-element bundle (header status field at top of this document; revision history block at top of this document; end-of-document footer at end of this document — see end-of-document footer for reference (immediately following § 12)).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible at lock tier (or drafting tier with bundle-initialization requirement):
+
+1. **Verify header status field exists** at top of document with Status, Authorship date, Owner ratification, Lock state. Flag missing or partial fields.
+2. **Verify revision history block exists** post-header with chronological record of vN transitions. Flag missing block; flag missing per-version date/scope/ratification fields.
+3. **Verify end-of-document footer exists** with lock-state confirmation, authorship CC tier, audit/patch/lock CC tier fields, ratification owner. Flag missing footer; flag missing fields.
+4. **Flag as MATERIAL if** any element of the three-element bundle is absent at lock tier.
+5. **Flag as MINOR if** all three elements exist but one or more sub-fields is missing or stale.
+
+### 4.17 Locked bibles preserve drafting-time historical context in narrative sections; lock-CC scope distinguishes metadata vs content
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When lock-CC tier promotes a document from DRAFT to LOCKED, lock-CC does NOT retroactively rewrite drafting-time content. Narrative sections, scope statements, framework descriptions, contextual references — the document's body content — are preserved verbatim from the drafting cycle. Lock-CC's scope is metadata transitions (Status field, Lock state designation, footer population, revision-history entry for the lock cycle) and surgical patches if audit-CC findings warrant them; not retroactive rewriting of content that was authored at drafting-time and reflects drafting-time substrate state.
+
+The distinction is sharp:
+
+- **Metadata** (lock-CC may transition): version-state designations, lock-state markers, footer fields, revision-history entries, header date fields.
+- **Content** (lock-CC preserves): narrative descriptions, contextual references, drafting-time framework citations, worked examples, cross-references that resolved at drafting time.
+
+The preservation rule protects against the failure mode where lock-CC, acting under "make this document lock-ready" mandate, rewrites drafting-time content in ways that lose the document's historical-evolution traceability. Drafting-time content carries the cycle's authorship state; preserving it across lock tier preserves the document's audit-trail.
+
+#### Worked example
+
+The lesson emerged across the Phase 1 Cohort cycles. Lock-CC tier observed in some cycles (FP, others) attempted to rewrite drafting-time framework citations to current Phase 0 lock versions retroactively, which obscured the drafting cycle's actual citation state. The parallel-cohort handoff banked the discipline: lock-CC preserves drafting-time content; cross-reference re-validation at version-bump (e.g., META_PLAN v6→v9) is in-scope for drafting CC at v(N+1) authorship, not for lock-CC at vN lock tier.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **Three-element metadata bundle sibling:** § 4.16 (lock-CC's metadata-transition scope).
+- **Drafting CC mandate sibling:** § 4.18 (drafting CC initializes bundle).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible at lock tier (or post-lock surveillance):
+
+1. **For each section beyond the metadata bundle, verify drafting-time content is preserved.** Compare lock-tier text against drafting-time text (where drafting-time text is recoverable from interim deliverables).
+2. **Distinguish content rewrites from cross-reference re-validation updates.** The latter is in-scope for next-cycle drafting CC; lock-CC does not perform retroactive cross-reference updates as part of lock tier.
+3. **Flag as MATERIAL if** lock-CC retroactively rewrote drafting-time content (narrative sections, scope statements, framework descriptions) at lock tier.
+4. **Flag as MINOR if** lock-CC's metadata transitions touch fields that arguably belong to content rather than metadata (e.g., scope-statement language that reads as content but is structured as metadata).
+
+### 4.18 Drafting-CC paste-prompts must mandate metadata-bundle initialization at v1-draft authorship
+
+*Banked: Phase 1 Cohort parallel-cohort handoff, 2026-05-08*
+
+#### Abstract rule
+
+When QB authors a drafting-CC paste-prompt for a Phase 1 (or Phase 0) bible cycle, the paste-prompt must explicitly mandate three-element metadata bundle initialization at v1-draft authorship. Drafting CC initializes the header status field skeleton, the revision history block skeleton, and the end-of-document footer skeleton at v1-draft tier; lock-CC populates the final values at lock tier (per § 4.16).
+
+The mandate is structural: drafting CC does not author metadata bundle content speculatively; QB's paste-prompt explicitly directs initialization. Without the explicit mandate, drafting CCs produce variable bundle states (the FP-rich / MLA-minimal / MER-hybrid pattern observed across the Phase 1 Cohort), which creates lock-CC tier rework.
+
+The mandate complements but does not duplicate § 4.16's lock-CC scope: drafting CC initializes; lock-CC finalizes; both tiers are required.
+
+#### Worked example
+
+The lesson emerged across the Phase 1 Cohort cycles. Three observed patterns:
+
+- **FP-rich** (Feature Provenance Bible): drafting CC initialized full bundle skeleton with rich metadata at v1-draft; lock-CC's finalization scope was minimal.
+- **MLA-minimal** (ML Layer Architecture Bible): drafting CC initialized only header status field; lock-CC's finalization scope included authoring revision-history block and footer from scratch.
+- **MER-hybrid** (Model Evaluation & Retraining Bible): drafting CC initialized header + footer; lock-CC's finalization scope included authoring revision-history block from scratch.
+
+The variance indicated standardization was needed at the QB-paste-prompt-authorship surface. The parallel-cohort handoff banked the mandate: drafting-CC paste-prompts for future cycles MUST direct three-element bundle initialization at v1-draft tier. The mandate is operative on the AUDIT_METHODOLOGY v3 cycle itself (this document's drafting CC initializes the bundle per spec § 8 metadata bundle requirements; see § 12 footer for reference).
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff (2026-05-08).
+- **Lock-CC scope sibling:** § 4.16 (lock-CC three-element metadata bundle finalization).
+- **Locked-content preservation sibling:** § 4.17.
+- **Inaugural application:** AUDIT_METHODOLOGY v3 drafting cycle (this document) — drafting CC initialized header + revision-history + footer per § 8 of v3 drafting spec.
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's drafting cycle:
+
+1. **Examine the drafting-CC paste-prompt** for explicit metadata-bundle-initialization mandate.
+2. **Verify drafting CC initialized all three bundle elements at v1-draft tier** (header status field skeleton, revision history block skeleton, end-of-document footer skeleton).
+3. **Flag as MATERIAL if** the paste-prompt did not mandate initialization AND drafting CC did not initialize, leaving lock-CC to author all three elements from scratch.
+4. **Flag as MINOR if** the paste-prompt mandated initialization but drafting CC partially initialized (e.g., header only, missing revision-history or footer).
+
+### 4.19 QB paste-verbatim discipline reinforcement (QB-tier paste operation: substrate quotation in QB chat output)
+
+*Banked: Phase 1 Cohort parallel-cohort handoff (PHASE_5_BACKLOG.md reconciliation cycle), 2026-05-08*
+
+See § 4.10 for the CC-tier sibling discipline (V1-N verification log entries); this lesson covers the QB-tier paste operation (substrate quotation in QB chat output).
+
+#### Abstract rule
+
+When QB pastes substrate content into chat output (e.g., quoting a line from a Phase 0 lock, citing a verbatim entry from a verification log, reproducing a row from a meta-document), QB pastes the entire line verbatim — not the substantive-content portion only. Partial-line paste, even when the omitted portion is plausibly redundant or contextually obvious, breaks the verbatim-paste discipline that is foundational to substrate-grounded reasoning across the QB orchestration tier.
+
+The rule's scope is QB-tier; the CC-tier sibling discipline (V1-N verification log entries) is at § 4.10. Both lessons share the principle (verbatim paste of substrate content) but apply at different tiers and to different artifact types: § 4.10 governs CC-authored verification log entries; § 4.19 governs QB-authored chat output.
+
+The discipline integrates with QB Self-Audit Check 5 generalization (§ 12.5): meta-document state claims must be substrate-verified at first cycle reference; the reinforcement is that the substrate-verified content is paste-quoted verbatim, not summarized.
+
+#### Worked example
+
+The lesson emerged from the PHASE_5_BACKLOG.md reconciliation cycle (a sub-cycle of the Phase 1 Cohort sequence). QB pasting a line from PHASE_5_BACKLOG.md to surface backlog-vocabulary content paste-quoted only the substantive-content portion of the line, omitting structural metadata (entry ID, severity tag, date stamp) that was contextually unambiguous to QB but load-bearing to the reconciliation cycle. The omitted metadata was the discriminator the reconciliation cycle needed to disambiguate Phase 5.3.1 seed (META_PLAN v6 § 11 vocabulary) from Phase 5.3.2-5.3.26 (TRIAGE_QUEUE_SPEC v1 vocabulary).
+
+The discipline was banked: paste entire line verbatim, not substantive-content portion only. The lesson reinforces § 4.10 at QB tier without duplicating the CC-tier rule.
+
+#### Cross-references
+
+- **Origin:** Phase 1 Cohort parallel-cohort handoff, PHASE_5_BACKLOG.md reconciliation cycle (2026-05-08).
+- **CC-tier sibling:** § 4.10 (Verbatim-paste discipline for V1-N entries).
+- **Related QB Self-Audit Check:** § 12.5 (meta-document state claim substrate verification).
+
+#### Audit-CC prophylactic check template
+
+When auditing a QB-authored cycle artifact (handoff document, drafting spec, paste-prompt) that quotes substrate content:
+
+1. **For each verbatim-quoted substrate line, verify the entire line was paste-quoted, not the substantive-content portion only.** Look for: line-prefix metadata (entry IDs, severity tags, dates) preserved in the quote.
+2. **Flag as MATERIAL if** a partial-line paste affected the cycle's reasoning (e.g., omitted metadata that was the discriminator for a downstream decision).
+3. **Flag as MINOR if** a partial-line paste did not affect cycle reasoning but breaks the verbatim discipline (style + reinforcement).
+
+### 4.20 Pattern A bundling default + Pattern B exception
+
+*Banked: API & Frontend Bible cycle, 2026-05-08*
+
+#### Abstract rule
+
+QB bundles content-authoring step with the adjacent spec-write CC paste-prompt step in the same chat turn by default (Pattern A). Deferring content-authoring to a separate chat turn ahead of the spec-write paste-prompt creates a drift surface: if Tony does not respond between turns, or responds with non-ratification, the content authored in the deferred turn risks bypassing ratification gates (the wrapper paste-prompt may not catch unratified content if it was authored ahead).
+
+Pattern B (defer content-authoring to a separate turn) is the exception, applied when QB explicitly flags amendment-likely content: novel structural questions (where Tony's ratification surface is large and amendments are anticipated), unverified substrate claims (where pre-paste verification is needed), low-confidence content (where QB seeks alignment before paste-prompt commitment).
+
+The default is Pattern A; Pattern B applies when QB explicitly justifies the deferral.
+
+#### Worked example
+
+The lesson emerged from the API & Frontend Bible cycle (2026-05-08). Step 5 of the cycle's spec-write process drifted: QB authored content for the spec in one chat turn with explicit deferral language ("I'll author the next portion in the following turn"), and Tony bypassed via direct paste using § 15 self-described authorization. The bypass left the cycle's ledger off-by-one (the wrapper paste-prompt at Step 5 was not exercised because § 15 self-authorization made it redundant).
+
+The lesson banks the default: bundle content-authoring with adjacent spec-write paste-prompt in the same chat turn. The Pattern B exception is reserved for explicitly flagged cases.
+
+#### Cross-references
+
+- **Origin:** API & Frontend Bible cycle, 2026-05-08; Step 5 ledger off-by-one drift.
+- **Related QB Self-Audit Check:** § 6.2 (self-describing authorization redundancy detection — the § 15 self-authorization that made the Step 5 wrapper redundant).
+
+#### Audit-CC prophylactic check template
+
+When auditing a QB-authored cycle's chat-turn structure (where reconstructable):
+
+1. **For each content-authoring step, verify it was bundled with the adjacent spec-write CC paste-prompt step in the same chat turn (Pattern A default).**
+2. **For deferred-authoring (Pattern B) instances, verify QB explicitly flagged the deferral with justification** (novel structural question, unverified substrate, low-confidence content).
+3. **Flag as MINOR if** a deferred-authoring instance lacks Pattern B justification.
+4. **Flag as MATERIAL if** the deferral resulted in a bypass of ratification gates (wrapper paste-prompt rendered redundant; off-by-one ledger drift; etc.).
+
+### 4.21 UC-cycle audit-scope methodology lesson (UPSTREAM-CORRECTION cycle scope determines audit cycle requirement)
+
+*Banked: UC-1 cycle, 2026-05-08*
+
+#### Abstract rule
+
+UPSTREAM-CORRECTION (UC) cycles are post-lock surgical patches to a locked Phase 1 (or Phase 0) document, scoped to address upstream substrate drift surfaced after lock. The cycle's scope determines the audit cycle requirement:
+
+- **Surgical row patch** (single locus + substrate-grounded; e.g., a single § X.Y row's content amended per upstream evidence): QB-audit synthesis tier suffices. QB synthesizes the patch's audit findings from the patch CC's interim outputs; no fresh audit-CC session required.
+- **Section-scope or wider** (multiple loci; cross-reference cascade; methodology-shape changes): fresh audit-CC session required. The wider scope's adversarial verification needs the independent eye of a fresh CC session.
+
+The discriminator is scope, not patch type. A surgical row patch with substrate-grounded single-locus changes is light-audit-tier; anything wider is audit-CC-tier.
+
+#### Worked example
+
+The lesson emerged from the UC-1 cycle (Architecture Overview v3-patched-a, 2026-05-08). UC-1 was a surgical row patch to § 3.1 equine-inference Lambda role drift, with single-locus substrate-grounded changes per V1-14 substrate evidence. The cycle dispatched under bounded authorization, applied the patch, and reached audit tier. The audit-tier dispatch ratified Q5 Option C (QB-audit synthesis tier) over Q5 Option B (fresh audit-CC); QB-audit's 4/4 PASS validated the lighter audit tier as appropriate for surgical scope.
+
+Had UC-1's scope been section-wide (e.g., affecting multiple subsections within § 3, or cascading to other documents' cross-references), the lighter audit tier would have been mis-sized; fresh audit-CC dispatch would have been the appropriate tier.
+
+#### Cross-references
+
+- **Origin:** UC-1 cycle, 2026-05-08; Q5 ratification (Option C QB-audit synthesis tier).
+- **Worked example artifact:** Architecture Overview v3-patched-a (locked 2026-05-08); V1-14 substrate evidence.
+
+#### Audit-CC prophylactic check template
+
+When evaluating an UPSTREAM-CORRECTION cycle's audit-tier appropriateness (post-lock):
+
+1. **Identify the patch scope.** Single locus + substrate-grounded = surgical row patch; multiple loci OR cross-reference cascade OR methodology-shape change = section-scope or wider.
+2. **For surgical row patches, verify audit-tier was QB-audit synthesis tier** (QB synthesized findings from patch CC's interim outputs).
+3. **For section-scope or wider, verify a fresh audit-CC session was dispatched.**
+4. **Flag as MATERIAL if** a section-scope-or-wider UC-cycle was audited at QB-audit synthesis tier (under-sized audit). Flag as MINOR if a surgical row patch was audited at fresh audit-CC tier (over-sized audit, but defensible).
+
+### 4.22 Two-tier cross-reference convention codification (carried-forward deferral from parallel cohort)
+
+*Carried-forward deferral from parallel cohort, codified at 2026-05-08*
+
+#### Abstract rule
+
+Cross-reference notation operates at two tiers: tier 1 (intra-document) uses unprefixed `§ X.Y` form; tier 2 (cross-bible) uses prefix-explicit `bible_name:X.Y` form. The two-tier convention is the formal codification of the discipline introduced at § 4.14 (intra-document section reference convention).
+
+This lesson carries forward the deferral from the parallel cohort's Q9 (cross-reference convention codification): the convention was operative across cycles before formal codification; this lesson codifies it. The two-tier framing aligns the convention with the existing W.N letter-prefix convention's tier separation (W.N references are inherently cross-bible per the bug-tracking forcing function; intra-bible W.N references are within-document numeric subsections).
+
+The two-tier convention extends to: cross-bible bug references (`bible_name:8.W.<n>` always), cross-bible section references (`bible_name:5.4` always), intra-bible section references (`§ 5.4` permitted unprefixed), intra-bible subsection references (`§ 4.6.2` permitted unprefixed within § 4.6's parent).
+
+#### Worked example
+
+The lesson was originally surfaced in the parallel-cohort cycle as Q9 (cross-reference convention codification deferral). The deferral propagated across multiple cycles (Database & Schema, Data Pipeline, Feature Provenance) without formal codification, though the convention was operatively followed. The AUDIT_METHODOLOGY v3 meta-cycle banks the codification per this lesson.
+
+#### Cross-references
+
+- **Origin:** Parallel-cohort cycle Q9 deferral, carried forward across multiple Phase 1 cycles, codified at AUDIT_METHODOLOGY v3 (2026-05-08).
+- **Companion lesson:** § 4.14 (intra-document section reference convention).
+- **W.N letter-prefix convention:** BIBLE_STRUCTURE_SPEC v6 § 5.5; META_PLAN v9 § 7.11.
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's cross-references:
+
+1. **Categorize each reference as tier 1 (intra-document) or tier 2 (cross-bible).**
+2. **Verify tier 1 references use unprefixed form** (or are explicitly prefix-formatted with no semantic loss).
+3. **Verify tier 2 references use prefix-explicit form** (`bible_name:X.Y` or `BIBLE_NAME v<N> § X.Y`).
+4. **Flag mixed-tier inconsistencies** as MINOR; flag tier 2 unprefixed references as MATERIAL (resolution ambiguity).
+
+### 4.23 database_schema_bible:V1-12 verification-log-claim-ID convention (carried-forward deferral from Database & Schema Bible cycle)
+
+*Carried-forward deferral from Database & Schema Bible cycle, codified at 2026-05-08*
+
+#### Abstract rule
+
+Verification log claim IDs follow the convention `V<bible_version>-<claim_number>` (e.g., `V1-12` for the 12th claim in v1's verification log). Cross-bible references to verification log claims use prefix-explicit form: `bible_name:V<n>-<m>` (e.g., `database_schema_bible:V1-12`).
+
+The convention was operative in the Database & Schema Bible v1 cycle but had not been formally codified at AUDIT_METHODOLOGY tier; this lesson carries forward the codification deferral.
+
+The claim-ID convention pairs with § 4.10 (verbatim-paste discipline for V1-N entries): V1-N entries are addressable by claim ID; claim IDs are the audit-CC's reference handle to specific verification claims. Cross-bible audit reports cite verification log claims by claim ID; the prefix-explicit form per § 4.22 (two-tier cross-reference convention) is mandatory.
+
+#### Worked example
+
+The lesson originally surfaced in the Database & Schema Bible v1 cycle when audit-CC's report cited V1-N entries by claim ID (e.g., "V1-12 substrate evidence cited") and the convention was operative. The codification was deferred at the cycle's lock and carried forward; AUDIT_METHODOLOGY v3 banks the codification per this lesson.
+
+The convention is also operative across the Phase 1 Cohort cycles (each bible's verification log uses the V<bible_version>-<claim_number> format).
+
+#### Cross-references
+
+- **Origin:** Database & Schema Bible v1 cycle, deferral carried forward across Phase 1 Cohort cycles, codified at AUDIT_METHODOLOGY v3 (2026-05-08).
+- **Companion lessons:** § 4.10 (Verbatim-paste discipline for V1-N entries); § 4.22 (two-tier cross-reference convention codification).
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's verification log:
+
+1. **Verify claim IDs follow `V<bible_version>-<claim_number>` format** consistently throughout the log.
+2. **For cross-bible audit reports citing verification log claims, verify prefix-explicit form** (`bible_name:V<n>-<m>`).
+3. **Flag as MINOR** if claim ID format deviates within a single verification log (style inconsistency).
+4. **Flag as MATERIAL** if a cross-bible audit cites a verification log claim without prefix-explicit form (resolution ambiguity at audit-trail).
+
+### 4.24 Verbatim-paste verlog-growth modeling (carried-forward deferral from prior cycle)
+
+*Carried-forward deferral from prior cycle, codified at 2026-05-08*
+
+#### Abstract rule
+
+Verbatim-paste discipline (§ 4.10 CC-tier; § 4.19 QB-tier) increases verification log size relative to summarization-based logs. Drafting specs that mandate verbatim-paste must model expected verlog (verification log) growth at spec authorship: predicted verlog size = baseline summarization size × verbosity multiplier (typically 1.5x–3x depending on command output verbosity).
+
+The modeling is operational, not methodology-prescriptive: drafting specs allocate verlog read-budget per the predicted size; QB and audit-CC anticipate the larger reads. The lesson protects against the failure mode where a drafting spec mandates verbatim-paste but does not model the resulting verlog growth, leaving downstream audit cycles surprised by read-budget consumption.
+
+The modeling does not introduce a methodology threshold; it is a planning aid for cycle resource allocation.
+
+#### Worked example
+
+The lesson originally surfaced in a prior cycle (specific cycle attribution carried forward as deferral, not substrate-verified at this codification tier per Lesson § 4.12 generalization — the substrate evidence is the cycle artifacts themselves). Verbatim-paste-mandated cycles produced verification logs 1.5x–3x larger than summarization-based predecessors. The growth pattern was banked as a planning consideration; the codification was deferred and carried forward.
+
+The lesson does not prescribe a specific verbosity multiplier — the multiplier varies per cycle's command-mix. Drafting CC at spec-write tier estimates per the cycle's expected V1-N entry count and per-entry command-output size.
+
+#### Cross-references
+
+- **Origin:** Prior cycle deferral (specific origin carried forward without substrate verification at this codification tier), codified at AUDIT_METHODOLOGY v3 (2026-05-08).
+- **CC-tier verbatim-paste discipline:** § 4.10.
+- **QB-tier verbatim-paste discipline:** § 4.19.
+
+#### Audit-CC prophylactic check template
+
+When auditing a Phase 1 bible's drafting cycle resource allocation:
+
+1. **Verify the drafting spec models expected verlog growth** when verbatim-paste is mandated. Look for: predicted verlog line count, baseline-vs-verbatim multiplier estimate, read-budget allocation.
+2. **Flag as MINOR if** the drafting spec mandates verbatim-paste without verlog-growth modeling (planning gap; not a methodology violation).
+3. **Flag as STYLE if** the modeling is present but the multiplier estimate diverged materially from actual (post-cycle observation, not pre-cycle predictability).
+
+The check applies to drafting specs that mandate verbatim-paste; it does not apply to specs that do not require verbatim-paste.
 
 ---
 
 ## 5. Audit-CC Prophylactic Check Templates Consolidated
 
-This section consolidates the seven prophylactic checks from § 4 in paste-ready form for integration into Phase 1 audit prompts. Each check is preceded by its lesson reference for traceability.
+This section consolidates the prophylactic checks from § 4 in paste-ready form for integration into Phase 1 audit prompts. Each check is preceded by its lesson reference for traceability.
+
+§§ 5.1–5.7 are preserved verbatim from v2-patched (paste-ready forms of Lessons 1–7). §§ 5.8–5.9 are new at v3 (paste-ready forms for Lessons § 4.21 and § 4.20's gap-type-enumeration extension; banking origins per attribution metadata at end of each subsection).
+
+The four-element-structure embedded checks in §§ 4.8–4.24 are not consolidated here at v3 — drafting CC integrates them into Phase 1 audit prompts case-by-case at audit-CC dispatch time. Future versions may consolidate the embedded checks into § 5 if pattern-recurrence warrants.
 
 ### 5.1 Verification-log precision check (Lesson 1, § 4.1)
 
@@ -570,8 +1205,8 @@ Flag as **fabricated content (lock-blocker)** if decomposition components don't 
 
 For any methodology construct in the audited document, verify it traces to one of:
 - Tony's locked instructions in this document's drafting spec.
-- META_PLAN v6 or earlier locked Phase 0 documents (Tony-authored or QB-drafted-and-Tony-ratified).
-- Operator-stated rationale per source-priority tier 5 (META_PLAN v6 § 4.5).
+- META_PLAN v9 or earlier locked Phase 0 documents (Tony-authored or QB-drafted-and-Tony-ratified).
+- Operator-stated rationale per source-priority tier 5 (META_PLAN v9 § 4.5).
 
 How to recognize:
 - A construct stated as a rule with no source citation.
@@ -610,7 +1245,7 @@ Flag if:
 
 For any letter-prefix or numeric-prefix convention in the audited document:
 - Grep for letter-prefix patterns (e.g., `[A-Z]\.<n>`).
-- For each prefix, verify it is named in META_PLAN v6, BIBLE_STRUCTURE_SPEC v3, or a Tony-locked drafting spec for this document. Independently — pattern parallelism does NOT satisfy ratification.
+- For each prefix, verify it is named in META_PLAN v9, BIBLE_STRUCTURE_SPEC v6, or a Tony-locked drafting spec for this document. Independently — pattern parallelism does NOT satisfy ratification.
 - For unratified prefixes, flag as METHODOLOGY-INTERPOLATION (lock-blocker).
 
 The check applies to: section-numbering letter prefixes, cross-reference syntax extensions, numeric-prefix conventions, any extension of an existing named pattern to adjacent cases.
@@ -635,13 +1270,60 @@ When the audited document contains shared templates referencing per-document sec
 
 Flag as MATERIAL if any per-document template deviates from shared template's expected numbering OR if a shared-template cross-reference fails to resolve OR if renumbering broke a prior cross-reference.
 
-The check is mechanical for the seven Phase 1 bibles: grep each bible's actual draft for canonical section headers; verify all seven drafts have the same absolute positions for the canonical 5/6/7/8 group. (Grep target is the bible drafts at `/docs/bible/<bible>.md`, not BIBLE_STRUCTURE_SPEC v3 § 6.X templates.)
+The check is mechanical for the seven Phase 1 bibles: grep each bible's actual draft for canonical section headers; verify all seven drafts have the same absolute positions for the canonical 5/6/7/8 group. (Grep target is the bible drafts at `/docs/bible/<bible>.md`, not BIBLE_STRUCTURE_SPEC v6 § 6.X templates.)
+
+### 5.8 Reference-drift refined check (refines existing reference-drift surface; new at v3 per queue item 11)
+
+*Banked: UC-1 cycle, 2026-05-08. Patch CC's refinement of the original Q3 framing surfaced the stronger version codified here.*
+
+For every Tier 4 working-tree-code claim in a locked bible, audit-CC cross-checks the claim against Tier 1 live state at lock authorship time. The check is especially load-bearing for claims that span multiple Lambdas with parallel implementations (Bug-#15-class drift surface): when the same logical operation is implemented in N parallel codepaths, drift between any two implementations creates a Tier-4-vs-Tier-1 mismatch surface that single-Lambda-scoped checks cannot catch.
+
+The check is a refinement of, not replacement for, § 5.7's TOC contradiction check. § 5.7 covers intra-document TOC consistency; § 5.8 covers Tier 4 working-tree claims vs Tier 1 live state across the bible's substrate-grounded content.
+
+How to perform:
+- Enumerate Tier 4 working-tree-code claims in the audited document (file paths, function signatures, line numbers, behavior assertions tied to specific code locations).
+- For each claim, cross-check against Tier 1 live state at lock authorship time (read the file at the cited path; verify the function signature; verify the line number; observe the behavior).
+- For claims that span multiple Lambdas with parallel implementations (e.g., calibration logic implemented in wr_inference_service.py AND ls_inference_service.py), cross-check ALL parallel implementations, not just one.
+
+Flag if:
+- A Tier 4 claim diverges from Tier 1 live state → MATERIAL (substrate drift).
+- A Tier 4 claim about parallel-implementation behavior was verified against only one implementation → MINOR (incomplete check) or MATERIAL if the unverified implementation diverges.
+
+The check pairs with Bug #15-class drift surface awareness: when the cycle history shows parallel-implementation drift (e.g., calibration applied at one inference service but bypassed at another), the check is mandatory at lock tier.
+
+### 5.9 Bidirectional consistency check with gap-type enumeration (refines audit-CC bidirectional checks; new at v3 per queue item 12)
+
+*Banked: API & Frontend Bible cycle, 2026-05-08. Refines the strict-dangling interpretation of bidirectional consistency checks to enumerate four gap types.*
+
+When auditing a Phase 1 bible's bidirectional cross-reference consistency (cross-references between this bible and other bibles in the corpus, or between this bible and locked Phase 0 documents), audit-CC enumerates five gap types (the strict-dangling case plus four extensions identified in the API & Frontend Bible cycle):
+
+1. **Strict dangling references**: cross-reference target does not exist (the cited section / row / entry is not present in the target document). The classic dangling case.
+2. **Deferral-language placeholders**: cross-reference resolves to a target that exists but contains deferral language ("[deferred to Phase X]", "[TBD]", "[pending]") rather than substantive content. The reference resolves syntactically but not semantically.
+3. **NAME-vs-stable-identifier inconsistencies**: cross-reference uses a NAME (human-readable label) that may have shifted between cycles, where a stable-identifier (numeric ID, hash, immutable reference) would resolve unambiguously. Example: citing "the calibration bypass discussion" rather than "ml_layer_architecture_bible:4.3".
+4. **TBD literal placeholders**: cross-reference target contains literal `TBD` or `[TBD]` placeholder content. Distinct from deferral-language placeholders by exactness of the placeholder marker.
+5. **Substrate-undeterminable cells masked by deferral language**: cross-reference target's content is substrate-undeterminable (e.g., a count that depends on live state at lock time) but the bible masks the undeterminability with deferral language rather than acknowledging the substrate-undeterminability explicitly.
+
+How to perform:
+- Enumerate all bidirectional cross-references in the audited document.
+- For each reference, classify against the five gap types (or PASS if none apply).
+- Aggregate counts per gap type.
+
+Flag as MATERIAL if:
+- Any strict-dangling reference (gap type 1).
+- Any cross-reference whose deferral-language target (gap type 2) prevents a downstream reader from completing the resolution.
+- Any NAME-vs-stable-identifier inconsistency (gap type 3) that has plausible drift surface (e.g., the NAME has shifted in a recent cycle).
+- Any TBD literal placeholder (gap type 4).
+- Any substrate-undeterminable cell masked by deferral language (gap type 5) — the masking obscures the substrate state.
+
+Flag as MINOR if a NAME-vs-stable-identifier inconsistency exists but the NAME is currently stable (style + reinforcement; promote to MATERIAL on observed drift).
+
+The check is a refinement extension of the bidirectional consistency dimension of § 5.7 (TOC contradiction); the gap-type enumeration is the substantive content. Origin-cycle "Cluster B / Check 4+5" labels are unrecoverable origin-cycle artifacts; the gap-type enumeration is the codification of substantive content.
 
 ---
 
 ## 6. Phase 1 Audit-CC Prompt Template
 
-This template is the canonical paste-ready structure for a Phase 1 per-bible audit-CC prompt. It extends META_PLAN v6 Appendix A.6's working example with the seven prophylactic checks from § 5. Per-bible audit prompts customize this template; the template ensures consistency across the seven Phase 1 bibles' audit cycles.
+This template is the canonical paste-ready structure for a Phase 1 per-bible audit-CC prompt. It extends META_PLAN v9 Appendix A.6's working example with the seven prophylactic checks from § 5. Per-bible audit prompts customize this template; the template ensures consistency across the seven Phase 1 bibles' audit cycles.
 
 QB customizes the template per audited bible by filling the bracketed sections (`[BIBLE NAME]`, `[VERIFICATION TARGETS]`, `[REGRESSION CHECK ITEMS]`, etc.). The seven prophylactic checks remain constant across all Phase 1 audit prompts; the document-type-specific verification mandate varies per bible.
 
@@ -657,11 +1339,11 @@ CONTEXT YOU NEED:
 
 EE is a horse-racing prediction system whose Architecture Bible is being constructed
 across multiple Phase 1 documents. Phase 0 produced five methodology documents
-(META_PLAN v6, BIBLE_STRUCTURE_SPEC v3, AUDIT_METHODOLOGY v1, CONVERGENCE_CRITERIA,
-TRIAGE_QUEUE_SPEC) that govern Phase 1 drafting. The bible you are auditing is one
+(META_PLAN v9, BIBLE_STRUCTURE_SPEC v6, AUDIT_METHODOLOGY v3, CONVERGENCE_CRITERIA v2,
+TRIAGE_QUEUE_SPEC v1) that govern Phase 1 drafting. The bible you are auditing is one
 of seven Phase 1 documents producing the canonical reference for what EE is.
 
-This bible's role in the Phase 1 inventory: [PER BIBLE — drawn from BIBLE_STRUCTURE_SPEC v3 § 4.1].
+This bible's role in the Phase 1 inventory: [PER BIBLE — drawn from BIBLE_STRUCTURE_SPEC v6 § 4.1].
 
 The roles in this project:
   - Tony: operator, final architectural authority
@@ -676,7 +1358,7 @@ REFERENCE MATERIALS:
     (META_PLAN.md, BIBLE_STRUCTURE_SPEC.md, AUDIT_METHODOLOGY.md, CONVERGENCE_CRITERIA.md, TRIAGE_QUEUE_SPEC.md)
   - The DD Architecture Bible at /home/strakajagr/projects/dynasty-dugout/ARCHITECTURE_BIBLE.md
   - The EE current state dump at /home/strakajagr/projects/equine-equalizer/docs/bible/_meta/EE_CURRENT_STATE_DUMP.md
-    (NOTE: dump is best-available baseline, not source of truth; verify against live state per META_PLAN v6 § 4.5)
+    (NOTE: dump is best-available baseline, not source of truth; verify against live state per META_PLAN v9 § 4.5)
   - Live AWS state via `aws` CLI for any infrastructure claim verification
   - Live API endpoints (e.g., dashboard at gb5qlfy10h.execute-api.us-east-1.amazonaws.com/dashboard/metrics)
   - The EE codebase at /home/strakajagr/projects/equine-equalizer/
@@ -686,9 +1368,9 @@ VERIFICATION DISCIPLINE (HARD RULE):
   - The dump has been wrong about multiple facts in prior audits. Independent verification is the safeguard.
   - For any claim about file paths, function signatures, line numbers, or behavior — read the file or run the command.
   - Counts must be decomposed (e.g., "3 instantiations + 1 import = 4 references"); do not accept compressible aggregations
-    in the draft. Per the verification-log precision rule (META_PLAN v6 § 6.5; AUDIT_METHODOLOGY § 4.1).
-  - Methodology constructs must trace to META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 / Tony-locked spec language.
-    Per the methodology-interpolation rule (META_PLAN v6 § 6.1; AUDIT_METHODOLOGY § 4.2), CC-introduced methodology is
+    in the draft. Per the verification-log precision rule (META_PLAN v9 § 6.5; AUDIT_METHODOLOGY § 4.1).
+  - Methodology constructs must trace to META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 / Tony-locked spec language.
+    Per the methodology-interpolation rule (META_PLAN v9 § 6.1; AUDIT_METHODOLOGY § 4.2), CC-introduced methodology is
     a lock-blocker regardless of count.
 
 [OPERATOR-VERIFIED EXTERNAL SOURCE BLOCK — IF APPLICABLE]
@@ -718,7 +1400,7 @@ QUESTION 1: What's in this deliverable that I can't verify from referenced sourc
 for ML Layer Architecture Bible; 41 routes for API & Frontend Bible.]
 
 QUESTION 2: What's missing based on the deliverable's stated scope?
-[Specific scope-completeness checks: e.g., does the bible contain all canonical TOC sections per BIBLE_STRUCTURE_SPEC v3
+[Specific scope-completeness checks: e.g., does the bible contain all canonical TOC sections per BIBLE_STRUCTURE_SPEC v6
 § 5.2? Does it satisfy its forcing function per § 3.2.1 / § 4.2 / § 4.3?]
 
 QUESTION 3: Where is language ambiguous enough that two readers could interpret it differently?
@@ -755,8 +1437,17 @@ PROPHYLACTIC CHECK 7 — TOC contradiction (§ 5.7):
 [Check template inserted verbatim from § 5.7. Includes mechanical grep instruction over per-document templates'
 canonical section headers.]
 
+PROPHYLACTIC CHECK 8 — Reference-drift refined (§ 5.8) [NEW at v3]:
+[Check template inserted verbatim from § 5.8. Tier 4 working-tree-code claims cross-checked against Tier 1 live
+state; Bug-#15-class drift surface awareness for parallel implementations.]
+
+PROPHYLACTIC CHECK 9 — Bidirectional consistency with gap-type enumeration (§ 5.9) [NEW at v3]:
+[Check template inserted verbatim from § 5.9. Five gap types: strict dangling, deferral-language placeholders,
+NAME-vs-stable-identifier inconsistencies, TBD literal placeholders, substrate-undeterminable cells masked
+by deferral language.]
+
 ADDITIONAL DOCUMENT-TYPE-SPECIFIC CHECKS:
-[QB inserts per-bible checks here. The examples below are drawn from BIBLE_STRUCTURE_SPEC v3 § 6.X anchor verifications,
+[QB inserts per-bible checks here. The examples below are drawn from BIBLE_STRUCTURE_SPEC v6 § 6.X anchor verifications,
 illustrative only — Phase 1 audit-CC customizations may differ based on what the specific bible drafting surfaces.
 The slot's purpose is to ensure customization happens; the examples show what customization can look like.
 
@@ -787,7 +1478,7 @@ with the following structure:
   - Summary verdict (Lock as-is / Lock after specific minor revisions / Revise + re-audit / Substantial rework)
   - Verification log audit (sample of N claims spot-checked against live state)
   - vN-1 finding regression check (if applicable)
-  - Per-question findings (Q1-Q6 + prophylactic checks 1-7 + document-type-specific checks)
+  - Per-question findings (Q1-Q6 + prophylactic checks 1-9 + document-type-specific checks)
   - Severity assessment table (Finding # | Description | Section reference | Severity)
   - Material findings count + justification
   - Fabricated-content findings count + zero-tolerance check
@@ -808,7 +1499,7 @@ Tag each finding: BLOCKER / MATERIAL / MINOR / STYLE.
 
 THRESHOLD CONTEXT:
 
-Tony's threshold (per META_PLAN v6 § 11; AUDIT_METHODOLOGY § 3.5):
+Tony's threshold (per META_PLAN v9 § 11; AUDIT_METHODOLOGY § 3.5):
   - < 5 MATERIAL findings AND
   - zero fabricated-content findings AND
   - zero methodology-interpolation findings (post-grandfathering)
@@ -838,7 +1529,7 @@ is wrong — re-read more skeptically. Begin.
 
 ## 7. Cross-Document Consistency Audit Prompt Template
 
-The cross-document consistency audit runs after all seven Phase 1 bibles lock individually. It is a separate fresh CC session that reads all per-document audit reports as input and verifies internal consistency across the corpus. Per META_PLAN v6 § 3.3, three additional questions are appended to the six adversarial questions of META_PLAN v6 § 6.2 for cross-document audit.
+The cross-document consistency audit runs after all seven Phase 1 bibles lock individually. It is a separate fresh CC session that reads all per-document audit reports as input and verifies internal consistency across the corpus. Per META_PLAN v9 § 3.3, three additional questions are appended to the six adversarial questions of META_PLAN v9 § 6.2 for cross-document audit.
 
 The template below extends the per-bible template with cross-document-specific framing, scope, and questions.
 
@@ -892,7 +1583,7 @@ to Tony).
 YOUR ADVERSARIAL TASK:
 
 Answer all nine questions in order. Six are inherited from per-bible audits; three are cross-document-specific
-per META_PLAN v6 § 3.3.
+per META_PLAN v9 § 3.3.
 
 QUESTION 1: What's in any bible that I can't verify from the referenced source material across other bibles?
 [Examples: a feature_provenance_bible reference to ml_layer_architecture_bible:5.4 — does that section exist?
@@ -900,8 +1591,8 @@ a data_pipeline_bible reference to a flow that's documented in architecture_over
 the two descriptions match?]
 
 QUESTION 2: What's missing across the corpus based on its stated scope?
-[Per BIBLE_STRUCTURE_SPEC v3 § 4: are all canonical TOC sections present in all seven bibles? Per the convergence
-test (META_PLAN v6 § 3.2.1): can a fresh CC session evaluate / rebuild / retrain a model in the gallery using only
+[Per BIBLE_STRUCTURE_SPEC v6 § 4: are all canonical TOC sections present in all seven bibles? Per the convergence
+test (META_PLAN v9 § 3.2.1): can a fresh CC session evaluate / rebuild / retrain a model in the gallery using only
 the locked corpus?]
 
 QUESTION 3: Where is language ambiguous enough that two readers could interpret it differently across bibles?
@@ -914,27 +1605,27 @@ QUESTION 5: What sections feel rushed or hand-waved within the corpus context?
 
 QUESTION 6: What examples are missing that would make abstract claims concrete across the corpus?
 
-QUESTION 7 (cross-document, per META_PLAN v6 § 3.3): Does the bible say something the code does not do?
+QUESTION 7 (cross-document, per META_PLAN v9 § 3.3): Does the bible say something the code does not do?
 [Phase 1 cross-document scope: limit to claims surfaced by bible-vs-bible cross-reference analysis. Full code-vs-
 bible reconciliation is Phase 2.]
 
-QUESTION 8 (cross-document, per META_PLAN v6 § 3.3): Does the code do something the bible does not say?
+QUESTION 8 (cross-document, per META_PLAN v9 § 3.3): Does the code do something the bible does not say?
 [Phase 1 cross-document scope: limit to gaps in coverage that bible-vs-bible analysis surfaces. Full code-vs-bible
 gap analysis is Phase 4.]
 
-QUESTION 9 (cross-document, per META_PLAN v6 § 3.3): Where do bible documents contradict each other across files?
+QUESTION 9 (cross-document, per META_PLAN v9 § 3.3): Where do bible documents contradict each other across files?
 [The canonical cross-document audit question. Specifically:
-  - Cross-cutting bug canonical-home assignments (per BIBLE_STRUCTURE_SPEC v3 § 5.3): is each cross-cutting bug
+  - Cross-cutting bug canonical-home assignments (per BIBLE_STRUCTURE_SPEC v6 § 5.3): is each cross-cutting bug
     homed in exactly one bible with cross-references from others, never duplicated?
-  - Canonical object names (per BIBLE_STRUCTURE_SPEC v3 § 4.1.1 in architecture_overview): consistent across all
+  - Canonical object names (per BIBLE_STRUCTURE_SPEC v6 § 4.1.1 in architecture_overview): consistent across all
     bibles that reference them?
-  - Canonical section numbering (per BIBLE_STRUCTURE_SPEC v3 § 5.2 mandatory 5/6/7/8): all seven bibles compliant?
+  - Canonical section numbering (per BIBLE_STRUCTURE_SPEC v6 § 5.2 mandatory 5/6/7/8): all seven bibles compliant?
   - Cross-bible references (`<bible_name>:<section_id>`): every reference resolves to an actual section in the
     target bible?]
 
 PROPHYLACTIC CHECKS (per AUDIT_METHODOLOGY § 5):
 
-The seven prophylactic checks apply across the corpus, not within single bibles:
+The prophylactic checks apply across the corpus, not within single bibles:
 
 PROPHYLACTIC CHECK 1 — Verification-log precision across the corpus (§ 5.1):
 For aggregable counts cited across multiple bibles (e.g., 88 = 45 active + 43 inactive cited in ml_layer_architecture_bible
@@ -942,13 +1633,13 @@ AND model_evaluation_retraining_bible AND elsewhere), verify decomposition match
 
 PROPHYLACTIC CHECK 2 — Methodology-interpolation across the corpus (§ 5.2):
 For methodology constructs introduced in any bible (e.g., a new discipline rule), verify the construct traces to
-META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 / Tony-locked drafting spec. Per-bible audits should have caught individual
+META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 / Tony-locked drafting spec. Per-bible audits should have caught individual
 instances; this check sweeps for any that survived multiple per-bible audits.
 
 PROPHYLACTIC CHECK 3 — Retroactive sweep discipline (§ 5.3):
 Verify cross-document audit specifically sweeps for instances of newly-introduced rules that may not have been
-caught by per-bible audits. Phase 1 introduces no new methodology rules (it operates under META_PLAN v6 +
-BIBLE_STRUCTURE_SPEC v3 + AUDIT_METHODOLOGY v1 already-locked); the retroactive sweep here verifies all seven
+caught by per-bible audits. Phase 1 introduces no new methodology rules (it operates under META_PLAN v9 +
+BIBLE_STRUCTURE_SPEC v6 + AUDIT_METHODOLOGY v3 already-locked); the retroactive sweep here verifies all seven
 bibles uniformly applied the locked rules.
 
 PROPHYLACTIC CHECK 4 — Operator-verified external source (§ 5.4):
@@ -958,7 +1649,7 @@ discussion), verify all citations match the verbatim source.
 
 PROPHYLACTIC CHECK 5 — Pattern-completion interpolation (§ 5.5):
 For letter-prefix or numeric-prefix conventions used across the corpus (W.N is the only ratified letter-prefix per
-BIBLE_STRUCTURE_SPEC v3 § 5.5), grep all seven bibles for any unratified prefix conventions. Pattern parallelism
+BIBLE_STRUCTURE_SPEC v6 § 5.5), grep all seven bibles for any unratified prefix conventions. Pattern parallelism
 across multiple bibles does NOT constitute ratification.
 
 PROPHYLACTIC CHECK 6 — "Tony's locked decision based on a wrong premise" (§ 5.6):
@@ -969,6 +1660,16 @@ PROPHYLACTIC CHECK 7 — TOC contradiction (§ 5.7):
 The MECHANICAL CHECK: grep each of the seven bibles for canonical 5/6/7/8 section headers (Discipline rules /
 Currently Open / Deprecated / What Was Fixed). Verify all seven bibles have these four sections at canonical
 absolute positions. Verify cross-bible references targeting these positions resolve consistently.
+
+PROPHYLACTIC CHECK 8 — Reference-drift refined (§ 5.8) [NEW at v3]:
+For Tier 4 working-tree-code claims spanning multiple bibles (e.g., Lambda implementations referenced from
+multiple bibles), cross-check each implementation against Tier 1 live state. Bug-#15-class drift surface
+awareness for parallel implementations is operative across the corpus.
+
+PROPHYLACTIC CHECK 9 — Bidirectional consistency with gap-type enumeration (§ 5.9) [NEW at v3]:
+For all cross-bible references in the corpus, classify against the five gap types (strict dangling, deferral-language
+placeholders, NAME-vs-stable-identifier inconsistencies, TBD literal placeholders, substrate-undeterminable cells
+masked by deferral language). Aggregate counts per gap type.
 
 CROSS-CUTTING CONSISTENCY ENUMERATION:
 
@@ -996,7 +1697,7 @@ with the following structure:
   - Front matter (audit subject: cross-document consistency; audit-CC role; threshold)
   - Summary verdict
   - Per-bible cross-cutting trace (which bibles contain references to each canonical home; consistency verified)
-  - Per-question findings (Q1-Q9 + prophylactic checks 1-7)
+  - Per-question findings (Q1-Q9 + prophylactic checks 1-9)
   - Cross-cutting consistency table (by canonical home: where homed, where referenced, consistency status)
   - Severity assessment table
   - Material findings count + justification
@@ -1009,7 +1710,7 @@ Same threshold as per-bible audits:
   - zero fabricated-content findings AND
   - zero methodology-interpolation findings (post-grandfathering)
 
-Per-bible re-revision trigger: per META_PLAN v6 § 3.3, "if a per-document audit returns >5 MATERIAL findings, that
+Per-bible re-revision trigger: per META_PLAN v9 § 3.3, "if a per-document audit returns >5 MATERIAL findings, that
 document goes back to Phase 1 revision before the cross-document audit runs." That trigger is checked before this
 audit runs; you can assume the seven bibles are individually under threshold. Your job is to find any cross-document
 issue not surfacing within any single bible's audit.
@@ -1028,40 +1729,133 @@ seven independently-drafted bibles, the bar is wrong — re-read more skepticall
 
 Surfaced for resolution during Phase 0 iteration. Not blocking AUDIT_METHODOLOGY lock unless audit returns one as critical.
 
+§§ 8.1–8.3 are preserved verbatim from v2-patched. §§ 8.4–8.5 are new at v3 per R8 substrate-grounded landing (queue item 21 + Candidate #6 per the AUDIT_METHODOLOGY meta-cycle).
+
 ### 8.1 Per-bible audit prompt customization granularity
 
-§ 6's template includes `[ADDITIONAL DOCUMENT-TYPE-SPECIFIC CHECKS]` as a customization slot. The customizations listed in the template's example block (verify INDEX section for Architecture Overview; verify 14 tables for Database & Schema; etc.) are illustrative, not prescriptive. Whether each Phase 1 audit prompt is hand-customized by QB at audit time OR derived from a per-bible template QB pre-writes is a Phase 1 working-agreement decision per the pattern established in META_PLAN v6 § 7.13's deferral-to-Phase-5 framing applied to Phase 1 audit-CC prompt drafting cadence.
+§ 6's template includes `[ADDITIONAL DOCUMENT-TYPE-SPECIFIC CHECKS]` as a customization slot. The customizations listed in the template's example block (verify INDEX section for Architecture Overview; verify 14 tables for Database & Schema; etc.) are illustrative, not prescriptive. Whether each Phase 1 audit prompt is hand-customized by QB at audit time OR derived from a per-bible template QB pre-writes is a Phase 1 working-agreement decision per the pattern established in META_PLAN v9 § 7.13's deferral-to-Phase-5 framing applied to Phase 1 audit-CC prompt drafting cadence.
+
+[OPEN — v3 cycle disposition: UNAFFECTED. The v3 cycle's queue items address methodology lessons + audit-CC checks + QB self-checks; no v3 promotion closes the per-bible audit prompt customization granularity question. Question carries forward.]
 
 ### 8.2 Cross-document audit re-trigger after per-bible revision
 
-If the cross-document audit surfaces a finding that requires one bible to revise, that bible re-locks per its own per-bible cycle. Whether the cross-document audit re-runs immediately, runs only at Phase 1 final completion, or follows a different cadence is deferred — per META_PLAN v6's pattern of deferring cadence-shaped decisions to operational phase entry.
+If the cross-document audit surfaces a finding that requires one bible to revise, that bible re-locks per its own per-bible cycle. Whether the cross-document audit re-runs immediately, runs only at Phase 1 final completion, or follows a different cadence is deferred — per META_PLAN v9's pattern of deferring cadence-shaped decisions to operational phase entry.
+
+[OPEN — v3 cycle disposition: UNAFFECTED. Question carries forward; cadence-shape decisions remain deferred to operational phase entry.]
 
 ### 8.3 Inheritance verification across audit cycles
 
 Per § 4.3's retroactive sweep discipline, when a methodology rule lands in cycle N, the audit-CC spec for cycle N+1 includes retroactive sweep. For Phase 1 audits, no new methodology rules are introduced (Phase 1 operates under locked Phase 0 documents); inheritance verification is the relevant check rather than retroactive sweep. The check template in § 5.3 covers both — when first-cycle-after-rule-introduction, perform sweep; otherwise, verify inheritance documented. Whether Phase 1 audits need any further refinement of the inheritance check is deferred until Phase 1 audit cycles surface a need.
 
+[OPEN — v3 cycle disposition: UNAFFECTED. Question carries forward; § 4.21 (UC-cycle audit-scope methodology lesson) is related but addresses UPSTREAM-CORRECTION cycle audit-tier sizing, not inheritance verification at Phase 1 per-bible audit cycles.]
+
+### 8.4 PHASE_5_BACKLOG.md vocabulary reconciliation strategy (NEW at v3 per queue item 21)
+
+*Banked: AUDIT_METHODOLOGY meta-cycle (post-Phase-1 dispatch sequence 4 of 4), 2026-05-08. Per R8 substrate-grounded landing, queue item 21 lands under § 8 Open Questions umbrella; final strategy selection surfaces to Tony at SP-A2 review.*
+
+PHASE_5_BACKLOG.md (substrate-verified at `/home/strakajagr/projects/equine-equalizer/docs/bible/PHASE_5_BACKLOG.md`) currently carries dual vocabulary:
+
+- **Phase 5.3.1 seed entry**: retains META_PLAN v6 § 11 vocabulary (BLOCKER / MATERIAL / MINOR / STYLE) per origination context (the seed entry was created at Phase 0 exit per META_PLAN v6 § 8.2; its vocabulary mirrored the Phase 0 cycle's locked threshold language).
+- **Phase 5.3.2 through 5.3.26 entries**: use TRIAGE_QUEUE_SPEC v1 vocabulary (HIGH / MEDIUM / LOW) per locked-2026-05-04 spec authoritative for Phase 1+ entries.
+
+The reconciliation was deferred per PHASE_5_BACKLOG.md header line 12 declaration; the AUDIT_METHODOLOGY meta-cycle ratifies the reconciliation strategy. Three candidate strategies are codified here; final strategy selection is a Tony ratification surface at SP-A2.
+
+#### Candidate strategy (a): Re-tag Phase 5.3.1 seed to TRIAGE_QUEUE_SPEC v1 vocabulary with substrate-grounded severity mapping
+
+Re-tag the Phase 5.3.1 seed entry from META_PLAN v6 § 11 vocabulary (BLOCKER / MATERIAL / MINOR / STYLE) to TRIAGE_QUEUE_SPEC v1 vocabulary (HIGH / MEDIUM / LOW). The substrate-grounded mapping for the seed (Bug #28 — HRN scraper data-acquisition substrate corruption affecting production payout extraction) likely maps to **HIGH** severity given the production-impact substrate.
+
+**Pros:** Single-vocabulary corpus across all 26 entries; future entries unambiguously tagged with the locked-2026-05-04 vocabulary. Eliminates ambiguity at Phase 5 execution time when the operator queries by severity.
+
+**Cons:** Requires retroactive amendment of a Phase 0 exit artifact (Phase 5.3.1 seed). The original META_PLAN v6 vocabulary tag carries historical context (Phase 0 cycle's locked language); re-tagging loses the historical traceability unless preserved in a parenthetical annotation.
+
+#### Candidate strategy (b): Preserve dual-vocabulary as documented historical-evolution record
+
+Preserve Phase 5.3.1 seed at META_PLAN v6 § 11 vocabulary; preserve Phase 5.3.2-5.3.26 at TRIAGE_QUEUE_SPEC v1 vocabulary. PHASE_5_BACKLOG.md header line 12 declaration is upgraded from "deferred" to "ratified preservation" — the dual-vocabulary state is the locked record of methodology evolution.
+
+**Pros:** No retroactive amendments; historical traceability preserved (the seed entry carries Phase 0 cycle's vocabulary; subsequent entries carry post-lock TRIAGE_QUEUE_SPEC v1 vocabulary; the boundary is the methodology-evolution marker).
+
+**Cons:** Phase 5 execution must handle dual-vocabulary translation; future entries must explicitly tag the vocabulary they use; query-by-severity becomes less direct.
+
+#### Candidate strategy (c): Alternative
+
+Tony may direct an alternative strategy at SP-A2 ratification. Examples of alternatives that emerged during meta-cycle dispatch:
+
+- (c.1) Maintain dual-vocabulary in body, but author a header-level translation table mapping vocabulary-A to vocabulary-B for Phase 5 query consumption. Combines (a)'s query-uniformity with (b)'s historical preservation.
+- (c.2) Re-tag the seed AND amend PHASE_5_BACKLOG.md header line 12 declaration to "reconciled to TRIAGE_QUEUE_SPEC v1 vocabulary at AUDIT_METHODOLOGY v3 meta-cycle (2026-05-08); seed's prior vocabulary preserved in parenthetical annotation per § 4.17 locked-content preservation discipline."
+- (c.3) Defer reconciliation to Phase 5 entry (when the operator first queries the backlog). The reconciliation timing is operational, not methodology-prescriptive.
+
+#### Ratified strategy
+
+[Pending Tony ratification at SP-A2.] Drafting CC's recommendation: **strategy (c.2)** — re-tag Phase 5.3.1 seed to TRIAGE_QUEUE_SPEC v1 vocabulary (HIGH for Bug #28 per substrate-grounded production-impact assessment) AND amend PHASE_5_BACKLOG.md header line 12 declaration to ratified-reconciliation language; seed's prior vocabulary preserved in parenthetical annotation per § 4.17. This combines (a)'s query-uniformity benefit with (b)'s historical-preservation benefit, and is consistent with § 4.17 locked-content preservation discipline (the seed's drafting-time vocabulary is preserved in annotation; the metadata transitions to current vocabulary).
+
+The ratified strategy will be documented in the v3 changelog (§ 10) and applied to PHASE_5_BACKLOG.md as a separate mechanical-paste cycle post-AUDIT_METHODOLOGY-v3 lock.
+
+### 8.5 Bible-corpus-uniform component-count standardization (Candidate #6, NEW at v3)
+
+*Banked at PHASE_5_BACKLOG triage, API & Frontend Bible cycle. Per R8 substrate-grounded landing, Candidate #6 lands under § 8 Open Questions umbrella; final disposition surfaces to Tony at SP-A2 review.*
+
+The seven Phase 1 bibles each carry component counts (e.g., 14 tables in Database & Schema; 88 = 45 active + 43 inactive in ML Layer Architecture; 41 routes in API & Frontend; 8 = 5 Active + 3 INACTIVE Lambdas in Architecture Overview; 14 Gonzo Sauce features in Feature Provenance). Whether the corpus benefits from a uniform component-count standardization rule (e.g., "every bible's Discipline rules section lists exactly N components per the canonical taxonomy") is a methodology question banked at PHASE_5_BACKLOG triage from the API & Frontend Bible cycle.
+
+The question is methodology-shape, not Phase 5 work — uniformity may not be a virtue if the bibles' component types vary in their natural cardinality (a bible covering 14 tables ≠ a bible covering 41 routes ≠ a bible covering 88 model-registry rows). Forcing uniformity could introduce taxonomy contortions; preserving heterogeneity could leave query patterns inconsistent across the corpus.
+
+#### Candidate disposition (a): Defer to Phase 5
+
+Defer the standardization question to Phase 5 entry. Phase 5 is the operational phase; if the heterogeneity becomes a friction surface during Phase 5 query patterns, the standardization can be authored at that point with operational evidence.
+
+**Pros:** No premature methodology constraint; Phase 5 operational evidence drives the decision.
+
+**Cons:** The heterogeneity may continue as a low-grade query-pattern friction across Phase 5; if standardization is the right answer, deferring delays its benefit.
+
+#### Candidate disposition (b): Codify uniform-count rule in BIBLE_STRUCTURE_SPEC
+
+Author a uniform component-count rule in BIBLE_STRUCTURE_SPEC v6 (or future v7) requiring each bible's Discipline rules section to enumerate components per a canonical taxonomy. The rule would force taxonomy decisions at lock tier and produce uniform-count corpus.
+
+**Pros:** Uniform query patterns across the corpus; operator can ask "how many components in <bible>" with consistent semantics.
+
+**Cons:** Forcing uniformity may distort taxonomies; the natural cardinality of bibles varies; some bibles may need synthetic groupings to fit the uniform structure.
+
+#### Candidate disposition (c): Preserve current heterogeneity
+
+Maintain the heterogeneous component-count state explicitly. Each bible enumerates components per its natural cardinality; cross-bible queries handle heterogeneity at query time.
+
+**Pros:** Honest taxonomies (each bible reflects its natural component structure); no taxonomy distortion.
+
+**Cons:** Query patterns vary across the corpus; operators must adapt query approach per bible.
+
+#### Drafting CC recommendation
+
+[Pending Tony disposition at SP-A2.] Drafting CC's recommendation: **disposition (a) — defer to Phase 5**. The standardization question is methodology-shape but the cost-benefit analysis depends on operational evidence not yet accumulated. Phase 5 operational evidence (which query patterns are actually used; which bibles' heterogeneity creates friction) is the discriminator. Premature codification risks distortion; deferral preserves optionality.
+
+The disposition will be documented in the v3 changelog (§ 10) and (if disposition (b)) propagated to BIBLE_STRUCTURE_SPEC v7 cycle scope at next Phase 0 cycle.
+
 ---
 
 ## 9. Lock Status
 
-**Document status:** DRAFT v2, pre-audit
-**Audit-CC pass:** pending (v2 audit pending after disk write)
-**Verification log:** `_audits/AUDIT_METHODOLOGY_v2_verification.md` — inherits v1's 41 claims with re-verified-2026-05-04 timestamps; adds 1 new claim (Claim 42 — verbatim attribution of v2 audit Q2.2 + Tony's Q4 in § 4.6)
+**Document status:** DRAFT v3, pre-audit
+**Audit-CC pass:** pending (v3 audit pending after disk write at SP-A2)
+**Verification log:** pending — v3 cycle's authorization scope (per Lesson § 4.12 bounded-authorization discipline) limited drafting CC's substrate reads to META_PLAN v9 + BIBLE_STRUCTURE_SPEC v6 + AUDIT_METHODOLOGY v2-patched + CONVERGENCE_CRITERIA v2 + TRIAGE_QUEUE_SPEC v1; v1-draft does not introduce new EE-substrate factual claims requiring verification log entries. Verification log scope assessment is a Tony ratification surface at SP-A2.
 **Tony review:** pending (will see post-audit version per workflow discipline)
-**Locked:** [pending]
+**Locked:** [pending audit + Tony review + iteration cycles]
 
-**Phase 0 prerequisites carried over from META_PLAN v6 § 11:**
-- All 5 Phase 0 documents pass adversarial audit (Tony's threshold: < 5 MATERIAL findings AND zero fabricated-content findings AND zero methodology-interpolation findings)
-- Operating-model convergence test passes (META_PLAN v6 § 5.4)
-- EE production code committed to baseline (META_PLAN v6 § 3.1.1)
-- `.gitignore` baseline audit performed; findings documented at `_audits/gitignore_baseline_audit.md` (META_PLAN v6 § 7.14)
-- `PHASE_5_BACKLOG.md` created with Bug #28 as first entry (META_PLAN v6 § 8.2)
+**Phase 0 prerequisites carried over from META_PLAN v9 § 11:**
+- All 5 Phase 0 documents pass adversarial audit (Tony's threshold: < 5 MATERIAL findings AND zero fabricated-content findings AND zero methodology-interpolation findings). Current Phase 0 lock state: META_PLAN v9 LOCKED 2026-05-05, BIBLE_STRUCTURE_SPEC v6 LOCKED 2026-05-05, AUDIT_METHODOLOGY (this document) DRAFT v3, CONVERGENCE_CRITERIA v2 DRAFT (pre-audit), TRIAGE_QUEUE_SPEC v1 DRAFT (pre-audit).
 
-**Next action:** QB writes paste-ready audit-CC prompt for v2. Tony runs audit. QB synthesizes findings.
+v3 meta-cycle executed against partial Phase 0 lock state: META_PLAN v9 + BIBLE_STRUCTURE_SPEC v6 LOCKED 2026-05-05; CONVERGENCE_CRITERIA v2 + TRIAGE_QUEUE_SPEC v1 in DRAFT state at v3 authorship time. Methodology baseline operationally sufficient for v3 cycle scope; future Phase 0 lock cycles for CONVERGENCE_CRITERIA v2 + TRIAGE_QUEUE_SPEC v1 may follow as separate post-Phase-1 work.
+- Operating-model convergence test passes (META_PLAN v9 § 5.4)
+- EE production code committed to baseline (META_PLAN v9 § 3.1.1)
+- `.gitignore` baseline audit performed; findings documented at `_audits/gitignore_baseline_audit.md` (META_PLAN v9 § 7.14)
+- `PHASE_5_BACKLOG.md` created with Bug #28 as first entry (META_PLAN v9 § 8.2). PHASE_5_BACKLOG.md current entry count was out-of-scope substrate for the v3 cycle (per spec § 2 substrate authorization). Entry count is verifiable post-lock at separate cycle; v3 cycle does not assert specific entry count.
+
+**Phase 1 status:** Phase 1 bibles' lock state was out-of-scope substrate for the v3 cycle (per spec § 2 substrate authorization). v3 cycle dispatch context indicated Phase 1 cohort cycles completed prior to v3 dispatch; specific lock-version and lock-date enumeration is verifiable post-lock at separate cycle.
+
+**v3 cycle pending actions:** QB writes paste-ready audit-CC prompt for v3 (separate session per Q1 ratification + Self-Audit Check 5 generalization (§ 12.5)). Tony runs audit. QB synthesizes findings. Patch CC tier dispatches if audit findings non-trivial. Lock-CC tier finalizes the three-element metadata bundle and transitions Status to LOCKED v3.
 
 ---
 
 ## 10. Changelog
+
+Per spec § 8 metadata bundle requirements + R8.b ratification, § 10 is the revision-history block target. v3 entry authored chronological-forward per v2-patched § 10 existing convention (v1 → v2 ordered chronologically forward).
 
 ### v1 → v2
 
@@ -1101,23 +1895,84 @@ Each lesson presented with the four required structural elements: abstract rule 
 
 No new flagging thresholds introduced; thresholds inherited from META_PLAN v6 § 11. No new methodology constructs introduced beyond what META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 / Tony's locked drafting spec for this document explicitly authorize.
 
+### v2 → v2-patched (2026-05-05)
+
+Four lessons banked in § 4 (Lessons § 4.8 / § 4.9 / § 4.10 / § 4.11) emerged from the Database & Schema Bible v1 cycle (drafting + audit + Tony ratifications 2026-05-05). Lessons cover: § 4.8 QB substrate findings during spec authorship require Tony ratification; § 4.9 QB review pass is light surface only; § 4.10 verbatim-paste discipline for V1-N entries; § 4.11 grep predictions against bootstrap-mirror file unions. Each lesson follows the existing four-element structure (abstract rule + worked example + cross-references + audit-CC prophylactic check template). Banked at next-sequential slots per the file's § 4.X = Lesson X convention. Substrate observation surfaced in `database_schema_bible_v1_verification.md` Section I V1-patch-10.
+
+### v2-patched → v3 (2026-05-08)
+
+**Cycle:** AUDIT_METHODOLOGY meta-cycle (post-Phase-1 dispatch sequence 4 of 4).
+
+**Cycle ratifications by Tony 2026-05-08:** Q1–Q8 + R1–R7 + R8 + R8.a + R8.b + D1–D4. Substrate-grounded section landing per R8 (new content integrates into existing v2-patched §§ 6–11 structure rather than displacing).
+
+**Promotion summary:** 21 queue items + 3 awareness items integrated.
+
+- **§ 4.X new lessons (§§ 4.12–4.24):** 13 new lessons banked at this cycle.
+  - § 4.12 — Low-cost substrate verification at row-authorship (queue item 2; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.13 — Inheritance read-scope discipline (queue item 1; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.14 — Intra-document section reference convention (queue item 3; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.15 — Composite-row treatment for orphan classes (queue item 4; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.16 — Lock-CC three-element metadata bundle (queue item 5; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.17 — Locked bibles preserve drafting-time historical context (queue item 6; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.18 — Drafting-CC paste-prompts must mandate metadata-bundle initialization (queue item 7; Phase 1 Cohort parallel-cohort handoff).
+  - § 4.19 — QB paste-verbatim discipline reinforcement (queue item 8; PHASE_5_BACKLOG.md reconciliation cycle).
+  - § 4.20 — Pattern A bundling default + Pattern B exception (queue item 9; API & Frontend Bible cycle).
+  - § 4.21 — UC-cycle audit-scope methodology lesson (queue item 10; UC-1 cycle).
+  - § 4.22 — Two-tier cross-reference convention codification (queue item 18; carried-forward deferral from parallel cohort).
+  - § 4.23 — database_schema_bible:V1-12 verification-log-claim-ID convention (queue item 19; carried-forward deferral from Database & Schema Bible cycle).
+  - § 4.24 — Verbatim-paste verlog-growth modeling (queue item 20; carried-forward deferral from prior cycle).
+
+- **§ 5.X new audit-CC prophylactic checks (§§ 5.8–5.9):** 2 new checks banked at this cycle.
+  - § 5.8 — Reference-drift refined check (queue item 11; UC-1 cycle).
+  - § 5.9 — Bidirectional consistency check with gap-type enumeration (queue item 12; API & Frontend Bible cycle).
+
+- **§ 12 new section — QB Self-Audit Checks (§§ 12.1–12.5):** 5 new QB-tier self-audit checks banked at this cycle.
+  - § 12.1 — Estimation calibration (queue item 13; cycle-originated Self-Audit Check finding).
+  - § 12.2 — Self-describing authorization redundancy detection (queue item 14; cycle-originated).
+  - § 12.3 — Paste-prompt transit-truncation discipline (queue item 15; cycle-originated; bookend markers PROMPT BEGINS / PROMPT ENDS).
+  - § 12.4 — Within-message placeholder discipline (queue item 16; cycle-originated).
+  - § 12.5 — Meta-document state claim substrate verification (queue item 17; cycle-originated; Awareness item B scope clause integrated verbatim).
+
+- **§ 8.X new subsections (§§ 8.4–8.5):** Per R8 substrate-grounded landing, queue item 21 + Candidate #6 land under § 8 Open Questions umbrella with novel ratification surfaces at SP-A2.
+  - § 8.4 — PHASE_5_BACKLOG.md vocabulary reconciliation strategy (queue item 21).
+  - § 8.5 — Bible-corpus-uniform component-count standardization (Candidate #6).
+
+- **Awareness item dispositions (3 items):**
+  - Awareness item A (path drift retroactive correction scope): OUT-OF-SCOPE this cycle. Resolved at Q8 — added as PHASE_5_BACKLOG.md entry 5.3.27 LOW post-AUDIT_METHODOLOGY-v3 lock as separate mechanical-paste cycle. NOT integrated into v3 body.
+  - Awareness item B (historically: 'Self-Audit Check 14 generalization scope'; now codified at § 12.5): FOLDED INTO § 12.5 codification as explicit scope clause covering "ALL meta-document inheritance, not just PHASE_5_BACKLOG.md" + "fabricated-by-accumulation" failure mode.
+  - Awareness item C (three-tier-confirmed Lesson § 4.12 bounded-authorization positive operational precedent): integrated VERBATIM into revision history block (header v3 entry above + § 10 v3 entry below). Operational precedent banking text per spec § 6.
+
+- **Phase 0 cross-reference re-validation (per Obs C / R7):** Header anchors updated from META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 to META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6. In-body cross-references updated: most v6 § X.Y references preserved at same numbering in v9 (verified during authorship); the v6 § 12 reference in § 4.1, § 4.2, § 4.3, § 4.6 cross-references updated to v9 § 12.4 (the v5→v6 changelog subsection within v9 § 12 changelog). Historical citations referencing specific past versions (META_PLAN v3 audit, BIBLE_STRUCTURE_SPEC v1 audit, etc.) preserved verbatim as immutable historical references.
+
+**Section-renumbering report:** Zero renumbering of v2-patched §§ 6–11 (R8 Option-b discipline). New § 12 appended; §§ 6, 7, 8, 9, 10, 11 preserved at original numbering. Eight intra-document cross-references at v2-patched lines 19, 124 (×2), 1209, 1266, 1276, 1292, 1293 preserved verbatim with original section numbers.
+
+**Operational precedent banking (v3 authorship, 2026-05-08):** Lesson § 4.12 bounded-authorization discipline confirmed operating cleanly at drafting CC + audit CC + patch CC tiers across six post-Phase-0 cycle classes (Database & Schema, Data Pipeline, parallel cohort, API & Frontend, UC-1, PHASE_5_BACKLOG additions). Positive operational evidence; no methodology amendment required.
+
+**Methodology lesson recorded (v2-patched → v3):**
+
+The v3 cycle introduces the QB-tier self-audit-checks dimension (§ 12) parallel to the audit-CC prophylactic checks dimension (§ 5). The two dimensions serve different audiences: § 5 governs audit-CC adversarial passes against Phase 1 bible drafts; § 12 governs QB's own meta-cycle authorship discipline. The v3 cycle's audit (post-SP-A2) verifies that the two-dimension framing does not introduce cross-audience confusion (i.e., a Phase 1 audit-CC does not erroneously apply § 12 checks to bible drafts; a QB meta-cycle authoring step does not erroneously apply § 5 checks to its own work).
+
+**Retained from v2-patched unchanged:** §§ 1–3 (with mechanical v6→v9 / v3→v6 anchor updates); §§ 4.1–4.11 (with mechanical anchor updates per Phase 0 cross-reference re-validation; historical citations preserved); §§ 5.1–5.7; § 6 (Phase 1 Audit-CC Prompt Template, with v6→v9 / v3→v6 anchor updates within the prompt body, and Prophylactic Checks 8–9 added per § 5.8–5.9 inclusion); § 7 (Cross-Document Consistency Audit Prompt Template, with anchor updates and Prophylactic Checks 8–9 inclusion); §§ 8.1–8.3 (preserved verbatim with v3 cycle disposition annotations: UNAFFECTED for all three); § 11 (CC Drafting Notes; § 11.1 with mechanical anchor updates per Phase 0 cross-reference re-validation; § 11.2.1 historical v1-era surfacing notes preserved verbatim per § 4.17 locked-content preservation discipline).
+
+**Lock-cycle execution 2026-05-08:** full four-tier ceremony completed. Drafting CC tier: single-pass authorship with two SP-A1 / SP-A1.5 halts on substrate-vs-inheritance divergences (cohort handoff § 4.13 claim refuted by substrate-verified § 4.11 high-water mark; inferred-terminal-§5-structure refuted by substrate-verified §§ 6–11 substantive content). Audit CC tier (SP-A3): 11 findings delivered (2 BLOCKER, 4 MATERIAL, 5 MINOR/STYLE); 6 self-applying-discipline failures surfaced (v3 codified disciplines violated by v3 authorship in real time). Patch CC tier (SP-A4): 10 surgical patches + 1 wontfix-with-parenthetical applied; zero halt-and-surface events; zero conditional escalations. Lock-CC tier (SP-A5): metadata bundle finalization + canonical file replacement per R5 deferred ratification; v3-draft → AUDIT_METHODOLOGY.md per substrate version-in-header convention. Cycle outcome operationally validates Q1 four-tier ceremony cost for methodology-promotion cycles.
+
 ---
 
 ## 11. CC Drafting Notes (Self-Check Surfaces)
 
 Per the methodology-interpolation rule, CC reviewed every new construct introduced in v1 against the rule. Items below are surfaced for Tony's awareness; CC's judgment on each is included.
 
-### 11.1 Constructs explicitly authorized by META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 / Tony's locked drafting spec
+### 11.1 Constructs explicitly authorized by META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 / Tony's locked drafting spec
 
-- Tier 3 designation per META_PLAN v6 § 4.1.
+- Tier 3 designation per META_PLAN v9 § 4.1.
 - The seven methodology lessons in § 4 (each individually authorized by Tony's locked methodology lesson catalog in the drafting spec).
 - The four required structural elements per lesson (rule + worked example + cross-references + prophylactic check template) — per Tony's locked drafting requirements.
 - The order of the seven lessons (introduced empirically across cycles) — per Tony's locked language: "The order reflects the empirical sequence of their introduction across cycles; preserving the order documents the discipline's evolution."
-- The audit-CC prompt template in § 6 extending META_PLAN v6 Appendix A.6.
-- The cross-document audit prompt template in § 7 extending § 6 with three cross-document questions per META_PLAN v6 § 3.3.
-- All threshold language inherited verbatim from META_PLAN v6 § 11.
-- All edge cases inherited verbatim from META_PLAN v6 § 3.1.
-- All workflow steps inherited from META_PLAN v6 § 3.1 + BIBLE_STRUCTURE_SPEC v3 § 8.3.
+- The audit-CC prompt template in § 6 extending META_PLAN v9 Appendix A.6.
+- The cross-document audit prompt template in § 7 extending § 6 with three cross-document questions per META_PLAN v9 § 3.3.
+- All threshold language inherited verbatim from META_PLAN v9 § 11.
+- All edge cases inherited verbatim from META_PLAN v9 § 3.1.
+- All workflow steps inherited from META_PLAN v9 § 3.1 + BIBLE_STRUCTURE_SPEC v6 § 8.3.
 
 ### 11.2 v1 / v2 surfacing notes
 
@@ -1166,19 +2021,236 @@ CC reviewed every new methodology construct introduced in v1 against the methodo
 
 CC did not draft any of the following — each would have been pattern-completion or methodology-interpolation:
 
-- **Iteration cap on Phase 1 audit cycles** — would be a numerical threshold not in source; deferred per META_PLAN v6's pattern.
+- **Iteration cap on Phase 1 audit cycles** — would be a numerical threshold not in source; deferred per META_PLAN v9's pattern.
 - **Cadence specification for cross-document audit re-trigger after per-bible revision** — surfaced as Open Question 8.2 instead of drafting a cadence rule.
-- **Severity thresholds beyond META_PLAN v6's < 5 MATERIAL** — not introduced; thresholds inherited verbatim from § 11.
+- **Severity thresholds beyond META_PLAN v9's < 5 MATERIAL** — not introduced; thresholds inherited verbatim from § 11.
 - **Completeness criteria for prophylactic check application** — would be a binary pass/fail rule; deferred to Tony's existing < 5 MATERIAL threshold and methodology-interpolation rule's lock-blocker classification.
 - **Scoring rubric for audit findings** — not introduced.
 - **Percentage criterion for cross-document consistency** (e.g., "≥ 90% of cross-references must resolve") — not introduced; resolution-failure is treated qualitatively per the seven prophylactic checks.
-- **Procedural sequencing rules beyond what META_PLAN v6 § 3.1 + BIBLE_STRUCTURE_SPEC v3 § 8.3 already specify** — not introduced.
-- **Tiebreaker criteria for canonical-home determination in cross-cutting bugs** — explicitly deferred to Tony per BIBLE_STRUCTURE_SPEC v3 § 5.3's locked deferral.
-- **New letter-prefix conventions** — not introduced (W.N remains the only ratified prefix per BIBLE_STRUCTURE_SPEC v3 § 5.5).
+- **Procedural sequencing rules beyond what META_PLAN v9 § 3.1 + BIBLE_STRUCTURE_SPEC v6 § 8.3 already specify** — not introduced.
+- **Tiebreaker criteria for canonical-home determination in cross-cutting bugs** — explicitly deferred to Tony per BIBLE_STRUCTURE_SPEC v6 § 5.3's locked deferral.
+- **New letter-prefix conventions** — not introduced (W.N remains the only ratified prefix per BIBLE_STRUCTURE_SPEC v6 § 5.5).
 - **Worked examples beyond those drawn from Phase 0 cycle audit findings** — every worked example in § 4 references a specific cycle and specific finding; no hypothetical or invented examples.
 
 The methodology-interpolation rule is operative; the discipline of self-surfacing remains. v1 surfaces what's new.
 
 ---
 
-End of AUDIT_METHODOLOGY.md v1.
+## 12. QB Self-Audit Checks (NEW at v3)
+
+This section codifies QB-tier self-audit checks for QB's own meta-cycle authorship discipline. The checks operate at the QB orchestration tier — distinct from § 5's audit-CC prophylactic checks, which operate at the audit-CC adversarial-pass tier against Phase 1 bible drafts.
+
+The audience separation is structural: § 5 governs audit-CC sessions auditing Phase 1 bible drafts; § 12 governs QB's own meta-cycle authorship of paste-prompts, transition messages, drafting specs, and meta-document references. A Phase 1 audit-CC does not apply § 12 checks to a bible draft (those checks target QB-authored artifacts); a QB meta-cycle authoring step does not apply § 5 checks to its own work (those checks target audit-CC's adversarial scope against bible drafts).
+
+The five checks below were banked across cycle-originated Self-Audit Check findings during the AUDIT_METHODOLOGY meta-cycle dispatch sequence (2026-05-08). Each check follows the abstract-rule + worked-example + cross-references structure parallel to § 4 lessons; the prophylactic-check-template element is replaced with QB-tier self-application criteria.
+
+### 12.1 QB Self-Audit Check — Estimation calibration
+
+*Banked: cycle-originated Self-Audit Check finding, 2026-05-08*
+
+#### Abstract rule
+
+QB's pre-authorship size estimates for cycle artifacts (drafting spec size, paste-prompt size, audit report size, etc.) carry ±15-20% confidence interval at this cycle's domain complexity. The interval is post-calibration — refined from the original ±40% confidence interval observed across earlier cycles. Estimates outside this confidence interval signal either (a) cycle scope drift (the actual scope diverged from the estimate's premise) or (b) estimation method gap (the estimation heuristic does not capture the scope's actual complexity).
+
+The check is QB-tier self-application: when QB authors a size estimate (chat output, paste-prompt size annotation, capacity-planning estimate), QB carries the ±15-20% confidence interval explicitly in the estimate language. Estimates without confidence intervals are flagged for QB self-correction.
+
+The check is operational, not methodology-prescriptive: it informs QB's planning of paste cycles and capacity expectations; it does not constrain content scoping decisions.
+
+#### Worked example
+
+The check's calibration emerged from the API & Frontend Bible drafting spec cycle. QB's pre-authorship size estimate was 22 KB; the actual drafting spec landed at 29,991 bytes (~36% over estimate). The post-calibration confidence interval (±15-20%) reflects subsequent observations across the cycle's downstream paste-prompt sizes, where ±15-20% became the operational range.
+
+The check is forward-looking: future QB size estimates carry the ±15-20% interval. Future cycles' actual sizes inform whether the calibration holds or requires re-tuning.
+
+#### Cross-references
+
+- **Origin:** API & Frontend Bible cycle, 2026-05-08; pre-authorship size estimate divergence.
+- **Related cycle:** AUDIT_METHODOLOGY meta-cycle (2026-05-08); estimation surfacing.
+
+#### QB self-application criteria
+
+When QB authors a pre-authorship size estimate (paste-prompt size, drafting spec size, audit report expected size, capacity-planning estimate):
+
+1. **Carry the ±15-20% confidence interval explicitly in the estimate.** Format: "estimated 22 KB ± 15-20%" or "estimated range 18-26 KB".
+2. **Flag the estimate's confidence-interval source** (post-calibration estimate or fresh estimate-without-prior-data).
+3. **For estimates outside ±15-20% post-cycle** (i.e., actual size diverges from estimate by >20%), surface the divergence in the cycle's changelog or self-check surfacing block. Categorize: scope drift (cycle scope diverged from premise) vs estimation method gap (heuristic insufficient).
+
+The check is informational, not lock-blocking. It informs operator capacity-planning trust in QB estimates over time.
+
+### 12.2 QB Self-Audit Check — Self-describing authorization redundancy detection
+
+*Banked: cycle-originated Self-Audit Check finding, 2026-05-08*
+
+#### Abstract rule
+
+When QB authors a self-describing § X authorization clause inside a meta document (e.g., a drafting spec's § 15 "Authorization Clause" naming the document's own authorization scope), QB checks whether the wrapper paste-prompt at Step N+1 (the paste-prompt that pastes the meta document forward) is rendered redundant by the self-describing § X. If redundant, QB explicitly flags the redundancy in the same chat turn as the authorization clause authorship.
+
+The check protects against the failure mode where a self-describing authorization clause inside a meta document and a wrapper paste-prompt's authorization framing both name the same scope, producing duplicate (or contradictory) authorization framings. The wrapper paste-prompt's value is in providing authorization framing; if the meta document's § X already provides equivalent framing, the wrapper paste-prompt is not adding value.
+
+The check applies at QB's authoring time, not at audit time — the redundancy is QB's surface to flag at meta-document authorship; downstream audit-CC's adversarial scope catches surviving redundancies but the prevention is QB-tier.
+
+#### Worked example
+
+The check's catch emerged from the API & Frontend Bible cycle. QB authored a self-describing § 15 authorization clause inside the drafting spec; the Step 5 wrapper paste-prompt that paste-routed the spec to drafting CC was rendered redundant by § 15's self-authorization framing. Tony's bypass of Step 5 (direct paste using § 15's self-authorization) left the cycle's ledger off-by-one. QB-side prevention would have been: at § 15 authorship, QB explicitly flag "Step 5 wrapper paste-prompt rendered redundant by § 15 self-authorization; recommend bundling § 15 authorship with Step 5's bypassing-or-skipping decision in the same chat turn."
+
+#### Cross-references
+
+- **Origin:** API & Frontend Bible cycle, 2026-05-08; Step 5 ledger off-by-one drift.
+- **Related lesson:** § 4.20 (Pattern A bundling default + Pattern B exception).
+
+#### QB self-application criteria
+
+When QB authors a self-describing § X authorization clause inside a meta document:
+
+1. **Identify the wrapper paste-prompt at Step N+1 (or analogous downstream paste step).**
+2. **Check whether § X's framing renders the wrapper paste-prompt's authorization scope redundant.** "Redundant" means the wrapper's framing duplicates or substantively overlaps with § X's framing.
+3. **If redundant, flag the redundancy in the same chat turn as the § X authorship.** Surface to Tony with a recommendation: skip the wrapper paste-prompt; bundle § X authorship with the wrapper's bypass decision (Pattern A); or rewrite the wrapper to add framing § X does not cover.
+4. **Surface the flag explicitly** — do not silently rely on operator catching the redundancy.
+
+The check is QB-tier self-flagging discipline. Audit-CC's adversarial scope catches surviving redundancies but prevention is QB's responsibility.
+
+### 12.3 QB Self-Audit Check — Paste-prompt transit-truncation discipline (bookend markers)
+
+*Banked: cycle-originated Self-Audit Check finding, 2026-05-08*
+
+#### Abstract rule
+
+QB paste-prompts >15 KB carry bookend markers `PROMPT BEGINS` (at the start of the paste-prompt) and `PROMPT ENDS` (at the end of the paste-prompt) prophylactically. Receiving CC verifies bookend integrity at receipt — if either marker is absent or content between them appears truncated, receiving CC halts and reports rather than executing on potentially-truncated content.
+
+The discipline protects against the failure mode where a paste-prompt is truncated in transit (chat-rendering, copy-paste, or transmission-layer truncation) and the receiving CC executes on the truncated content without detection. Receiving CC's truncation-detection-at-receipt is the prevention; mid-execution truncation discovery (where CC has already begun work and surfaces the truncation as a halt) is the failure mode the prevention avoids.
+
+The 15 KB threshold is operational (paste-prompts under 15 KB are observably less prone to transit truncation in this cycle's transmission context). The threshold is not methodology-prescriptive; it is QB-tier self-application criterion.
+
+For paste-prompts >15 KB with embedded content blocks (e.g., a SPEC-FILE-CONTENT-BEGINS / SPEC-FILE-CONTENT-ENDS block within a wrapper paste-prompt), the inner content blocks carry their own bookend markers; the outer wrapper carries `PROMPT BEGINS` / `PROMPT ENDS` at the wrapper's outermost boundaries.
+
+#### Worked example
+
+The check emerged from the API & Frontend Bible drafting CC dispatch (Step 7 truncation in transit). A ~17 KB paste-prompt was truncated mid-paste; the drafting CC's fragment-detection HALT was correctly applied at receipt rather than mid-authorship. The discipline is banked: bookend markers on paste-prompts >15 KB enable receipt-time truncation detection.
+
+The AUDIT_METHODOLOGY meta-cycle's own paste-prompt sequence applied the discipline (PROMPT BEGINS / PROMPT ENDS bookends + SPEC-FILE-CONTENT-BEGINS / SPEC-FILE-CONTENT-ENDS inner bookends). All paste-prompts in the meta-cycle landed without transit truncation.
+
+#### Cross-references
+
+- **Origin:** API & Frontend Bible drafting CC dispatch, 2026-05-08; Step 7 transit truncation.
+- **Operational evidence:** AUDIT_METHODOLOGY meta-cycle paste-prompt sequence (2026-05-08); bookend-marker discipline applied.
+
+#### QB self-application criteria
+
+When QB authors a paste-prompt:
+
+1. **Estimate the paste-prompt size before authorship completes.** If estimated size > 15 KB, plan to include bookend markers.
+2. **For paste-prompts > 15 KB, prepend `PROMPT BEGINS — <PASTE-PROMPT-NAME>` at the start and append `PROMPT ENDS — <PASTE-PROMPT-NAME>` at the end.**
+3. **For paste-prompts with embedded content blocks (e.g., file-content blocks), wrap the embedded blocks in their own inner bookend markers** (e.g., `SPEC-FILE-CONTENT-BEGINS` / `SPEC-FILE-CONTENT-ENDS`).
+4. **Direct the receiving CC to verify bookend integrity at receipt** — if either outer marker is absent or content between them appears truncated, halt and report rather than executing.
+
+The check is operational; the 15 KB threshold informs QB's bookend-application decision but is not lock-blocking.
+
+### 12.4 QB Self-Audit Check — Within-message placeholder discipline
+
+*Banked: cycle-originated Self-Audit Check finding, 2026-05-08*
+
+#### Abstract rule
+
+QB transition messages between gates may contain placeholder syntax templating Tony's ratification values (e.g., `<X / Y>` placeholders awaiting Tony's selection between options). QB completes placeholder interpolation BEFORE rendering the transition message to chat. Rendering a transition message with un-interpolated placeholders to chat creates the failure mode where Tony parses a placeholder as ratifiable content (e.g., interpreting `<X / Y>` as "X" or "Y" based on context), introducing ambiguity at the gate's ratification surface.
+
+Three acceptable resolution patterns:
+
+(a) **Author transition message ONLY after explicit ratification.** QB defers transition-message authorship to the chat turn following Tony's ratification; the message reflects ratified values, not placeholders.
+
+(b) **Author with explicit per-decision branches.** Transition message presents Tony's selection as explicit branches: "If Tony ratifies X: <message variant 1>; if Tony ratifies Y: <message variant 2>". No placeholders; all paths enumerated.
+
+(c) **Author placeholders interpolated to neutral language.** Where neither (a) nor (b) is feasible, QB rewrites the placeholder syntax as neutral prose that does not commit to either option (e.g., "pending Tony's ratification of strategy choice between (a) and (b)" rather than `<a / b>`).
+
+The check applies at QB's chat-rendering moment — the discipline is "no un-interpolated placeholders rendered to chat."
+
+#### Worked example
+
+The check's catch emerged from the API & Frontend Bible cycle's SP-A2 → SP-A3 transition (Observation 4). QB rendered a transition message containing angle-bracket placeholders `<X / Y>` without filled-in ratification value; drafting CC's HALT was correctly applied per Lesson § 4.12 bounded-authorization discipline (the placeholder syntax was not within the drafting CC's authorized substrate to interpolate).
+
+The AUDIT_METHODOLOGY meta-cycle dispatch applied the discipline: transition messages between SP-A1 → resumption + SP-A1.5 → resumption used resolution pattern (a) — QB authored transition only after Tony's explicit ratification, presenting ratified values directly.
+
+#### Cross-references
+
+- **Origin:** API & Frontend Bible cycle, 2026-05-08; SP-A2 → SP-A3 transition Observation 4.
+- **Related lesson:** § 4.12 bounded-authorization discipline (drafting CC's HALT-on-out-of-scope-content).
+
+#### QB self-application criteria
+
+When QB authors a transition message between gates:
+
+1. **Identify any placeholder syntax in the draft message** (`<X / Y>`, `<X>`, `[TBD]`, `[pending]`, etc.).
+2. **For each placeholder, select resolution pattern (a) / (b) / (c)** before rendering to chat.
+3. **Resolution (a):** Defer message authorship to post-ratification turn. Render no message in current turn; render ratified-value message in subsequent turn.
+4. **Resolution (b):** Author the message with explicit per-decision branches. Each branch presents the message variant for that ratification path; no placeholders survive.
+5. **Resolution (c):** Rewrite placeholder as neutral prose. Render the neutral-prose message; ratification surface is in the prose, not in placeholder syntax.
+6. **Halt and re-author** if a placeholder survives to chat-render time. Surface the failure to Tony with self-correction.
+
+The check is QB-tier discipline; failures surface to Tony as transition-message ambiguity findings.
+
+### 12.5 QB Self-Audit Check — Meta-document state claim substrate verification (with Awareness item B scope clause integrated verbatim)
+
+*Banked: cycle-originated Self-Audit Check finding, 2026-05-08*
+
+#### Abstract rule
+
+Meta-document state claims must be substrate-verified at first cycle reference, not inherited as authoritative across cycles. Inherited unverified state claims accumulate into fabricated-by-accumulation substrate that surfaces only when a downstream cycle attempts to interact with the meta-document directly.
+
+**Generalization scope: applies to ALL meta-document inheritance, not just PHASE_5_BACKLOG.md.** Inherited unverified state claims from prior cycles accumulate into fabricated-by-accumulation substrate regardless of meta-document type. First cycle reference of a meta-document state claim requires substrate verification; subsequent same-cycle references may rely on the verified state.
+
+The check is QB-tier self-application: when QB authors a paste-prompt, drafting spec, or chat-output content that references a meta-document's state (count, path, version, content), QB substrate-verifies the state at first cycle reference. Inheritance from a prior cycle's authority is not substrate verification; the prior cycle's authority is itself a meta-document state claim subject to verification.
+
+The check protects against the fabricated-by-accumulation failure mode: a meta-document state claim authored at cycle N (e.g., "the backlog has 26 entries at path X") is treated as authoritative at cycle N+1 without re-verification; cycle N+2 carries forward the inherited claim; by cycle N+M the inherited claim has been re-cited multiple times without substrate verification, and any drift between the original state and current state is invisible until a cycle directly interacts with the meta-document. The accumulation produces fabricated substrate (the claim is no longer verified by current state) without any single cycle being responsible for fabrication.
+
+#### Worked example
+
+The check's catch emerged across multiple cycles surfacing during PHASE_5_BACKLOG.md additions cycle dispatch. Three inherited claims were tested at substrate verification: 2 failed (path drift over 8+ paste-prompts; reconciliation-status drift cited as "complete" when actually deferred); 1 survived (entry count). The substrate verification was the prevention; without it, the failed claims would have continued propagating until a cycle attempted direct interaction.
+
+The check applies to ALL meta-document state claims, not just PHASE_5_BACKLOG.md state claims. The generalization is operative across:
+
+- File paths (inherited path claims may have drifted; substrate verify at first reference).
+- Version state (inherited version claims may have drifted; substrate verify).
+- Content count (inherited count claims may have drifted; substrate verify).
+- Reconciliation status (inherited reconciliation claims may have drifted; substrate verify).
+- Lock state (inherited lock-state claims may have drifted; substrate verify).
+- Cross-reference targets (inherited cross-reference claims may have drifted; substrate verify).
+
+#### Cross-references
+
+- **Origin:** PHASE_5_BACKLOG.md additions cycle dispatch, 2026-05-08; path drift + reconciliation-status drift surfaced at first substrate verification.
+- **Awareness item B (verbatim scope clause):** integrated above ("Generalization scope: applies to ALL meta-document inheritance, not just PHASE_5_BACKLOG.md. Inherited unverified state claims from prior cycles accumulate into fabricated-by-accumulation substrate regardless of meta-document type. First cycle reference of a meta-document state claim requires substrate verification; subsequent same-cycle references may rely on the verified state.").
+- **Related lesson:** § 4.12 (Low-cost substrate verification at row-authorship — parallel discipline at CC tier).
+
+#### QB self-application criteria
+
+When QB authors a paste-prompt, drafting spec, or chat-output content that references a meta-document's state:
+
+1. **Identify each meta-document state claim in the content.** State claims include path, version, content count, reconciliation status, lock state, cross-reference targets.
+2. **For each state claim, identify whether it is a first cycle reference or a subsequent reference.** "First cycle reference" means QB has not substrate-verified the claim within the current cycle.
+3. **For first cycle references, substrate-verify the claim.** Read the meta-document; verify the claim against current state; cite the verification in the content (e.g., "substrate-verified at YYYY-MM-DD HH:MM").
+4. **For subsequent same-cycle references, rely on the verified state** (no need to re-verify within the same cycle).
+5. **Flag any state claim that surfaces a substrate gap** (current state diverges from inherited claim). Surface the gap to Tony as a meta-document drift finding; do not silently propagate the inherited (now-divergent) claim.
+
+The check is QB-tier discipline; failures surface as meta-document drift findings at the cycle's relevant gate.
+
+---
+
+**End-of-document footer:**
+
+**Lock state confirmation:** LOCKED v3 confirmed 2026-05-08.
+
+**Authorship CC tier:** drafting CC (this cycle, 2026-05-08); single-pass authorship to SP-A2 with two prior halts at SP-A1 (substrate verification report) + SP-A1.5 (renumbering check halt) ratified by Tony before resumption.
+**Audit CC tier:** completed SP-A3 2026-05-08; 11 findings delivered (2 BLOCKER, 4 MATERIAL, 5 MINOR/STYLE); 6 self-applying-discipline failures surfaced (v3 codified disciplines violated by v3 authorship in real time); patch CC tier dispatched to address all findings.
+**Patch CC tier:** completed SP-A4 2026-05-08; 10 surgical patches + 1 wontfix-with-parenthetical applied; file delta +1,162 bytes / −5 lines; zero halt-and-surface events; zero conditional escalations.
+**Lock CC tier:** executed SP-A5 2026-05-08; canonical file replacement per L3 Option (a); v3-draft → AUDIT_METHODOLOGY.md per substrate version-in-header convention; L3.a defensive substrate check passed pre-overwrite (v2-patched canonical state confirmed not drifted); three-element metadata bundle finalized.
+**Ratification owner:** Tony.
+
+**Three-element metadata bundle (per § 4.16, § 4.18, and inaugural application to AUDIT_METHODOLOGY itself per spec § 8):**
+- Element 1 (Header status field): top of document — Status (LOCKED v3), Authorship date (2026-05-08), Locked date (2026-05-08), Owner ratification (Tony), Tier (3), Anchored on (META_PLAN v9 + BIBLE_STRUCTURE_SPEC v6 LOCKED 2026-05-05).
+- Element 2 (Revision history block): top of document (header revision-history list) + § 10 Changelog (v1 → v2 → v2-patched → v3 chronological-forward, with v3 entry extended through lock-cycle execution paragraph) per R8.b ratification.
+- Element 3 (End-of-document footer): this footer block, all four CC tier fields populated with completion records.
+
+**Operational precedent banking (v3 authorship, 2026-05-08):** Lesson § 4.12 bounded-authorization discipline confirmed operating cleanly at drafting CC + audit CC + patch CC tiers across six post-Phase-0 cycle classes (Database & Schema, Data Pipeline, parallel cohort, API & Frontend, UC-1, PHASE_5_BACKLOG additions). Positive operational evidence; no methodology amendment required.
+
+**Four-tier ceremony precedent banking (v3 lock-cycle, 2026-05-08):** Q1's four-tier ceremony (drafting CC + audit CC + patch CC + lock-CC as four distinct sessions) operationally validated for methodology-promotion cycles. Self-Audit Check 14 generalization (§ 12.5) applied across all four tiers without authorization-boundary crossing. Cycle banking: four-tier discipline pays its cost at methodology-promotion scope; surgical-row patch (UC-1 class) cycles continue to use lighter QB-audit synthesis tier per § 4.21 (UC-cycle audit-scope methodology lesson).
+
+End of AUDIT_METHODOLOGY.md v3 (LOCKED 2026-05-08).
