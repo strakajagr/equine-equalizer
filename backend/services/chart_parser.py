@@ -765,10 +765,11 @@ def insert_race(conn, race: dict, track_id: str) -> str:
                 race_type, race_name, conditions, grade,
                 purse, claiming_price,
                 field_size, track_condition,
-                temperature, weather_conditions
+                temperature, weather_conditions,
+                equibase_race_id
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s
             )
             ON CONFLICT (track_id, race_date, race_number)
             DO UPDATE SET
@@ -778,7 +779,8 @@ def insert_race(conn, race: dict, track_id: str) -> str:
                 field_size = EXCLUDED.field_size,
                 track_condition = EXCLUDED.track_condition,
                 temperature = EXCLUDED.temperature,
-                weather_conditions = EXCLUDED.weather_conditions
+                weather_conditions = EXCLUDED.weather_conditions,
+                equibase_race_id = EXCLUDED.equibase_race_id
             RETURNING race_id""",
             (
                 track_id, race['race_date'], race['race_number'],
@@ -789,6 +791,7 @@ def insert_race(conn, race: dict, track_id: str) -> str:
                 race.get('purse'), race.get('claiming_price'),
                 race.get('field_size'), race.get('track_condition'),
                 race.get('temperature'), race.get('weather_conditions'),
+                race.get('equibase_race_id'),
             )
         )
         return str(cur.fetchone()['race_id'])
