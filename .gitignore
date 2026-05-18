@@ -9,6 +9,7 @@ build/
 .Python
 env/
 venv/
+.venv*/
 .env
 .env.local
 *.egg
