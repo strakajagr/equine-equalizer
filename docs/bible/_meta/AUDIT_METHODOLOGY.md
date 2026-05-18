@@ -2,7 +2,7 @@
 
 **Document:** AUDIT_METHODOLOGY
 **Phase:** 0 (Methodology) — Phase 0 deliverable 3 of 5
-**Status:** LOCKED v3 (2026-05-08)
+**Status:** LOCKED v3-patched-d (2026-05-12)
 **Author:** CC (drafting under verification discipline; QB orchestrated and reviewed)
 **Date:** 2026-05-08
 **Locked:** 2026-05-08 (Tony ratification chain: Q1–Q8 + R1–R8 + R8.a + R8.b + R9–R12 + 11 finding ratifications + L1–L6)
@@ -13,6 +13,10 @@
 - v2 (2026-05-04): post-v1-audit surgical patch pass integrating Tony's three locked decisions (Q1: Option B addressing MATERIALs + tightly coupled MINORs; Q2a: Option (a) verbatim from source for § 4.6 quote attributions; Q2b: verification log delta with Claim 42 confirming verbatim accuracy). Companion verification log at `_audits/AUDIT_METHODOLOGY_v2_verification.md` inherits v1's 41 claims with re-verified-2026-05-04 timestamps and adds 1 new claim (Claim 42 — verbatim attribution of v2 audit Q2.2 + Tony's Q4 in § 4.6).
 - v2-patched (2026-05-05): four lessons banked in § 4 (Lessons § 4.8 / § 4.9 / § 4.10 / § 4.11) emerged from the Database & Schema Bible v1 cycle (drafting + audit + Tony ratifications 2026-05-05). Lessons cover: § 4.8 QB substrate findings during spec authorship require Tony ratification; § 4.9 QB review pass is light surface only; § 4.10 verbatim-paste discipline for V1-N entries; § 4.11 grep predictions against bootstrap-mirror file unions. Each lesson follows the existing four-element structure (abstract rule + worked example + cross-references + audit-CC prophylactic check template). Banked at next-sequential slots per the file's § 4.X = Lesson X convention; the patch-spec referenced "Lesson 11/12/13" as labels but the file's slot numbering starts continuation at § 4.8. Substrate observation surfaced in `database_schema_bible_v1_verification.md` Section I V1-patch-10.
 - v3 (2026-05-08): AUDIT_METHODOLOGY meta-cycle (post-Phase-1 dispatch sequence 4 of 4). 21 promotion-queue items + 3 awareness-item dispositions integrated. Cycle ratifications captured Q1–Q8 + R1–R8 + R8.a + R8.b by Tony 2026-05-08. New content: § 4.12–§ 4.24 (13 new lessons); § 5.8–§ 5.9 (2 new audit-CC prophylactic checks); § 12 (new section — 5 QB Self-Audit Checks); § 8.4–§ 8.5 (queue item 21 Reconciliation Strategies + Candidate #6 Standardization, landed under § 8 Open Questions per R8 substrate-grounded landing); § 10 changelog v3 entry; revision-history block per spec § 8 metadata-bundle requirement targeting § 10 (R8.b); end-of-document footer. Phase 0 anchor versions updated from META_PLAN v6 / BIBLE_STRUCTURE_SPEC v3 to META_PLAN v9 / BIBLE_STRUCTURE_SPEC v6 throughout. Three-element metadata bundle initialized at v1-draft authorship (header status field above; revision-history block here; end-of-document footer below). Operational precedent banking (v3 authorship, 2026-05-08): Lesson § 4.12 bounded-authorization discipline confirmed operating cleanly at drafting CC + audit CC + patch CC tiers across six post-Phase-0 cycle classes (Database & Schema, Data Pipeline, parallel cohort, API & Frontend, UC-1, PHASE_5_BACKLOG additions). Positive operational evidence; no methodology amendment required.
+- v3-patched-d (2026-05-12): Phase A AMCS5 dispatch — § 4.32 Worked example expansion with Case Study 5 (parallel-dispatch source-state interaction) + Abstract rule extension (parallel-dispatch authorization under Directive 2 requires inter-dispatch source-state interaction analysis) + Audit-CC prophylactic check template extension (parallel-dispatch source-state interaction verification check). **Override disclosure (Q5 ratification preserved):** Tier 2 surgical F.4 patch under Phase A entry directive ceremony cap. UC § 7.2 step 4 per-bible patch-CC convention explicitly overridden by ceremony cap. **1 patch applied** with three sub-components: (a) Abstract rule extended with parallel-dispatch source-state interaction analysis requirement per Tony Decision 4 verbatim ratification language; (b) Worked example expanded to 5 case studies (Case Study 5 = E3 Step 2 + E4 Step 2 cdk source conflict caught at CC pre-execution); (c) Audit-CC prophylactic check template extended with parallel-dispatch source-state interaction verification check item. Banking queue stays at 6 per Tony adjudication; Case Study 5 expansion does NOT inflate queue (expansion of existing § 4.32, not new refinement). Cross-references preserved: § 4.31 producer-attribution refinement; § 4.33/§ 4.34 banking candidates (codification deferred to Phase A close-out).
+- v3-patched-c (2026-05-12): Phase A AMCS4 dispatch — § 4.32 Worked example expansion with Case Study 4 (QB-side framing-inheritance across multiple dispatch turns) + Audit-CC prophylactic check template extension (QB-side dispatch authoring discipline check). **Override disclosure (Q5 ratification preserved):** Tier 2 surgical F.4 patch under Phase A entry directive ceremony cap. UC § 7.2 step 4 per-bible patch-CC convention explicitly overridden by ceremony cap. **1 patch applied:** Case Study 4 appended to § 4.32 Worked example (4-case-study banking; refinement applies recursively to QB-side dispatch authoring, not just at-handoff or at-CC-diagnostic). Cross-references: § 4.31 producer-attribution refinement (recursive application); § 4.33 change-event-boundary-investigation refinement (codification deferred to Phase A close-out per Tony banking cadence); § 4.34 alarms-encoding-design-state-expectations refinement (codification deferred to Phase A close-out). Banking queue stays at 6 per Tony adjudication; Case Study 4 expansion does NOT inflate queue (expansion of existing § 4.32, not new refinement).
+- v3-patched-b (2026-05-12): Phase A AUDIT_METHODOLOGY patch dispatch — § 4.32 lesson banking handoff-authoring-without-substrate-verification methodology refinement per Tony CANDIDATE-this-session ratification. **Override disclosure (Q5 ratification preserved from D6 precedent):** Tier 2 surgical F.4 patch under Phase A entry directive ceremony cap. UC § 7.2 step 4 per-bible patch-CC convention explicitly overridden by ceremony cap. **1 patch applied:** new § 4.32 entry under existing 4-element convention (Abstract rule / Worked example / Cross-references / Audit-CC prophylactic check template); 3 case studies banked verbatim (D6 V1 catastrophic substrate divergence; D6 Appendix A1 substrate-incorrect classification near-miss; E1 Path 2 V1 CAPTCHA-solver scope propagation). Cross-references created: § 4.32 cross-links § 4.27 (producer-attribution refinement applies to D6 Appendix A1 case study); § 4.32 cross-links § 4.29 (QB-framing-not-substrate-verified applies to E1 Path 2 V1 case study). Cross-bible cross-reference freeze status: NOT re-engaged for AMP (Tier 2 ceremony cap pattern).
+- v3-patched-a (2026-05-12): Phase A D6 bundled bible patches dispatch — 7 new methodology lessons banked from Phase A operational cycle (A.5 / A.5.1 / A.5.2 / A.5.3 / A.5-ext / A.6.a–f / D2 / D3 / D4 dispatch sequence). New content: § 4.25–§ 4.31 (7 new lessons appended to § 4 Methodology Lessons Catalog). **Override disclosure (Q5 ratification):** D6 surgical patches per F.4 pattern under Tier 2 ceremony cap per Phase A entry directive. UC § 7.2 step 4 per-bible patch-CC convention explicitly overridden by ceremony cap. Rationale: D6 documents Phase A operational findings into bibles per Phase A re-dispatch venue (R14.2 Option A scope); not a running cross-bible-cross-reference-freeze UC cycle. Override disclosure preserves UC-ceremony precedent for future cycles. § 4 entry convention preserved (4-element structure: Abstract rule + Worked example + Cross-references + Audit-CC prophylactic check template). Cross-bible cross-references created: § 4.27 cross-links § 4.31; § 4.30 cross-links data_pipeline_bible:4.5 (AWS API validation discipline). Substrate source: `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1, § 2.2, § 6.2.
 
 **Tier:** 3 per META_PLAN v9 § 4.1 + § 6.5. CC-drafted under QB spec; companion verification log required; CC-audited.
 
@@ -1179,6 +1183,429 @@ When auditing a Phase 1 bible's drafting cycle resource allocation:
 3. **Flag as STYLE if** the modeling is present but the multiplier estimate diverged materially from actual (post-cycle observation, not pre-cycle predictability).
 
 The check applies to drafting specs that mandate verbatim-paste; it does not apply to specs that do not require verbatim-paste.
+
+§ 4.25–§ 4.31: seven lessons banked at v3-patched-a (Phase A D6 bundled bible patches dispatch, 2026-05-12; substrate `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` §§ 2.1 / 2.2 / 6.2).
+
+### 4.25 Code-passes-review-without-implementation-reality-verified (script vs service summary-dict)
+
+#### Abstract rule
+
+A script's read-key assumption can pass code review (and even tests) when the service-summary-dict structure isn't independently verified at script-write-time. When a script consumes a service-returned summary dict, the read-key set must be verified to match the service's actual return-key set at the implementation site, not the script-author's assumption.
+
+#### Worked example
+
+Phase A D2 backfill script (`scripts/backfill_d2.py`) was authored expecting `result.get("entries_inserted")` and `result.get("count")` keys from the IngestionService summary; the service actually returned the `races_stored` key. The script reported "Entries=0" for runs that did write rows. Caught at A.6.b bundle troubleshooting (drafting CC tier review against operator-supplied run-log output); fix substituted `result.get("races_stored", 0)`. The cosmetic "0 entries" output masked successful operation — operator confusion at run-time was the only signal.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 1.
+- **Dispatch report:** A.6.b bundle (drafting CC + Tony saved-diff review).
+- **Substrate file:** `scripts/backfill_d2.py` (current state post-A.6.b fix).
+
+#### Audit-CC prophylactic check template
+
+When the audited document references a script that reads from a service-returned summary-dict:
+
+1. **Verify both substrates: script read-key calls + service return-dict keys at implementation site.** Both required; script-side alone is insufficient.
+2. **Enumerate `result.get("X")` patterns in the script.** Cross-check against the service's documented or implementation-grounded return-key set.
+3. **Flag MATERIAL** when read-key/return-key mismatch detected and the script's behavior depends on the mismatched key (script writes successful when key missing → cosmetic-only bug; script raises or zero-paths through critical logic → MATERIAL substrate defect).
+
+### 4.26 Documentation-not-substrate-grounded (function docstring vs implementation divergence)
+
+#### Abstract rule
+
+Function docstrings can drift from implementation. Callers reading docstrings to determine return-tuple structure or function signature may mis-unpack returns, producing TypeError or silent shape-mismatch errors. When the audited document references a function's behavior, the reference must trace to implementation substrate, not to docstring.
+
+#### Worked example
+
+`backend/lambdas/nyra-workouts/handler.py` `fetch_track_page` and `parse_nyra_html` docstrings claimed singular returns; implementation returned 2-tuples. The Phase A D2 backfill script called `html = nyra_handler.fetch_track_page(...)` and received a tuple, producing `TypeError: expected string or bytes-like object, got 'tuple'`. A.6.a diagnostic surfaced the V-N2 caller-side tuple-unpack mismatch; A.6.b bundle fix substituted `url, html = nyra_handler.fetch_track_page(...)` + `rows, stats = nyra_handler.parse_nyra_html(...)`.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 2.
+- **Dispatch reports:** A.6.a (TypeError diagnostic) + A.6.b (fix bundle).
+- **Substrate file:** `backend/lambdas/nyra-workouts/handler.py` (docstring-vs-implementation divergence preserved post-A.6.b; D6 documentation candidate per Phase A handoff).
+
+#### Audit-CC prophylactic check template
+
+When the audited document references a function by docstring-described signature:
+
+1. **Verify the docstring's return-shape claim against the implementation's `return` statement(s).** The implementation is canonical; docstring may be stale.
+2. **For cross-module callers** (script, Lambda, service-layer caller): verify the caller-side unpack pattern matches the implementation's return shape, not the docstring's claim.
+3. **Flag MATERIAL** for docstring-implementation divergence when downstream callers rely on the divergent claim.
+
+### 4.27 Inference-promoted-to-substrate-fact-without-Tony-confirmation (A.6.d case study)
+
+#### Abstract rule
+
+When operational behavior is inferred from substrate evidence (S3 writes, IAM role usage patterns, log-line timestamps, code-symmetry between training and inference), the inference must be flagged as inference in the audited document — not propagated as substrate-verified fact. Per Phase A producer-attribution methodology refinement (§ 4.31 below), explicit Tony confirmation or substrate-direct verification is required to promote operational-signal inference to operational reality.
+
+#### Worked example
+
+Phase A A.6.d CC report inferred "Tony's local HRN scrape ~4000 rows/day" from log signals + OCRC IAM-role attribution (E1 substrate at v3-patched-b § 3.9). Tony flagged the inference as not-verified. A.6.f verification surfaced the actual producer: `/home/strakajagr/equibase_scraper/run_daily_refresh.sh` — sibling repo on Tony's local machine, Equibase scraper, not HRN. The "~4000 rows/day" volume claim was also misread — the Lambda `inserted=N` log value is records-processed-from-JSON, not net-new-DB-inserts; UPSERT collapse yields ~12-22% of file volume as net-new rows (per A.6.f investigation). Producer-attribution at IAM-role level (OCRC-class finding) does NOT establish operational-producer attribution.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 3.
+- **Methodology refinement banking:** § 4.31 below (5-case-study catalog including this instance).
+- **Dispatch reports:** A.6.d (CC inference) + A.6.f (Tony-flagged verification surfacing actual producer).
+- **Substrate file (actual producer):** `/home/strakajagr/equibase_scraper/run_daily_refresh.sh` (sibling repo).
+
+#### Audit-CC prophylactic check template
+
+When the audited document characterizes operational behavior (daily producer attribution, schedule timing, throughput volumes, data-flow attribution):
+
+1. **Classify each claim**: substrate-direct-verified (cron-defined schedule citation; function-source-code citation; DB-direct row count; live-AWS API response) vs operational-signal-inference (S3 write pattern; log-line timestamp; IAM-role attribution; code-symmetry between training and inference).
+2. **For inference-class claims**: verify the document flags the claim as inference (e.g., "operationally inferred from log signal X" rather than "operationally Y"). Operational-signal-inference presented as fact without explicit flagging triggers the rule.
+3. **Flag MATERIAL** for inference-presented-as-fact without explicit inference-flagging OR Tony-confirmation citation.
+
+Per § 4.31, IAM-role attribution alone does not establish producer attribution at operational layer (multiple operational actors can consume a shared IAM role).
+
+### 4.28 Dispatch-text-framing-inherited-from-session-memory-not-substrate-verified (HRN CAPTCHA case study)
+
+#### Abstract rule
+
+Framing carried over from prior cycles into dispatch text without substrate re-verification can propagate stale or wrong claims. Session-memory inheritance (CC's recall of prior-cycle claims) does not constitute substrate verification. Dispatch-text framing must trace to substrate at dispatch-authorship time, not to memory.
+
+#### Worked example
+
+Phase A pre-A.6.d framing assumed CAPTCHA-gating on the HRN workouts scraper at `backend/services/data_sources/hrn_workout_scraper.py:66`. Substrate inspection 2026-05-12 (during A.6.d → A.6.f investigation) proved "no CAPTCHA or bot-protection" at the cited location. The CAPTCHA framing had been inherited from session memory of an earlier Bug #7 disposition cycle, never re-verified at A.6.d dispatch authorship. The framing propagated through QB → CC dispatch text into A.6.d CC report's reasoning before A.6.f substrate verification surfaced the divergence.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 4.
+- **Dispatch report:** A.6.d (CC report carrying inherited framing) + A.6.f (substrate verification).
+- **Substrate file:** `backend/services/data_sources/hrn_workout_scraper.py:66` (current state — no CAPTCHA/bot-protection).
+
+#### Audit-CC prophylactic check template
+
+When the audited document references operational details inherited from prior cycles (CAPTCHA gating, bot-protection, scraper limitations, third-party-source behavior, deprecated infrastructure characteristics):
+
+1. **Verify each inherited detail against current substrate.** Substrate citation required: file:line for code claims; live-AWS API response for resource claims; recent dispatch report for transient operational state.
+2. **Session-memory citation insufficient.** "Per CC recall from prior cycle" is not a substrate citation.
+3. **Flag MATERIAL** for session-memory-inherited claims not re-verified at the audited document's authorship-time.
+
+### 4.29 QB-framing-not-substrate-verified-before-propagation (D4 Source 2 conflation case study)
+
+#### Abstract rule
+
+QB dispatch-text framing of operational architecture may conflate distinct entities (Lambda vs Lambda-action; rule-name vs Lambda-name; cron-schedule vs Lambda-invocation-timing). Ratified-by-Tony scope can inherit the conflation if CC doesn't verify entity-level claims against substrate before propagating them through dispatch text.
+
+#### Worked example
+
+Phase A D4 dispatch text (authored by QB) described Source 2 as "equine-results Lambda; cron 04:00 UTC via equine-fetch-results-nightly post-OCRC Input fix". Substrate verification at D4 execution:
+- HRN-results-scraping = `equine-ingestion` Lambda's `fetch_results` action @ 01:30 UTC via EventBridge rule `equine-fetch-results-nightly` (Input payload `{"action":"fetch_results","date":"USE_TODAY_MINUS_1"}` per architecture_overview:3.6 line 151 InputTransformer).
+- `equine-results` matcher Lambda is a SEPARATE reconciliation Lambda @ 04:00 UTC via EventBridge rule `equine-results-daily` (purpose-built, single-flow per architecture_overview:3.1).
+
+QB conflated two distinct Lambda entities into a single "equine-results" framing. CC verified independently and surfaced the correction at D4 CC report.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 5.
+- **Dispatch report:** D4 (5-source operational enumeration with substrate correction).
+- **Substrate cross-references:** `architecture_overview.md` § 3.1 (Lambda inventory enumerating `equine-ingestion` + `equine-results` distinctly) + § 3.6 (EventBridge rule inventory enumerating `equine-fetch-results-nightly` + `equine-results-daily` distinctly).
+
+#### Audit-CC prophylactic check template
+
+When QB framing of operational architecture is propagated through dispatch text:
+
+1. **Verify each entity-level claim against substrate.** Specifically check: Lambda names, EventBridge rule names, cron schedules, Lambda actions (default-case vs admin-action dispatch).
+2. **Cross-reference architecture_overview substrate** for Lambda inventory and EventBridge rule inventory.
+3. **Flag MATERIAL** for QB-framing-not-substrate-verified-before-propagation when entity conflation detected. CC's halt-and-surface protocol is the correct response.
+
+### 4.30 Dispatch-text-step-ordering-vs-API-dependency-requirements-mismatch (A.5-ext case study)
+
+#### Abstract rule
+
+Dispatch-text-prescribed step ordering must match API dependency requirements, not logical-deliverable order. AWS APIs that validate dependencies at API time require dependency-grant precedes config-write. QB dispatch text that prescribes logical-deliverable order may produce InvalidParameterValueException at API time if dependency-grants are not pre-applied.
+
+#### Worked example
+
+A.5-ext CC executed dispatch text in literal order:
+- Step 2: `aws lambda put-function-event-invoke-config ... --destination-config '{"OnFailure":{"Destination":"<DLQ ARN>"}}'`
+- Step 3: `aws iam put-role-policy ... AsyncDLQSend` granting `sqs:SendMessage` on DLQ.
+
+Lambda's `PutFunctionEventInvokeConfig` API validates `sqs:SendMessage` permission on the destination at API time; Step 2 failed with `InvalidParameterValueException: The function execution role does not have permissions to call SendMessage on arn:aws:sqs:us-east-1:584812014683:equine-async-failure-dlq` before Step 3's IAM grant was applied. Recovery: reapply Step 2 after Step 3 succeeded; passed on first retry, no IAM-propagation lag observed.
+
+The earlier Phase A-prime DLQ wiring (5 Lambdas) and A.5 DLQ wiring (3 Lambdas) executed correctly because CC discretion chained IAM-grant before event-invoke-config (masking the dispatch-text inversion). A.5-ext (1 Lambda, executed literal) surfaced the dependency requirement.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.1 pattern entry 6 + § 2.3 AWS API validation discipline.
+- **Bible cross-reference:** `data_pipeline_bible:4.5` (AWS API validation discipline section, D6 patched).
+- **Dispatch report:** A.5-ext (NYRA workouts Lambda DLQ wiring; F-D4-1-α closure).
+- **AWS API behavior reference:** Lambda `PutFunctionEventInvokeConfig` API documentation (validates IAM permissions at API time).
+
+#### Audit-CC prophylactic check template
+
+When the audited dispatch text prescribes step ordering for AWS resource provisioning (event-invoke-configs, S3 bucket policies, IAM role attachments, KMS key policies, cross-service ARN destinations):
+
+1. **Verify the prescribed step order matches API dependency requirements.** Specifically:
+   - IAM grants on target resources must precede config-writes that validate against those grants.
+   - Dependent-resource creates must precede consuming-config writes.
+2. **For AWS APIs that validate permissions at API time** (Lambda PutFunctionEventInvokeConfig, S3 PutBucketNotification destination-validation, EventBridge PutTargets ARN-permission-validation): the validation occurs before the config takes effect; grant-precedes-config is mandatory.
+3. **Flag METHODOLOGY-INTERPOLATION** for dispatch-text step ordering not API-dependency-validated — QB authoring must validate against API behavior, not against logical-deliverable order.
+
+### 4.31 Producer-attribution methodology refinement (5-case-study banking)
+
+#### Abstract rule
+
+Inference from operational signal does not establish operational reality. Operational signals include: S3 writes, IAM role usage patterns, log-line timestamps, code-symmetry between training and inference, throughput-volume log values. Each signal class supports inference at its own scope; promotion of inference to substrate-verified-fact requires either (a) substrate-direct verification (cron-defined schedule citation, function-source-code citation, DB-direct query, live-AWS API response) or (b) explicit Tony confirmation citation.
+
+The refinement clarifies: producer-attribution at IAM-role level (the OCRC D1 substrate-classification convention) does not establish operational-producer attribution. Multiple operational actors can consume a shared IAM role; multiple producers can write to a shared S3 prefix; multiple consumers can read from a shared DB table. Operational-layer attribution requires identification of the producing entity (cron rule + Lambda + invocation payload), not its IAM role.
+
+#### Worked example
+
+Five case studies banked across Phase A operational cycle:
+
+1. **A.6.c ambient delta speculation → DB-state-verified absence.** `rerun_inference` summary reported "LS=152 vs WR/PL=151"; CC speculation classified as "coupled-entry / AE handling artifact." A.6.c discriminating-entries query against `wr_predictions` ∪ `pl_predictions` ∪ `ls_predictions` filtered to AE/coupled returned ZERO rows; speculation disproven by substrate-direct DB query.
+
+2. **A.6.d → A.6.f workouts producer attribution** (also catalogued at § 4.27 above). A.6.d inferred local HRN scrape from log signals + OCRC IAM-role attribution; Tony flagged inference; A.6.f surfaced actual producer (sibling-repo Equibase scraper). Five-element substrate chain (cron-defined schedule + script-source-code + S3-write-attribution + DB-row-count + Tony confirmation) verified actual producer.
+
+3. **A.5.2 gonzo defect classification.** D1-defect verdict required substrate trace through 11 `compute_*` helpers + CloudWatch logs forensic + 'Tapit Shoes' discriminator analysis. Classification NOT inferred from code-symmetry between training and inference; substrate-direct trace through inference exception-suppression path.
+
+4. **A.5.3 checkpoint #11 training behavior inference.** CC claimed "training-time same-helper run will silently filter same NaN rows" from code-symmetry. Methodology refinement applied prophylactically: claim recognized as inference-not-substrate-verified; deferred to Phase B substrate review of training pipeline rather than promoted to fact at A.5.3 fix scope.
+
+5. **D4 Source 2 architecture conflation** (also catalogued at § 4.29 above). QB framing of `equine-ingestion fetch_results` action vs `equine-results` matcher Lambda was not substrate-verified before propagating to D4 dispatch text. CC verified independently and surfaced correction; refinement codified at § 4.29.
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 2.2 (5-case-study enumeration) + § 6.2 (refinement statement banking).
+- **Case-study Lessons:** § 4.27 (A.6.d → A.6.f) + § 4.29 (D4 Source 2 conflation).
+- **Dispatch reports:** A.6.c, A.6.d, A.6.f, A.5.2, A.5.3, D4 (all Phase A operational cycle).
+- **OCRC D1 substrate classification convention:** `docs/operations/RESOURCE_INVENTORY_2026-05-09.md` § 2 legend (IAM-role attribution as classification basis).
+
+#### Audit-CC prophylactic check template
+
+For any operational-behavior claim in the audited document:
+
+1. **Classify the claim** as substrate-direct-verified vs operational-signal-inference.
+   - Substrate-direct: cron schedule citation, function-source-code citation, DB-direct query result, live-AWS API response output.
+   - Operational-signal-inference: S3 write pattern, log-line timestamp, IAM-role attribution, code-symmetry between training and inference, throughput-volume log values.
+2. **For inference-class claims**: verify the document flags the claim as inference (explicit inference-flagging language) OR cites explicit Tony confirmation. If neither, flag MATERIAL.
+3. **IAM-role attribution check**: when the audited document attributes a producer to an IAM-role, verify the producer is independently identified (cron rule + Lambda + invocation payload), not solely by IAM-role. Multiple operational actors can consume a shared IAM role; IAM-role attribution alone is operational-signal-inference, not substrate-direct-verified.
+4. **Throughput-volume check**: when the audited document cites a throughput volume from a log-line "inserted=N" or similar value, verify the N is net-new-DB-inserts (DB-direct query) rather than records-processed-from-payload (which may UPSERT-collapse). The two values can diverge by 5x or more per A.6.f investigation.
+
+Flag MATERIAL for operational-signal-inference presented as fact without explicit inference-flagging or Tony-confirmation citation.
+
+§ 4.32: one lesson banked at v3-patched-b (Phase A AUDIT_METHODOLOGY patch dispatch, 2026-05-12; substrate: 3 case studies surfaced across Phase A session arc).
+
+### 4.32 Handoff-authoring-without-substrate-verification (deferred-classification-encoded-in-session-memory case-study expansion)
+
+#### Abstract rule
+
+Phase handoff documents classify resources as deletion candidates / orphan / deprecated / retirement-candidate only after independent substrate-grep verification across all inbound-reference classes (cross-Lambda invoke, API Gateway permissions, EventBridge rule targets, CDK declarations, IAM resource-based policies, CloudTrail invocation history, sibling-repo + script grep). Classification inherited from session memory or prior-cohort substrate WITHOUT grep verification at authoring time is **NOT substrate-grounded** and must be flagged as inference-not-substrate-verified until grep completes.
+
+The rule applies symmetrically: (a) handoff documents authored from session memory; (b) QB dispatch text authored from prior-cohort substrate; (c) CC reports recommending classification. All three layers must perform substrate-grep at authoring time, not inherit framing from prior-layer reports.
+
+This is a recursive application of § 4.31 (producer-attribution methodology refinement) to resource classification: just as operational behavior inference requires substrate verification, resource-class classification requires inbound-reference verification.
+
+**Additional Abstract rule (v3-patched-d AMCS5 extension per Tony Decision 4 verbatim ratification):** Additionally, parallel-dispatch authorization under Directive 2 default cadence requires inter-dispatch source-state interaction analysis: dispatches operating on shared source files (CDK app, bible files, configuration files) may produce incompatible source-state combinations even when each dispatch is independently substrate-grounded. Authorization analysis must verify that the union of dispatch source modifications produces an executable state, not just that each dispatch is independently executable.
+
+#### Worked example
+
+Three case studies enumerated across Phase A session arc:
+
+**Case Study 1 — D6 V1 dispatch catastrophic substrate divergence (2026-05-12).**
+
+Substrate trace: handoff `PHASE_A_HANDOFF_2026-05-12.md` § 2 patch content + § 3.2 D6 dispatch scope authored against assumed bible state without verification of LOCKED 2026-05-11 re-lock-cycle structural state.
+
+Actual state: 4 bibles + AUDIT_METHODOLOGY LOCKED at 2026-05-11 re-lock ceremony with cross-bible cross-reference freeze re-engaged; structural mismatches between handoff D6-{1,2,3,4,5,6} patch targets and current LOCKED bible structure surfaced as 6 divergence classes (D1-D6 enumerated at D6 V1 halt-and-surface report):
+- D1: data_pipeline_bible § 4.2 per-source structure vs handoff "pattern entries" framing
+- D2: data_pipeline_bible § 4.1 per-flow vs handoff "5-source extension"
+- D3: architecture_overview § 3.10 ORPHAN-descriptor scattered vs handoff discrete subsection
+- D4: handoff content overlap with already-incorporated bible substrate
+- D5: § 4.2.4 NYRA deferred-disposition reservation explicit named but D6 patches did not address directly
+- D6: UPSTREAM-CORRECTION § 7.2 step 4 ceremony scope conflict with Tier 2 single-CC dispatch
+
+Mitigation: CC halted at Step 0/1 boundary per dispatch out-of-scope condition; QB re-authored D6 V2 with Decision Rule ("bible reflects reality + best practices") + Tony Q1-Q5 adjudications; V2 dispatch substrate-verification Step 0 + Decision Rule + adjudications produced 22-patch successful execution across 5 LOCKED bibles.
+
+Classification: **handoff document substrate specifications not verified against current LOCKED bible state at handoff authoring time**.
+
+**Case Study 2 — D6 patched Appendix A1 substrate-incorrect classification near-miss (2026-05-12 E3 prior dispatch).**
+
+Substrate trace: handoff § 1.4 Appendix A1 classified `equine-inference` Lambda as "Deprecated; superseded by WR/PL/LS inference; retirement candidate"; classification propagated verbatim into D6 RC-3 `architecture_overview.md § 3.12.1` ORPHAN consolidated subsection at v3-patched-d.
+
+Actual state: `equine-inference` Lambda is **production API handler** for 15+ API Gateway routes (`/health`, `/races/{date}`, `/races/today`, `/races/{raceId}/detail`, `/races/available-dates`, `/predictions/{date}`, `/predictions/today`, `/predictions/value`, `/predictions/run` GET+POST, `/predictions/{date}/{track_code}/{race_number}`, `/dashboard/metrics`, `/horses/{horse_id}/pps`, `/cards/{date}/{track_code}`) + cross-Lambda invoke at `backend/lambdas/ingestion/handler.py:843` (`lambda_client.invoke(FunctionName='equine-inference', InvocationType='Event', ...)` for batch-date dispatch). Only the `equine-inference-daily` cron rule is deprecated (DISABLED; superseded by per-model WR/PL/LS scheduled rules); the Lambda itself is load-bearing for the production EE API.
+
+CC E3 Step 1 substrate-grep across 8 inbound-reference classes (cross-Lambda invoke / API Gateway resource-based policies / EventBridge targets / CDK declarations / IAM resource-based policies / CloudTrail / event-source-mappings / sibling-repo grep) surfaced the divergence within minutes of dispatch authorization.
+
+Near-miss severity: if CC inbound-reference grep had not been performed before E3 deletion execution, entire EE production API would have gone offline at `cdk deploy EquineComputeStack` removing the `InferenceFunction` construct. Resource-based policies for API Gateway routes would have orphaned; subsequent API requests would have returned 502 errors across all 15+ routes.
+
+Mitigation: E3 narrow-scope reframing (Tony Option 1 ratification) + bible reclassification patches (architecture_overview.md § 3.12.1 Appendix A1 corrected to production-class; § 3.10 alarm reclassification; deletion scope narrowed to `equine-feature-engineering` cohort only).
+
+Classification: **handoff Appendix A1 classification inherited from session memory without substrate-grep verification of inbound references**. Recursive application of § 4.31 producer-attribution refinement: IAM-role inventory classification (the OCRC D1 substrate basis) does not establish operational-role classification.
+
+**Case Study 3 — E1 Path 2 V1 dispatch CAPTCHA-solver scope propagation (2026-05-12 prior turn).**
+
+Substrate trace: prior session directive established "no CAPTCHA solver service" stance per Tony's banked operational-cost-vs-benefit posture; E1 Step 1 CC diagnostic surfaced 4 Path candidates including Path 2 "probe-promotion-via-paid-solver" (referencing existing `equibase_probe/option_*_probe.py` exploratory cohort + Phase 5.3.18 backlog candidate disposition).
+
+QB E1 Path 2 V1 dispatch authored vendor research scope (Capsolver / CapMonster / 2captcha / Anti-Captcha evaluation matrix across 8 dimensions × 4 vendors) without re-verifying against the prior directive substrate.
+
+CC executed vendor research per dispatch authorization (Capsolver recommended; CapMonster ToS-blocked; 2captcha + Anti-Captcha don't support Imperva). Tony ratification at SP-E1P2-Step1 gate REJECTED procurement; cited prior directive ("no CAPTCHA solver service" banked decision); vendor research output discarded.
+
+Path 2 RE-SCOPED to substrate investigation (discriminating-variable analysis of May 11 ~22:00 EDT successful manual run vs Apr 30 failed cron — investigation surfaced no manual-run substrate at that timestamp; .session_state.json mtime remains 2026-04-30 00:16:48 EDT; Branch B verdict per substrate-grounded headed-vs-headless fingerprint discrimination).
+
+Classification: **QB dispatch authoring inherited CC diagnostic Path 2 framing without independent verification against prior session directive substrate**. The CC diagnostic correctly enumerated Path 2 as one of 4 candidates with "Tony decides" framing; QB dispatch authoring elevated it to actionable scope without re-checking the directive.
+
+Mitigation: re-scoped Path 2 dispatch confines scope to substrate investigation + Branch A/B/C routing per substrate-determined discriminating variable; vendor research is discarded artifact; Tony directive substrate honored.
+
+**Case Study 4 — QB-side framing-inheritance across multiple dispatch turns (2026-05-12 E1 Path 2 RE-SCOPED V2 + Xvfb investigation venue).**
+
+Substrate trace: regression-frame framing propagated across **4 consecutive dispatch turns** before substrate investigation forced a design-state pivot.
+
+- **Turn 1 — Phase A handoff § 5.1 authoring**: framed Equibase chart-failure as "FAILING DAILY exit=1 ... non-blocking for Source 4 workouts ... SNS alerts may be firing daily until disposition lands." Framing inherited regression-pattern session-memory inference (4-of-4-days continuous failure at handoff authoring time = "regression" assumption; no verification of pre-failure green-state evidence).
+- **Turn 2 — E1 Step 1 diagnostic + Path enumeration**: CC inherited handoff regression-frame; classified failure mechanism as F-auth Imperva session expired (current-state finding); enumerated 4 Path candidates (Path 1 manual; Path 2 paid solver; Path 3 paid API; Path 4 drop). All 4 paths implicitly assumed regression-from-prior-green-state.
+- **Turn 3 — E1 Path 1 bridge runbook authoring**: QB ratified bridge runbook scope; CC authored 22.5 KB runbook describing "session refresh + 13-day backfill" — the "bridge" framing implies resumption-from-green-state. No substrate verification of whether scraper was ever green in cron mode.
+- **Turn 4 — E1 Path 2 V1 vendor research dispatch**: QB authored Capsolver / CapMonster / 2captcha / Anti-Captcha evaluation matrix; CC executed research; Tony directive substrate rejected procurement; vendor research discarded as artifact per Case Study 3 above.
+- **Turn 5 — E1 Path 2 RE-SCOPED V1 dispatch**: QB authored discriminating-variable investigation (May 11 ~22:00 EDT successful manual run vs Apr 30 failed cron); CC investigated; surfaced headed-vs-headless Chromium fingerprint discriminator + reese84-vs-server-side-TTL mechanism. Branch B verdict (manual-touch requirement). **Still regression-frame implicit** — analysis assumed prior green-state existed.
+- **Turn 6 — Tony surfaced methodology gap**: "discriminator-today finding is downstream of change-event finding; investigating downstream first risks misdiagnosis." Methodology refinement candidate banked: change-event-boundary-investigation must precede current-state discriminator analysis.
+- **Turn 7 — E1 Path 2 RE-SCOPED V2 dispatch**: QB authored change-event substrate investigation per Tony's methodology gap surfacing. CC executed Classes 1-9 substrate investigation:
+  - 15/15 captured cron runs failed since deployment 2026-04-27 evening
+  - Zero cron-time-pattern S3 PDF uploads ever existed
+  - README.md "Charts under cron — known limitation" section EXPLICITLY documents design-state at deployment time
+  - Class 9 sub-question "Was scraper ever green in cron mode?" verdict: **NO** (substrate-definitive)
+  - **No change-event boundary identifiable; scraper has been in design-state red since deployment.**
+- **Turn 8 — QB ratified Branch R-irreversible (design-state qualifier)**: regression-frame retired; Xvfb investigation authorized per Directive 2 in-Phase-A scope.
+
+Classification: **QB dispatch authoring inherits session-memory framing across multiple turns without periodic substrate-grounding verification**. The refinement applies RECURSIVELY to QB-side dispatch authoring discipline, not just at-handoff scope (Case Study 1) or at-CC-diagnostic scope (Case Studies 2-3). All three layers (handoff / QB / CC) must perform substrate-grounding verification at authoring time; framing inherited from prior-layer reports requires explicit substrate-verification step before propagation.
+
+Mitigation pattern observed: Tony surfaced methodology gap (change-event-boundary-investigation refinement, banked as new queue entry per Phase A close-out cadence); CC executed substrate-grounded investigation; substrate-verified design-state verdict invalidated regression-frame assumption that had propagated for 4 consecutive dispatch turns.
+
+Secondary lesson: Tony-side methodology-gap surfacing is the highest-leverage recursion gate. When neither handoff nor QB nor CC catches an inherited framing, Tony's outside-view perspective is the discriminator. The refinement may apply at Tony-ratification surfaces too (recursive); but Tony's outside-view is the canonical safety mechanism, not a layer requiring substrate-grep at authoring time.
+
+**Case Study 5 — Parallel-dispatch source-state interaction analysis gap (2026-05-12 E3 Step 2 + E4 Step 2 cdk source conflict).**
+
+Substrate trace:
+
+- **Tony Directive 2 reinforcement**: "All operational work authorizes in parallel" — parallel-dispatch authorization becomes default cadence at Phase A entry directive.
+- **QB authored 4 dispatches in single chat output** (E1 Path 2 RE-SCOPED + E2 + E3 + E4) per Directive 2 default cadence; CC executed all 4 SP-Step1 reports in parallel turn.
+- **QB encoded E3 → E4 resource state sequencing** explicitly in E4 dispatch text ("E4 Step 3-4 executes AFTER E3 Step 2 deletion completes"). Resource-level dependency captured correctly.
+- **QB did NOT analyze source-state interaction** between E3 Step 2 + E4 Step 2 dispatches; both modify `infrastructure/cdk/lib/compute-stack.ts`.
+- **E4 Step 2 patches added ~556 LOC** to compute-stack.ts at lines 659-1207 (resource declarations for ~50 CLI-only resources via CDK constructs).
+- **E3 Step 2 dispatched `cdk deploy`** from compute-stack.ts at the E4-Step-2-patched state; pre-execution analysis surfaced that `cdk deploy` would attempt to CREATE all ~50 new resource declarations (which already exist in AWS) producing "resource already exists" CloudFormation errors. Deployment would fail entirely; feature-engineering removal would not execute.
+- **CC pre-execution substrate verification** caught the incompatibility before mid-execution failure (CC's defense-in-depth read at SP-E3NS-Step2 entry surfaced compute-stack.ts state post-E4-Step-2-patches; halt-and-surfaced sequencing conflict for Tony adjudication).
+- **Resolution via Path 1 sequencing inversion** (resource-import-first → cdk diff verification → cdk deploy for feature-engineering removal only): execute E4 Step 3 Phase 1+2 (CloudFormation resource-import; brings ~50 resources under CFN management without creation) BEFORE E3 Step 2 cdk deploy (now only removes feature-engineering as net diff).
+
+Classification: **parallel-dispatch authorization without inter-dispatch source-state interaction analysis**. Methodology gap distinct from substrate-grep-at-classification (Case Studies 1-4) but adjacent: at-authorization-time discipline applies to dispatch combinations, not just individual dispatches. The Directive 2 parallel-cadence default makes this gap class structurally probable; without inter-dispatch source-state union analysis, individually-substrate-grounded dispatches can produce structurally-incompatible execution states.
+
+Mitigation pattern observed: CC pre-execution substrate verification caught the conflict (defense-in-depth at the CC pre-execution layer; not at QB authorization layer where the gap originated). QB-side mitigation (banked at this Case Study 5): at parallel-dispatch authorization time, analyze union of dispatch source modifications across shared source files (CDK app, bible files, configuration files) for executable-state compatibility before authorizing the parallel batch.
+
+Cross-application across all 5 case studies: the refinement applies at multiple authoring scopes:
+- **Case Studies 1-2**: handoff document authoring (at-handoff layer)
+- **Case Studies 3-4**: QB single-dispatch authoring (at-QB-dispatch layer)
+- **Case Study 5**: QB parallel-dispatch authorization (at-parallel-authorization layer; Directive 2 default cadence)
+
+#### Cross-references
+
+- **Phase A handoff substrate:** `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` § 1.4 (Appendix A1 source of substrate-incorrect classification per Case Study 2); § 3.2 (D6 dispatch scope source per Case Study 1).
+- **Related lessons:** § 4.27 (Inference-promoted-to-substrate-fact-without-Tony-confirmation — A.6.d case study; producer-attribution refinement applies to Case Study 2 recursively); § 4.29 (QB-framing-not-substrate-verified-before-propagation — D4 Source 2 case study; applies to Case Study 3 directly); § 4.31 (Producer-attribution methodology refinement — 5-case-study banking; recursive application to resource classification per this lesson).
+- **Dispatch reports:** D6 V1 halt-and-surface report (Case Study 1 origin); E3 Step 1 prior dispatch (Case Study 2 substrate-grep methodology demonstration); E1 Path 2 V1 vendor research report (Case Study 3 artifact discarded per Tony directive substrate).
+- **Substrate citation for substrate-grep methodology:** E3 Step 1 prior dispatch executed 8-class inbound-reference grep producing zero-false-positive substrate verification — methodology codified in Audit-CC prophylactic check template below.
+
+#### Audit-CC prophylactic check template
+
+When the audited document classifies a resource (Lambda / IAM role / EventBridge rule / SQS queue / CloudWatch alarm / S3 bucket / ECR repo / Secrets Manager entry) as orphan / deprecated / deletion-candidate / unused / retirement-candidate:
+
+1. **Verify the audited document cites substrate-grep verification for ALL inbound-reference classes**, OR cites prior dispatch report performing the grep. The 8-class substrate-grep methodology (E3 Step 1 demonstration):
+   - **Cross-Lambda invoke**: `grep -rn "FunctionName='<resource>'" backend/lambdas/ --include="*.py"` for `lambda_client.invoke(...)` patterns
+   - **API Gateway resource-based policies**: `aws lambda get-policy --function-name <resource>` for Statement.Principal.Service "apigateway.amazonaws.com" entries
+   - **EventBridge rule targets**: `aws events list-rules` + per-rule `aws events list-targets-by-rule --rule <rule>` for resource-as-target presence
+   - **CDK declarations**: `grep -rn "<resource>" infrastructure/cdk/ --include="*.ts"` for CDK construct references
+   - **IAM resource-based policies**: enumerate consuming services via resource ARN cross-reference
+   - **CloudTrail invocation history**: `aws cloudtrail lookup-events --lookup-attributes AttributeKey=ResourceName,AttributeValue=<resource>` last 14d
+   - **Event source mappings**: `aws lambda list-event-source-mappings --function-name <resource>` (Lambda-specific)
+   - **Sibling-repo + script grep**: `grep -rn "<resource>" <sibling-repos> scripts/` for cron / scheduled / manual invocation patterns
+
+2. **For each inbound-reference class returning non-zero hits**, document the consumer + dependency type. Any non-zero inbound reference invalidates orphan / deprecated / retirement-candidate classification; resource is substrate-grounded as production-class (or other load-bearing class).
+
+3. **Verify the audited document distinguishes resource-LEVEL classification vs adjacent-rule classification.** Case Study 2 pattern: the Lambda itself is production-class but the associated EventBridge cron rule may be DISABLED/deprecated. These are SEPARATE resources; classifying the Lambda as deprecated because the rule is deprecated is a category error.
+
+4. **Verify the audited document cites prior-cycle DIRECTIVE substrate** (if applicable): when the document propagates a recommendation that intersects with Tony's banked operational-cost-vs-benefit decisions, cross-reference the directive at authoring time. Case Study 3 pattern: vendor research scope should have re-checked "no CAPTCHA solver service" directive before authoring.
+
+Flag MATERIAL for classification-inherited-from-session-memory-without-grep:
+- Resource classified as orphan/deprecated/deletion-candidate without ≥ 3 of 8 inbound-reference classes substrate-verified
+- Resource-level classification not distinguished from adjacent-rule classification (Case Study 2 pattern)
+- Recommendation propagated past prior-cycle directive without cross-reference verification (Case Study 3 pattern)
+
+Flag as **fabricated content (lock-blocker)** if classification contradicts substrate-grep results that ARE cited in the same document (internal-inconsistency).
+
+**Additional check (QB-side dispatch authoring discipline; added at v3-patched-c per Case Study 4 banking):**
+
+Before authoring any dispatch that classifies a resource state (orphan / deprecated / failure-mode / regression / design-state), QB executes ONE of the following substrate-grounding paths at dispatch-authoring time:
+
+1. **Substrate-grep verification path** (canonical): execute the 8-class methodology directly at dispatch authoring (or cite prior-cycle CC report that performed the grep within the current substrate window).
+2. **Design-state verification path**: read README + code comments + deployment-time hypotheses + deployment notes for the affected resource; verify whether failure mode is design-state-since-deployment (no regression to investigate) vs regression-from-prior-green-state. If design-state evidence is unambiguous (e.g. README "known limitation" section), no substrate-grep needed; failure-mode classification follows design-state framing.
+3. **Change-event boundary verification path** (per AUDIT_METHODOLOGY § 4.33 candidate refinement; codification deferred to Phase A close-out): identify last-green vs first-red substrate boundary; if no green-state evidence exists in available substrate window, design-state diagnosis applies (Case Study 4 pattern).
+4. **CC pre-investigation path**: CC executes a Tier-3 read-only substrate investigation BEFORE QB dispatch authors recommendations on the affected resource. Tier-3 investigation output substitutes for substrate-grep at QB dispatch authoring (banked at this dispatch as the operational pattern: Tony surfaces methodology gap → CC investigates → QB ratifies post-investigation).
+
+Flag MATERIAL if QB dispatch authoring classifies a resource without one of these 4 substrate-grounding paths AND the classification propagates from session-memory framing inherited from prior dispatches (Case Study 4 pattern).
+
+**Recursive application notice**: this prophylactic check operates at THREE layers:
+- **At-handoff layer**: handoff document authoring (Case Study 1 + Case Study 2 patterns)
+- **At-QB-dispatch layer**: QB dispatch authoring (Case Study 3 + Case Study 4 patterns)
+- **At-CC-diagnostic layer**: CC report authoring (recursive via § 4.27 / § 4.31 + Case Study 2 producer-attribution refinement)
+
+Tony-ratification layer operates as outside-view safety mechanism per Case Study 4 secondary lesson; not a layer requiring substrate-grep at authoring time (Tony's outside-view discriminator function is the recursion-base-case).
+
+**Additional check (parallel-dispatch source-state interaction analysis; added at v3-patched-d per Case Study 5 banking):**
+
+**Check name**: Inter-dispatch source-state interaction verification at parallel-dispatch authorization
+
+**Trigger condition**: QB authorizes parallel dispatches under Directive 2 default cadence where two or more dispatches in the parallel-authorization batch modify shared source files (CDK app, bible files, configuration files).
+
+**Mandatory verifications before parallel authorization is substrate-grounded**:
+
+1. **Enumerate shared source files** across all dispatches in the parallel-authorization batch. Example: E3 Step 2 + E4 Step 2 both modify `infrastructure/cdk/lib/compute-stack.ts`.
+2. **Per-shared-file: identify each dispatch's source modifications** (additions, deletions, modifications). Example: E3 Step 2 removes FeatureEngineeringFunction construct + IAM grants + rule; E4 Step 2 adds ~50 resource declarations.
+3. **Per-shared-file: analyze union of modifications for compatibility**. The union must produce a valid executable state, not just each dispatch's modifications individually. Example: union of E3 Step 2 (FE removal) + E4 Step 2 (50 additions) produces compute-stack.ts with both feature-engineering-removed AND 50-new-declarations; `cdk deploy` on this union state would attempt to create the 50 new resources (fail: already exist) AND delete FE (intended).
+4. **Identify sequencing constraints implicit in source-state combinations**. Example: E4 Step 2 source modifications require resource-import workflow before any `cdk deploy`; E3 Step 2 cdk deploy must execute after resource-import to avoid the create-already-exists failure mode.
+5. **Encode discovered sequencing constraints explicitly in dispatch text**. Example: E4 Step 3 Phase 1+2 (resource-import) must execute before E3 Step 2 Phase 2 (cdk deploy) under shared compute-stack.ts source state.
+6. **If source-state combinations are structurally incompatible without sequencing**: halt parallel authorization; require Tony adjudication of execution order before issuing dispatches.
+
+**Failure mode**: parallel-dispatch execution fails mid-deploy with structural error (resource-already-exists, schema-conflict, similar) when union of source modifications is incompatible; CC pre-execution verification catches structural-incompatibility as defense-in-depth (Case Study 5 mitigation pattern), but root-cause is at QB parallel-authorization layer.
+
+**Flag MATERIAL** if parallel-dispatch batch authorizes without Step 1-5 verifications, AND dispatches in the batch modify shared source files.
+
+**Banking instance**: Case Study 5 enumerates Phase A E3 Step 2 + E4 Step 2 parallel-authorization without source-state union analysis; CC defense-in-depth caught the conflict before mid-execution failure; resolution via Path 1 sequencing inversion (resource-import-first).
+
+**Recursive application notice (extended at v3-patched-d)**: this prophylactic check operates at FOUR layers:
+- **At-handoff layer**: handoff document authoring (Case Study 1 + Case Study 2 patterns)
+- **At-QB-single-dispatch layer**: QB single-dispatch authoring (Case Study 3 + Case Study 4 patterns)
+- **At-QB-parallel-authorization layer** (NEW): QB parallel-dispatch authorization under Directive 2 default cadence (Case Study 5 pattern)
+- **At-CC-diagnostic layer**: CC report authoring (recursive via § 4.27 / § 4.31 + Case Study 2 producer-attribution refinement; CC pre-execution verification serves as defense-in-depth for Case Study 5 gap class)
+
+Tony-ratification layer operates as outside-view safety mechanism per Case Study 4 secondary lesson; recursion-base-case.
+
+### 4.33 Per-layer training script registration discipline (substrate-permanent shared registration module)
+
+#### Abstract rule
+
+Per-layer ML training scripts (those that produce S3-uploaded artifact files outside of the canonical `model/training/train.py` entry point) MUST invoke `model.training.registration.register_trained_artifact()` immediately post-S3-upload, within the same Fargate training cycle that produced the artifact. The shared registration module is the substrate-permanent locus for `model_versions` INSERTs; no per-layer script may construct its own INSERT against `model_versions`, and no per-layer script may delegate registration to a post-cycle helper script.
+
+Defaults `is_active=FALSE` per § 4.34 forensic-gate discipline (activation requires forensic substrate validation, not training-time eval). The shared module is responsible for `model_type` derivation (from `version_name` prefix-map when not explicitly passed), `feature_list` and `hyperparameters` JSONB serialization, unrecognized-extras folding into `hyperparameters._training_extras`, and rollback-on-failure semantics.
+
+Substrate-prophylactic check: any new per-layer training script added under `model/<layer>/train.py` (or equivalent path) is reviewed at PR-time for a `register_trained_artifact` invocation guarded by try/except (registration failure must log-and-continue, never crash training — the S3 artifact is the primary substrate; registration is secondary durability).
+
+#### Worked example
+
+**Banking substrate (Tier 1 Phase 3.5, 2026-05-12 → SP-§4.33 bake-in 2026-05-17).**
+
+Substrate trace: per-layer training scripts `model/wr/train.py`, `model/pl/train.py`, `model/longshot/train.py`, `model/ranker/train.py`, `model/ensemble/train.py`, `model/trajectory/train.py`, `model/win_prob/train.py` each implemented their own `save_artifacts()` (or inline equivalent) that wrote model + metadata + eval JSONs locally, then uploaded to `s3://equine-model-artifacts/<layer>/`. None of the seven invoked `register_model()` or `insert_model_version()` post-upload. Only canonical `model/training/train.py` registered.
+
+Actual state (Tier 1 Phase 3.5 inventory): 37 lean58 artifacts present in S3 across `pl/`, `win_prob/`, `ranker/` prefixes; zero corresponding rows in `model_versions`. Forensic adjudication cycles requiring `model_version_id` foreign keys (predictions FK constraint per `schema.sql` line 386) could not proceed against unregistered artifacts.
+
+Mitigation (Phase 3.5): `/tmp/phase3_register_artifacts.py` helper scanned S3 for unmatched lean58 base artifacts, read paired `_meta.json` + `_eval.json` sidecars, derived `model_type` from `version_name` prefix pattern, and inserted the missing rows with `is_active=FALSE`. Helper was substrate-pragmatic but session-ephemeral.
+
+Bake-in fix (SP-§4.33, 2026-05-17): `model/training/registration.py` extracts the substrate-correct INSERT shape into a shared module; the seven per-layer scripts each gained a registration call following the S3 upload loop. Synthetic validation (`/tmp/sp_4_33_synthetic_validation.py`) verified: (a) `derive_model_type` maps the eight prefix-map cases substrate-correctly; (b) `register_trained_artifact` constructs a 19-column INSERT with positional params in canonical order, unrecognized metadata extras folded into `hyperparameters._training_extras` JSONB, `is_active=FALSE` default; (c) rollback-on-failure path engages cleanly without leaving partial state.
+
+Classification: **per-layer training scripts inherited substrate-bug of skipping registration; bake-in fix prevents future Fargate training cycles from producing unregistered S3 artifacts**. Recursive application of § 4.31 producer-attribution methodology refinement: the producer of an S3 artifact bears registration responsibility within the same cycle, not a downstream helper.
+
+**Related lesson**: § 4.34 (forensic-gate activation discipline — `is_active=FALSE` default is the substrate-pragmatic complement of this lesson; activation is a separate, forensic-substrate-gated step).
+
+**Related lesson**: § 4.31 (producer-attribution methodology refinement — producer-bears-registration is a recursive application of producer-bears-attribution).
+
+Substrate-permanent: all future Fargate training cycles produce registered artifacts automatically; Tier 2 retrain candidates (per alternate methodology 4A-4I) register cleanly without post-cycle backfill.
 
 ---
 
