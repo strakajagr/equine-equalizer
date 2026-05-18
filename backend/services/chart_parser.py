@@ -108,7 +108,7 @@ def parse_race_header(block: str, track_code: str, file_date: date) -> dict | No
     track_condition = None
     temperature = None
     weather = None
-    for line in lines[:15]:
+    for line in lines[:25]:
         if 'weather:' in line.lower() and 'track:' in line.lower():
             wm = re.search(r'Weather:(\S+)', line)
             if wm:
@@ -216,6 +216,7 @@ def parse_race_header(block: str, track_code: str, file_date: date) -> dict | No
         'num_calls': num_calls,
         'runners': runners,
         'field_size': len(runners),
+        'equibase_race_id': f'{track_code}_{file_date.strftime("%Y%m%d")}_R{race_number}',
     }
 
 
