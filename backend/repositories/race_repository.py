@@ -240,7 +240,8 @@ class RaceRepository(BaseRepository):
                    EXCLUDED.weather_conditions,
                  wind_speed = EXCLUDED.wind_speed,
                  wind_direction = EXCLUDED.wind_direction,
-                 off_turf = EXCLUDED.off_turf
+                 off_turf = EXCLUDED.off_turf,
+                 equibase_race_id = EXCLUDED.equibase_race_id
                RETURNING race_id""",
             (
                 race_data['track_id'],
