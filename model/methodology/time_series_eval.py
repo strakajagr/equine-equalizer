@@ -87,8 +87,9 @@ def featurize_sequence(df, n_pp=5):
     return wide.fillna(0.0)
 
 
-def evaluate(window_start, window_end, output_path):
-    df = load_pp_sequences(window_start, window_end)
+def evaluate(window_start, window_end, output_path, extended=False):
+    n_pp = 10 if extended else 5
+    df = load_pp_sequences(window_start, window_end, n_pp_lookback=n_pp)
     print(f"PP rows: {len(df)}")
     if len(df) < 100:
         result = {'verdict': 'substrate-thin', 'n_observations': len(df)}
@@ -96,7 +97,7 @@ def evaluate(window_start, window_end, output_path):
             json.dump(result, f, indent=2)
         return result
 
-    wide = featurize_sequence(df, n_pp=5)
+    wide = featurize_sequence(df, n_pp=n_pp)
     print(f"Wide cohort: {len(wide)} rows")
 
     np.random.seed(42)
@@ -116,10 +117,12 @@ def evaluate(window_start, window_end, output_path):
     # GBM-sequence variant
     dtr = xgb.DMatrix(train[feature_cols].values, label=train['is_winner'].values)
     dte = xgb.DMatrix(test[feature_cols].values, label=test['is_winner'].values)
+    xgb_params = {'objective': 'binary:logistic', 'eval_metric': 'auc',
+                  'max_depth': 6 if extended else 4, 'eta': 0.05,
+                  'subsample': 0.8, 'colsample_bytree': 0.7}
+    n_rounds = 500 if extended else 300
     booster = xgb.train(
-        {'objective': 'binary:logistic', 'eval_metric': 'auc',
-         'max_depth': 4, 'eta': 0.05, 'subsample': 0.8},
-        dtr, num_boost_round=300, evals=[(dte, 'eval')],
+        xgb_params, dtr, num_boost_round=n_rounds, evals=[(dte, 'eval')],
         early_stopping_rounds=30, verbose_eval=False,
     )
     gbm_seq_auc = float(roc_auc_score(test['is_winner'], booster.predict(dte)))
@@ -160,9 +163,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--window-start', default='2026-05-02')
     parser.add_argument('--window-end', default='2026-05-17')
+    parser.add_argument('--extended-scope', action='store_true',
+                        help='Extended scope: n_pp_lookback 10 (default 5) + deeper XGBoost')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
-    evaluate(args.window_start, args.window_end, args.output)
+    evaluate(args.window_start, args.window_end, args.output, extended=args.extended_scope)
 
 
 if __name__ == '__main__':

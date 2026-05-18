@@ -79,9 +79,10 @@ def evaluate(window_start, window_end, output_path):
     X_train = sm.add_constant(train['win_probability'].values)
     y_train = train['is_winner'].values.astype(float)
 
-    # Fit QuantReg at 0.5, 0.75, 0.9
+    # Fit QuantReg at multiple quantiles (extended scope: 7 quantiles)
     calibrated_briers = {}
-    for q in [0.5, 0.75, 0.9]:
+    quantiles_to_try = [0.1, 0.25, 0.5, 0.6, 0.75, 0.85, 0.9]
+    for q in quantiles_to_try:
         model = QuantReg(y_train, X_train).fit(q=q)
         X_test = sm.add_constant(test['win_probability'].values)
         preds = model.predict(X_test).clip(0, 1)
@@ -121,6 +122,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--window-start', default='2026-05-02')
     parser.add_argument('--window-end', default='2026-05-17')
+    parser.add_argument('--extended-scope', action='store_true',
+                        help='Extended scope: tries 7 quantiles instead of 3')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     evaluate(args.window_start, args.window_end, args.output)

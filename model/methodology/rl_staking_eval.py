@@ -163,7 +163,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--window-start', default='2026-05-02')
     parser.add_argument('--window-end', default='2026-05-17')
-    parser.add_argument('--timesteps', type=int, default=1000)
+    parser.add_argument('--timesteps', '--total-timesteps', type=int, default=1000)
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     evaluate(args.window_start, args.window_end, args.output, args.timesteps)

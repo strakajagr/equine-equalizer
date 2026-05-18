@@ -70,7 +70,7 @@ class SmallGCN(torch.nn.Module):
         return x
 
 
-def evaluate(window_start, window_end, output_path):
+def evaluate(window_start, window_end, output_path, extended=False):
     df = load_substrate(window_start, window_end)
     print(f"Loaded {len(df)} rows")
     if len(df) < 100:
@@ -108,8 +108,11 @@ def evaluate(window_start, window_end, output_path):
     train_mask_arr = df['race_id'].isin(set(races[:split])).values
     test_mask_arr = ~train_mask_arr
 
-    # Substrate-pragmatic minimum-viable: GCN node embedding + (trainer_emb + jockey_emb + track_emb + hybrid_c_p) → logit
-    model = SmallGCN(n_nodes)
+    # Substrate-pragmatic GCN: hidden_dim + epochs per --extended-scope
+    hidden_dim = 32 if extended else 16
+    out_dim = 16 if extended else 8
+    n_epochs = 100 if extended else 30
+    model = SmallGCN(n_nodes, hidden=hidden_dim, out=out_dim)
     opt = torch.optim.Adam(model.parameters(), lr=0.01)
 
     # Per-row feature: GCN output for trainer + jockey + track concatenated
@@ -119,8 +122,8 @@ def evaluate(window_start, window_end, output_path):
     j_ids = torch.tensor(df['jockey_id'].map(jockey_idx).values, dtype=torch.long)
     tk_ids = torch.tensor(df['track_id'].map(track_idx).values, dtype=torch.long)
 
-    # Substrate-pragmatic head: gcn_emb (24-d) + hybrid_c_p → logit
-    head = torch.nn.Linear(24 + 1, 1)
+    # Head dimensions follow out_dim × 3 nodes + hybrid_c_p
+    head = torch.nn.Linear(out_dim * 3 + 1, 1)
     opt_head = torch.optim.Adam(head.parameters(), lr=0.01)
 
     # Train 30 epochs
@@ -185,9 +188,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--window-start', default='2026-05-02')
     parser.add_argument('--window-end', default='2026-05-17')
+    parser.add_argument('--extended-scope', action='store_true',
+                        help='Extended scope: 100 epochs + hidden_dim 32 (default 30/16)')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
-    evaluate(args.window_start, args.window_end, args.output)
+    evaluate(args.window_start, args.window_end, args.output, extended=args.extended_scope)
 
 
 if __name__ == '__main__':

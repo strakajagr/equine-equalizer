@@ -132,6 +132,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--window-start', default='2026-05-02')
     parser.add_argument('--window-end', default='2026-05-17')
+    parser.add_argument('--extended-scope', action='store_true',
+                        help='Extended scope: adds morning_line_odds as additional covariate')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     evaluate(args.window_start, args.window_end, args.output)
