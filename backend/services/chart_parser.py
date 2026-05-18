@@ -194,6 +194,7 @@ def parse_race_header(block: str, track_code: str, file_date: date) -> dict | No
                 runners.append(runner)
 
     meta = extract_race_meta(block)
+    scratched_horses = parse_scratched_horses(block)
 
     return {
         'track_code': track_code,
@@ -217,7 +218,43 @@ def parse_race_header(block: str, track_code: str, file_date: date) -> dict | No
         'runners': runners,
         'field_size': len(runners),
         'equibase_race_id': f'{track_code}_{file_date.strftime("%Y%m%d")}_R{race_number}',
+        'scratched_horses': scratched_horses,
     }
+
+
+def parse_scratched_horses(race_text: str) -> list[dict]:
+    """Extract scratched horse list from race chart.
+
+    Substrate-format: "ScratchedHorse(s): Name1(Reason1),Name2(Reason2),..."
+    Multi-line continuation supported. Reasons observed: RegVet-Injured,
+    PrivVet-Illness, Main-Track-Only, Trainer, Off-Turf.
+
+    Returns list of name/match_key/reason dicts; match_key uses
+    horse_match_key() for fuzzy matching against horses.horse_name.
+    """
+    m = re.search(
+        r'ScratchedHorse\(s\):\s*(.+?)(?=\n(?:TotalWPSPool|Pgm\s|Trainer:|$))',
+        race_text, re.DOTALL,
+    )
+    if not m:
+        return []
+    collapsed = re.sub(r'\s+', '', m.group(1))
+    result = []
+    for token in collapsed.split('),'):
+        name_match = re.match(r'^([^(]+)', token)
+        if not name_match:
+            continue
+        name = name_match.group(1).strip()
+        if not name:
+            continue
+        reason_match = re.search(r'\(([^)]*)\)?', token)
+        reason = reason_match.group(1) if reason_match else None
+        result.append({
+            'name': name,
+            'match_key': horse_match_key(name),
+            'reason': reason,
+        })
+    return result
 
 
 # ═══════════════════════════════════════════
@@ -794,7 +831,35 @@ def insert_race(conn, race: dict, track_id: str) -> str:
                 race.get('equibase_race_id'),
             )
         )
-        return str(cur.fetchone()['race_id'])
+        race_id = str(cur.fetchone()['race_id'])
+
+        # Mark scratched horses per chart-PDF ScratchedHorse(s) substrate.
+        # Entries-scraper is pre-race snapshot; chart-parser is truth-source
+        # for vet/late scratches. Match horse name via horse_match_key
+        # (alphanumeric-lowercase fuzzy match).
+        for sh in (race.get('scratched_horses') or []):
+            mk = sh.get('match_key') if isinstance(sh, dict) else None
+            if not mk:
+                continue
+            reason = sh.get('reason') if isinstance(sh, dict) else None
+            cur.execute(
+                f"""UPDATE entries
+                    SET is_scratched = TRUE,
+                        scratch_reason = COALESCE(%s, scratch_reason)
+                    WHERE race_id = %s
+                      AND horse_id IN (
+                          SELECT horse_id FROM horses
+                          WHERE {HORSE_MATCH_KEY_SQL} = %s
+                      )""",
+                (reason, race_id, mk),
+            )
+            if cur.rowcount == 0:
+                logger.warning(
+                    f"ScratchedHorse no entries match: race_id={race_id} "
+                    f"name={sh.get('name')!r} match_key={mk!r}"
+                )
+
+        return race_id
 
 
 def parse_payout_section(block: str) -> dict:
