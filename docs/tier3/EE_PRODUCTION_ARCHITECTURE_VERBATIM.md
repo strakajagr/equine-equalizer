@@ -512,7 +512,7 @@ Add `primary_ensemble: str` config (env var OR DB column). Strategies read `RANK
 Column                         Type                      Nullable  Default
 ─────────────────────────────────────────────────────────────────────────────
 model_version_id               uuid                      NO        uuid_generate_v4()  [PK]
-version_name                   character varying         NO        —
+version_name                   varchar(50)               NO        —
 training_date                  timestamp with time zone  NO        —
 training_data_start            date                      NO        —
 training_data_end              date                      NO        —
@@ -524,15 +524,31 @@ top3_accuracy                  numeric                   YES       —
 calibration_score              numeric                   YES       —
 feature_list                   jsonb                     YES       —
 hyperparameters                jsonb                     YES       —
-s3_artifact_path               character varying         YES       —
+s3_artifact_path               varchar(500)              YES       —
 is_active                      boolean                   YES       false
 notes                          text                      YES       —
 created_at                     timestamp with time zone  YES       now()
-model_type                     character varying         YES       'wr'
+model_type                     varchar(60)               YES       'wr'   ← was varchar(30) pre-δ.1 σ-2
 flat_bet_roi                   numeric                   YES       —
 kelly_roi                      numeric                   YES       —
 value_bet_win_rate             numeric                   YES       —
 ```
+
+**Substrate-amendment 2026-05-19T00:30:00Z** (per δ.1 σ-2 surface):
+Original transcription at commit 19c295a omitted `character_maximum_length`
+for varchar columns. Substrate-actual lengths surfaced via δ.1 Phase 5
+substrate-bug (StringDataRightTruncation at varchar(30) on model_type).
+Substrate-actual lengths now inline above. `model_type` ALTERED from
+varchar(30) → varchar(60) per σ-2 ratification (δ.1 substrate-prerequisite).
+§ 4.32 sub-pattern B firing #8 banked: substrate-permanent reference itself
+substrate-incomplete; remediated this amendment.
+
+**Latent substrate-bug banked (separate scope)**: `version_name` varchar(50)
+substrate-collides with `train_specialist_architectures.py:196` version_name
+construction `f'specialist_{variant}_{partition_name}_{timestamp}'` worst-case
+= 53 chars (`specialist_field_size_specialist_xlarge_YYYYMMDD_HHMM`). Fires
+only for field_size_specialist variant; δ.1 style_specialist substrate-
+unaffected. Deferred to separate adjudication.
 
 **PK**: `model_version_id` (NOT `model_uuid` as memory said)
 **Indexes**:
@@ -683,6 +699,83 @@ Training scripts with `--no-register` flag:
 **FLAG 3**: BD2v2 `--no-register` consequence: specialist_style has NO model_versions row. Activation dispatch MUST first call `register_trained_artifact()` for each sub-booster, then optionally call `set_active_model()`.
 
 **FLAG 4**: Memory's PK column name `model_uuid` is wrong — substrate-actual is `model_version_id`. Any Path A dispatch SQL referencing `model_uuid` would substrate-error.
+
+### 4.7 Post-δ.1 registration state (added 2026-05-19T00:30:00Z)
+
+**State transition**: BD2v2 --no-register substrate-gap closed for
+specialist_style sub-boosters per Tony Option δ ratification + σ-2 schema
+ALTER substrate-prerequisite.
+
+**Substrate-prerequisite σ-2**: `ALTER TABLE model_versions ALTER COLUMN
+model_type TYPE varchar(60);` applied transactionally. `idx_active_model_per_type`
+partial unique index substrate-preserved verbatim post-ALTER.
+
+**Substrate-grep B-validation** (Phase B per σ-2 dispatch): max model_type
+length observed across all train_* producers = 48 chars
+(`ensemble_specialist_field_size_specialist_xlarge`). varchar(60) substrate-
+coherent ceiling for all current substrate.
+
+**Registrations added** (is_active=FALSE; registration only, NOT activation;
+State B per Phase 2.1 — META wrapper substrate-omitted):
+
+```
+sprint sub-booster:
+  model_version_id:   1202021f-2937-46eb-a1fd-0dd9b0d1fe20
+  model_type:         ensemble_specialist_style_specialist_sprint  (43 chars)
+  version_name:       specialist_style_specialist_sprint_20260518_0252
+  s3_artifact_path:   s3://equine-model-artifacts/ensemble/test/specialist_style_specialist_sprint_20260518_0252.json
+  training_window:    2026-04-25 → 2026-05-01
+  training_races:     100 (n_train=80 + n_eval=20)
+  top1_accuracy:      0.8829 (eval_auc per BD2v2 meta)
+  is_active:          FALSE
+  created_at:         2026-05-19 00:29:45.699683+00
+
+route sub-booster:
+  model_version_id:   c217c11e-1f71-43e2-8281-bf99e993331e
+  model_type:         ensemble_specialist_style_specialist_route   (42 chars)
+  version_name:       specialist_style_specialist_route_20260518_0252
+  s3_artifact_path:   s3://equine-model-artifacts/ensemble/test/specialist_style_specialist_route_20260518_0252.json
+  training_window:    2026-04-25 → 2026-05-01
+  training_races:     104 (n_train=83 + n_eval=21)
+  top1_accuracy:      0.7496 (eval_auc per BD2v2 meta)
+  is_active:          FALSE
+  created_at:         2026-05-19 00:29:45.743187+00
+```
+
+**Substrate-state post-δ.1**:
+- model_versions inventory: ensemble-class rows now 6 (was 4 per Section 4.2)
+  - `ensemble_hybrid_option_c`: 1 row (is_active=TRUE; Hybrid C production)
+  - `ensemble`: 3 rows (1 active legacy 10-feat; 2 inactive)
+  - `ensemble_specialist_style_specialist_sprint`: 1 row (is_active=FALSE)
+  - `ensemble_specialist_style_specialist_route`: 1 row (is_active=FALSE)
+- is_active=TRUE rows: UNCHANGED (Hybrid C + legacy 10-feat)
+- Production prediction path: UNCHANGED (MCIS pins by hardcoded constants
+  per Section 1; registration does NOT route; MCIS initialize substrate-
+  verified post-registration — 32 L1 artifacts + Hybrid C booster loaded
+  substrate-coherent)
+- hybrid_c_predictions writes: zero post-δ.1 writes (no inference triggered)
+
+**Substrate-prerequisite unblocked**:
+- δ.2 multi-track substrate-validation forensic measurement (next dispatch);
+  forensic can substrate-pin by model_version_id now
+- Future α (Path A) activation requires R2-R8 per Section 8.2; not unblocked
+  by registration alone
+- Future β (Path B) activation requires same R2-R8 subset; not unblocked
+  by registration alone
+
+**Rollback artifact**: `/tmp/delta_1_registration_rollback.sql` with verbatim
+PKs:
+- sprint PK: `1202021f-2937-46eb-a1fd-0dd9b0d1fe20`
+- route PK:  `c217c11e-1f71-43e2-8281-bf99e993331e`
+
+**Backup artifact**: `/tmp/model_versions_pre_delta_1_20260519-001308.sql`
+(pre-δ.1 model_versions snapshot; 145640 bytes; 212 lines).
+
+**Substrate-grounding cite**: `/tmp/delta_1_substrate_grounding.md` (419
+lines; Section 4 + 6 verbatim cite from commit 19c295a).
+
+**Reference commit pre-δ.1**: `19c295a` (Option A ratification, Sections 1-8)
+**Reference commit post-δ.1**: (this commit)
 
 ---
 
