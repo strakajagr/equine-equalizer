@@ -238,6 +238,64 @@ Hardcoded write tag: `HYBRID_C_VERSION_NAME` (line 366) — `'option_c_hybrid_en
 
 Substrate-pragmatic scope: ~100-200 LOC MCIS extension. Substrate-coherent (no architectural blocker).
 
+### 1.9 — _load_artifact verbatim body (added 2026-05-19T02:00:00Z; per Q-pre-β-1 R-1-1)
+
+**Amendment scope**: R-1-1 substrate-grounding requirement for β.1 MCIS sprint extension authoring — pre-β.1 verification surfaced reference substrate-cited function signature without body.
+
+**Substrate-actual source**: `backend/services/multicohort_inference_service.py` lines 242-258 (verbatim per Phase B.1 substrate-grep).
+
+**Verbatim function body**:
+
+```python
+    def _load_artifact(self, art: L1Artifact) -> Any:
+        local = f'/tmp/mci_artifacts/{art.cohort}__{art.model_type}__{art.version_name}'
+        os.makedirs('/tmp/mci_artifacts', exist_ok=True)
+        bucket, key = _parse_s3(art.s3_path)
+        # Use basename of s3 key as local file extension to match artifact_format dispatch
+        local_path = local + '_' + os.path.basename(key)
+        if not os.path.exists(local_path):
+            self.s3.download_file(bucket, key, local_path)
+
+        if art.artifact_format == 'xgb_json':
+            booster = xgb.Booster()
+            booster.load_model(local_path)
+            return booster
+        if art.artifact_format == 'pkl_sklearn':
+            return joblib.load(local_path)
+        raise RuntimeError(f"Unsupported artifact_format={art.artifact_format} for {art.column_name}")
+```
+
+**Substrate-pragmatic load semantics for β.1 sprint extension**:
+- Sprint sub-booster artifact_format is `xgb_json` (per Section 6.2 `.json` extension on S3 path)
+- Local cache path constructed from `{cohort}__{model_type}__{version_name}_{key_basename}`; β.1 substrate-pragmatic uses same pattern
+- S3 download idempotent via `os.path.exists(local_path)` guard
+- Returns `xgb.Booster` for xgb_json format (substrate-coherent with β.1 sprint sub-booster substrate)
+
+§ 4.32 sub-pattern B firing #12 banked: verbatim function-body transcription discipline. Codification queue +1.
+
+### 1.10 — ensemble_version write convention for production sprint routing (added 2026-05-19T02:00:00Z; per Q-pre-β-1 Option B)
+
+**Amendment scope**: R-1-4 substrate-grounding requirement for β.1 sprint sub-booster production write convention. Tony Q-pre-β-1 Option B ratification: production-era sprint-only predictions write with sub-booster-specific tag, NOT META wrapper version.
+
+**Substrate-actual semantic convention** for `ensemble_version` values in `hybrid_c_predictions` table:
+
+| ensemble_version value | Semantic |
+|---|---|
+| `option_c_hybrid_ensemble_20260515` | Hybrid C production (canonical) |
+| `specialist_style_specialist_20260518_0252` | Forensic-era META wrapper (BD3v2 + Track A + δ.2; mixed routing) |
+| `specialist_style_sprint_20260518_0252` | Production-era sprint-only (post-β activation; Q1 P1 + Q2 R1) |
+
+**Production routing semantics under Q1 P1 + Q2 R1**:
+- Distance ≤ 6.5 furlongs → sprint sub-booster invoked → writes `ensemble_version='specialist_style_sprint_20260518_0252'`
+- Distance > 6.5 furlongs → no specialist_style write; Hybrid C remains canonical via existing path
+- Route sub-booster DEPRECATED per Q2 R1; `is_active=FALSE` permanent; never invoked
+
+**Substrate-pragmatic consumer-clarity note**: strategy_harness β.2 extension sprint ranking_layer SELECT filters by `ensemble_version='specialist_style_sprint_20260518_0252'` only; substrate-additionally precise (never reads forensic-era META rows).
+
+**Substrate-coherence with σ-2 extension verification**: sub-booster sprint tag is 41 chars; substrate-coherent with `hybrid_c_predictions.ensemble_version` varchar(100) ceiling per σ-2 extension Phase 2.5 producer enumeration.
+
+**Substrate-coherence with δ.1 model_versions registration**: sub-booster sprint tag matches `version_name` registered in model_versions (PK `1202021f-2937-46eb-a1fd-0dd9b0d1fe20`); substrate-coherent traceability from prediction row → model_versions row → S3 artifact path.
+
 ---
 
 ## SECTION 2 — strategy_harness
@@ -363,6 +421,56 @@ Single substrate-grep finding: ensemble_version appears in this file ONLY at lin
 **FLAG 2**: `is_active` model_versions flag is NOT consulted by load. Substrate-pragmatic implication: ANY activation mechanism must change strategy_harness CODE, not DB flags. This is a structural refactor or an additive load block.
 
 **FLAG 3**: Mechanism for activating specialist_style as PRIMARY (vs additive shadow) substrate-actually requires changing strategy classes' `ranking_layer` attribute in strategy_registry.py from `'ensemble_hybrid_option_c'` → `'ensemble_specialist_style'`. This is Python code change in strategy_registry.py, NOT a flag flip.
+
+### 2.10 — HorsePrediction verbatim class body (added 2026-05-19T02:00:00Z; per Q-pre-β-1 R-2-2)
+
+**Amendment scope**: R-2-2 substrate-grounding requirement for β.2 strategy_harness sprint extension authoring — pre-β.1 verification surfaced reference cited RANKING_LAYER_FIELDS verbatim but HorsePrediction class body narrative-only.
+
+**Substrate-actual source**: `backend/services/strategy_harness.py` lines 26-58 (verbatim per Phase B.2 substrate-grep).
+
+**Verbatim class body**:
+
+```python
+@dataclass
+class HorsePrediction:
+    """Per-horse prediction with all layer outputs normalized."""
+    horse_id: str
+    horse_name: str
+    program_number: Optional[str] = None
+    morning_line_odds: Optional[float] = None
+    # Layer outputs (any may be None if layer didn't run for this race/style)
+    win_probability: Optional[float] = None       # wr_predictions / canonical wp
+    place_probability: Optional[float] = None
+    show_probability: Optional[float] = None
+    ensemble_win_prob: Optional[float] = None
+    handicapping_prob: Optional[float] = None     # market-blind model output
+    market_prob: Optional[float] = None
+    rank_score: Optional[float] = None            # ranker output
+    pl_win_probability: Optional[float] = None    # pl_predictions
+    pl_predicted_ev: Optional[float] = None
+    pl_edge_pct: Optional[float] = None
+    longshot_prob: Optional[float] = None
+    longshot_alert: bool = False
+    trajectory_score: Optional[float] = None
+    hybrid_c_win_prob: Optional[float] = None    # Hybrid C culled-rebuilt ensemble output
+    angle_name: Optional[str] = None
+    angle_posterior: Optional[float] = None
+    angle_ev: Optional[float] = None
+    style: Optional[str] = None                   # which specialist style (general/speed/closer/...)
+    # Production-strategy outputs (read-only context)
+    recommended_bet_type: Optional[str] = None
+    is_top_pick: bool = False
+    is_value_flag: bool = False
+    overlay_pct: Optional[float] = None
+    kelly_fraction: Optional[float] = None
+```
+
+**Substrate-pragmatic field-addition pattern for β.2**:
+- Pattern-match `hybrid_c_win_prob` (line 47 substrate; layer-output section)
+- β.2 adds: `specialist_style_sprint_win_prob: Optional[float] = None  # Specialist_style sprint sub-booster output (post-β activation; Q1 P1 SPRINT-ONLY routing)`
+- Substrate-pragmatic insertion point: after `hybrid_c_win_prob` line (substrate-coherent grouping with ensemble outputs)
+
+**Substrate-coherence with Q-pre-β-1 Option B**: field name `specialist_style_sprint_win_prob` substrate-coherent with `ensemble_version='specialist_style_sprint_20260518_0252'` per Section 1.10 convention (sub-booster-specific tag throughout consumer substrate).
 
 ---
 
@@ -501,6 +609,60 @@ Add `primary_ensemble: str` config (env var OR DB column). Strategies read `RANK
 **FLAG 1**: CC Phase 1 HALT undercounted classes (19 vs 58 substrate-actual). The 19 likely came from a `grep -cE '^class T|^class W|^class E|^class H'` style filter that missed underscore-prefixed base classes (`_RawLayerWin`, `_EnsembleBox`, etc.) and factory classes (`_DD_Spread`, etc.). Substrate-permanent count is 58 classes / 162 instances. Memory-corrected.
 
 **FLAG 2**: Tony Path A Phase 4 SQL operations against a `strategies` table are substrate-broken — no such table. Strategy additions are Python source edits + Lambda redeploy. Substrate-pragmatic: this matches Dynasty Dugout "deploy live in seconds" pattern; not a blocker, but operationally distinct from SQL.
+
+### 3.9 — Strategy exemplar verbatim class body (added 2026-05-19T02:00:00Z; per Q-pre-β-1 R-3-3)
+
+**Amendment scope**: R-3-3 substrate-grounding requirement for β.3 strategy_registry sprint additions — pre-β.1 verification surfaced reference cited STRATEGIES list verbatim (Section 3.5) but no Strategy class body anywhere.
+
+**Substrate-actual source**: `backend/services/strategy_registry.py` (canonical Hybrid C top1_win exemplar + parent `_RawLayerWin`; per Phase B.3 substrate-grep).
+
+**Parent class `_RawLayerWin` (strategy_registry.py:126)**:
+
+```python
+class _RawLayerWin(StrategyBase):
+    """Generic: bet $2 to win on top-1 from configured ranking layer."""
+    category = 'raw_layer'
+    def recommend(self, rp, ctx):
+        top = self.top_n(rp, 1)
+        if not top: return None
+        return BetRecommendation(
+            strategy_name=self.name, race_id=rp.race_id, bet_type='win',
+            horses=[top[0].horse_name], stake=2.0,
+            confidence=getattr(top[0], self.get_ranking_field()),
+            rationale=f'{self.ranking_layer} top1; prob={getattr(top[0], self.get_ranking_field()):.4f}',
+        )
+```
+
+**Exemplar `HybridC_Top1_Win` (strategy_registry.py:419)**:
+
+```python
+class HybridC_Top1_Win(_RawLayerWin):
+    name = 'hybrid_c_top1_win'
+    description = 'Hybrid C ensemble top-1 → $2 win'
+    ranking_layer = 'ensemble_hybrid_option_c'
+```
+
+**Substrate-pragmatic β.3 sprint top1_win addition pattern**:
+
+```python
+class SS_Sprint_Top1_Win(_RawLayerWin):
+    name = 'ss_sprint_top1_win'
+    description = 'Specialist_style sprint top-1 → $2 win (distance ≤ 6.5f only)'
+    ranking_layer = 'ensemble_specialist_style_sprint'
+```
+
+**Substrate-pragmatic per-strategy attribute substrate**:
+- `name`: snake_case unique identifier (substrate-coherent with strategy_pnl/strategy_recommendations.strategy_name varchar(100) ceiling per σ-2 extension Phase 2.5)
+- `description`: human-readable per-report annotation
+- `ranking_layer`: dispatcher key into RANKING_LAYER_FIELDS (Section 2.3); new value `'ensemble_specialist_style_sprint'` substrate-additive per β.2 RANKING_LAYER_FIELDS amendment
+- `category`: inherited from `_RawLayerWin` (`'raw_layer'`); β.3 substrate-coherent
+
+**Substrate-pragmatic β.3 STRATEGIES list registration**:
+- Add instance `SS_Sprint_Top1_Win()` to STRATEGIES list per Section 3.5 module-tail pattern
+- Substrate-pragmatic insertion point: substrate-coherent grouping with other ensemble-tied strategies (after Hybrid C single-race block per Section 3.5 verbatim list)
+- Substrate-additive route-filter (distance ≤ 6.5) substrate-pragmatic at recommend() override OR consumer-side strategy_harness filter (β.4 substrate-pragmatic scope)
+
+**Substrate-coherence note**: β.3 produces only ONE Top1 win Strategy initially; full β.3 scope (multi-leg spreads, exa/tri/sf boxes, etc.) substrate-pragmatic extensible via parameterized factory pattern per Section 3.2 (_DD_Spread / _P3_Spread / etc. substrate-already in production).
 
 ---
 
