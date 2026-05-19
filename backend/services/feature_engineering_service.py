@@ -221,7 +221,7 @@ class FeatureEngineeringService:
             self.compute_trip_features(all_pps)
         )
         features.update(
-            self.compute_trainer_features(entry, all_pps)
+            self.compute_trainer_features(entry, all_pps, race.race_date)
         )
         features.update(
             self.compute_workout_features(
@@ -718,10 +718,11 @@ class FeatureEngineeringService:
     def compute_trainer_features(
         self,
         entry: Entry,
-        all_pps: list
+        all_pps: list,
+        race_date=None
     ) -> dict:
         trainer_name = entry.trainer.trainer_name
-        stats = self._get_trainer_stats(trainer_name)
+        stats = self._get_trainer_stats(trainer_name, race_date=race_date)
 
         if stats:
             # FIX #7-10: use data_loader defaults, not 0.0
@@ -1122,11 +1123,26 @@ class FeatureEngineeringService:
     # ═══════════════════════════════════════════
 
     def _get_trainer_stats(
-        self, trainer_name: str
+        self, trainer_name: str, race_date=None
     ) -> Optional[dict]:
+        """REPAIR-5 Step B: AS-OF read against trainer_stats_history.
+
+        race_date is the AS-OF anchor — query returns most recent snapshot
+        with snapshot_date <= race_date. Substrate-prophylactic per § 4.32
+        #18: race_date is REQUIRED (raises ValueError if missing).
+
+        Falls back to current trainer_stats materialized view if the
+        history table has no snapshot for the AS-OF date (cold-start
+        before daily snapshots accumulate).
+        """
         if not trainer_name:
             return None
-        key = trainer_name.lower()
+        if race_date is None:
+            raise ValueError(
+                "race_date is required for trainer_stats AS-OF discipline "
+                "(REPAIR-5 B). Pass race.race_date from calling context."
+            )
+        key = (trainer_name.lower(), str(race_date))
         if key in self._trainer_stats_cache:
             return self._trainer_stats_cache[key]
         try:
@@ -1139,10 +1155,28 @@ class FeatureEngineeringService:
                      itm_rate,
                      layoff_win_rate,
                      lasix_win_rate
-                   FROM trainer_stats
-                   WHERE LOWER(trainer_name) = LOWER(%s)""",
-                (trainer_name,)
+                   FROM trainer_stats_history
+                   WHERE LOWER(trainer_name) = LOWER(%s)
+                     AND snapshot_date <= %s
+                   ORDER BY snapshot_date DESC LIMIT 1""",
+                (trainer_name, race_date)
             )
+            if row is None:
+                # Substrate-cold-start fallback: history empty for this
+                # AS-OF date; use current latest (substrate-pragmatic-
+                # approximate AS-OF until daily snapshots accumulate).
+                row = execute_one(
+                    self.conn,
+                    """SELECT
+                         total_starts,
+                         win_rate,
+                         itm_rate,
+                         layoff_win_rate,
+                         lasix_win_rate
+                       FROM trainer_stats
+                       WHERE LOWER(trainer_name) = LOWER(%s)""",
+                    (trainer_name,)
+                )
             self._trainer_stats_cache[key] = row
             return row
         except Exception as e:

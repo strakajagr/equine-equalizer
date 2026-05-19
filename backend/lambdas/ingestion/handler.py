@@ -213,6 +213,50 @@ def handler(event, context):
             logger.error(f"refresh_angle_stats failed: {e}", exc_info=True)
             return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
 
+    # ── Refresh trainer_stats materialized view + snapshot to history ──
+    # REPAIR-5 Step B: dual-write pattern parallel to refresh_angle_stats.
+    # Invoke periodically (manual or cron) to accumulate daily snapshots.
+    if action == 'refresh_trainer_stats':
+        try:
+            with get_db() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("REFRESH MATERIALIZED VIEW trainer_stats")
+                conn.commit()
+
+                # Dual-write: snapshot today's refreshed view into history
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO trainer_stats_history (
+                            trainer_name, total_starts, wins, win_rate,
+                            itm, itm_rate, layoff_win_rate,
+                            lasix_win_rate, claimed_win_rate, snapshot_date
+                        )
+                        SELECT
+                            trainer_name, total_starts, wins, win_rate,
+                            itm, itm_rate, layoff_win_rate,
+                            lasix_win_rate, claimed_win_rate, CURRENT_DATE
+                        FROM trainer_stats
+                        ON CONFLICT DO NOTHING
+                    """)
+                conn.commit()
+
+                with conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) as cnt FROM trainer_stats")
+                    count = cur.fetchone()
+                    cur.execute(
+                        "SELECT COUNT(*) as cnt FROM trainer_stats_history "
+                        "WHERE snapshot_date = CURRENT_DATE"
+                    )
+                    hist_count = cur.fetchone()
+            return {'statusCode': 200, 'body': json.dumps({
+                'refreshed': True,
+                'rows': count['cnt'] if isinstance(count, dict) else count[0],
+                'history_snapshot_rows': hist_count['cnt'] if isinstance(hist_count, dict) else hist_count[0],
+            })}
+        except Exception as e:
+            logger.error(f"refresh_trainer_stats failed: {e}", exc_info=True)
+            return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+
     # ── Collect workouts for today's entries from HRN ──
     # Invoke: {"action": "collect_workouts"} or {"action": "collect_workouts", "date": "2026-03-21"}
     if action == 'collect_workouts':
