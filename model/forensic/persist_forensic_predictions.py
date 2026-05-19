@@ -4,7 +4,9 @@ Persist BD3v2 forensic-window predictions to hybrid_c_predictions schema per T-A
 Schema-coherent insert: race_id (UUID) + horse_id (TEXT) + ensemble_version (varchar)
                        + hybrid_c_win_probability (numeric) + predicted_at (timestamp)
                        + l1_input_count (integer).
-UNIQUE constraint on (race_id, horse_id, ensemble_version): ON CONFLICT DO UPDATE.
+UNIQUE constraint on (race_id, horse_id, ensemble_version): ON CONFLICT DO NOTHING
+(UNFUCK-1 Step B; substrate-protect against re-write contamination per
+AS-OF leakage finding — re-runs should use new ensemble_version tag).
 """
 
 import argparse
@@ -49,10 +51,7 @@ def persist(parquet_path, l1_input_count=None):
             (race_id, horse_id, ensemble_version, hybrid_c_win_probability,
              predicted_at, l1_input_count)
         VALUES %s
-        ON CONFLICT (race_id, horse_id, ensemble_version) DO UPDATE
-        SET hybrid_c_win_probability = EXCLUDED.hybrid_c_win_probability,
-            predicted_at = EXCLUDED.predicted_at,
-            l1_input_count = EXCLUDED.l1_input_count
+        ON CONFLICT (race_id, horse_id, ensemble_version) DO NOTHING
     """, rows)
     conn.commit()
 

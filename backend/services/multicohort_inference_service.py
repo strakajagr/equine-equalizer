@@ -395,8 +395,7 @@ class MultiCohortInferenceService:
                    l1_input_count, ensemble_version)
                 VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (race_id, horse_id, ensemble_version)
-                DO UPDATE SET hybrid_c_win_probability = EXCLUDED.hybrid_c_win_probability,
-                              predicted_at = NOW()
+                DO NOTHING
             """, (race_id, hid, float(p), len(self._l1_artifacts), HYBRID_C_VERSION_NAME))
             rows_inserted += 1
         return rows_inserted
@@ -460,7 +459,9 @@ class MultiCohortInferenceService:
         substrate-permanent reference Section 1.10 ensemble_version convention +
         Section 5 D12 UNIQUE constraint (dual-write substrate-coherent natively).
 
-        Idempotent: ON CONFLICT (race_id, horse_id, ensemble_version) DO UPDATE.
+        Write-once: ON CONFLICT (race_id, horse_id, ensemble_version) DO NOTHING
+        (UNFUCK-1 Step B; substrate-protect race-fire-time write from
+        post-race re-invocation overwrite per AS-OF leakage finding).
         Writes ONLY when result contains sprint predictions (route_dispatch='sprint').
         Substrate-coherent no-op when route_dispatch='hybrid_c_canonical' OR result None.
         """
@@ -479,8 +480,7 @@ class MultiCohortInferenceService:
                    l1_input_count, ensemble_version)
                 VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (race_id, horse_id, ensemble_version)
-                DO UPDATE SET hybrid_c_win_probability = EXCLUDED.hybrid_c_win_probability,
-                              predicted_at = NOW()
+                DO NOTHING
             """, (race_id, hid, float(p), len(self._l1_artifacts),
                   self.SPRINT_ENSEMBLE_VERSION))
             rows_inserted += 1
