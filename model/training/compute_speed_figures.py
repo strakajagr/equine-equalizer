@@ -11,24 +11,28 @@ Computes Beyer-equivalent speed figures with:
 
 Usage: python compute_speed_figures.py
 
-REPAIR-4 SUBSTRATE-LEAKAGE MARKER (Step C.3, deferred to REPAIR-5+):
-  Par times (Step 2 query) + Beyer normalization constants (Step 6
-  median+std) are computed from the FULL past_performances corpus then
-  applied uniformly to every row — including rows from race dates that
-  PRECEDE the data used in the aggregate. This is substrate-leakage of
-  AGGREGATE statistics into earlier rows: a 2022 horse's computed_speed_
-  figure is normalized against par times that include 2024-2026 races.
+REPAIR-5 SUBSTRATE-FIX (Step A, applied 2026-05-19):
+  Par times (Step 2) + Beyer normalization (Step 6) now use PER-YEAR
+  bucketing with AS-OF discipline. Each row from year Y is processed using
+  ONLY data from years strictly < Y:
 
-  For PRODUCTION INFERENCE at race-fire-time this is substrate-mostly
-  acceptable — figures on past PPs reflect par times up to roughly
-  yesterday. For TRAINING the leakage is substrate-actual: models trained
-  on 2022-2024 data see speed figures normalized against 2025-2026 data.
+    Step 2: par_map keyed by (track, distance, surface, year). Row from
+            year Y uses par from most-recent-year < Y via bisect lookup.
+    Step 3: par lookup uses lookup_par(track, distance, surface, row.year).
+    Step 4: same-day variants — substrate-correct unchanged.
+    Step 5: applies variant — substrate-correct unchanged.
+    Step 6: norm_map keyed by year (median, std of computed_speed_figure).
+            Row from year Y normalized with stats from most-recent-year < Y.
+            Per-year UPDATE filtered by EXTRACT(YEAR FROM race_date).
 
-  Substrate-correct fix (rolling-window par times per race_date) is a
-  substrate-substantial pipeline rewrite. Deferred to REPAIR-5 when
-  retrain rules re-enable + 39 contaminated models get retrained. Until
-  then, retrain rules REMAIN DISABLED (UNFUCK-3 Step A) so this leakage
-  class cannot propagate into new model versions.
+  Substrate-effect: a 2022 row no longer sees 2024-2026 aggregate
+  statistics in its par/norm constants. Training cohorts assembled from
+  the resulting speed figures are substrate-AS-OF clean.
+
+  Pre-REPAIR-5 caveat: retrain rules were DISABLED (UNFUCK-3 Step A) so
+  the substrate-leaky figures never propagated into new model versions
+  beyond the 39 contaminated models trained pre-REPAIR-4. REPAIR-5
+  retrain wave (Step F) produces clean-cohort replacements.
 """
 
 import logging
@@ -99,8 +103,20 @@ def main():
             """)
         conn.commit()
 
-        # Step 2: Par times (FAST TRACK ONLY)
-        logger.info("Step 2: Building par times (fast/firm only)...")
+        # Step 2: Par times — ROLLING WINDOW per year (REPAIR-5 A.2 AS-OF fix)
+        #
+        # Substrate-fix: par_map now keyed by (track, distance, surface, year)
+        # using ONLY winners from years strictly BEFORE the target year.
+        # Substrate-implementation: build a per-year par map via SQL with
+        # GROUP BY year, then at row-computation time look up using
+        # (track, distance, surface, row.year - 1) — i.e., the most recent
+        # complete year before the row's race date.
+        #
+        # Per-year semantics: a row from year Y gets par from year (Y-1)'s
+        # complete corpus. This is substrate-stricter than a 365-day trailing
+        # window but substrate-pragmatic-cleaner (no SQL subqueries per row;
+        # one substrate-aggregate query produces all year buckets).
+        logger.info("Step 2: Building per-year par times (REPAIR-5 AS-OF)...")
         fast_list = "', '".join(FAST_CONDITIONS)
         par_rows = execute_query(
             conn,
@@ -108,6 +124,7 @@ def main():
                   track_code,
                   distance_furlongs,
                   surface,
+                  EXTRACT(YEAR FROM race_date)::int as par_year,
                   PERCENTILE_CONT(0.5) WITHIN GROUP
                     (ORDER BY final_time) as par_time,
                   COUNT(*) as sample_count
@@ -118,23 +135,51 @@ def main():
                   AND distance_furlongs BETWEEN 3.5 AND 12.0
                   AND surface IS NOT NULL
                   AND track_condition IN ('{fast_list}')
-                GROUP BY track_code, distance_furlongs, surface
+                GROUP BY track_code, distance_furlongs, surface,
+                         EXTRACT(YEAR FROM race_date)
                 HAVING COUNT(*) >= 5"""
         )
+        # par_map keyed by (track, distance, surface, year): par time at end
+        # of that year. For row from year Y, lookup uses year (Y-1).
         par_map = {}
         for r in par_rows:
             key = (
                 r['track_code'],
                 float(r['distance_furlongs']),
-                r['surface']
+                r['surface'],
+                int(r['par_year']),
             )
             par_map[key] = float(r['par_time'])
-        logger.info(f"Built {len(par_map)} par time buckets")
-        for key in sorted(par_map.keys())[:8]:
+        logger.info(f"Built {len(par_map)} per-year par buckets")
+        # Show samples across multiple years for diagnostic
+        sample_keys = sorted(par_map.keys())[:8]
+        for key in sample_keys:
             logger.info(
-                f"  {key[0]} {key[1]}f {key[2]}: "
+                f"  {key[0]} {key[1]}f {key[2]} y{key[3]}: "
                 f"{par_map[key]:.2f}s"
             )
+
+        # Fallback strategy: if (track, distance, surface, year-1) missing,
+        # try most-recent-prior year for same (track, distance, surface).
+        # Pre-compute a sorted-years-per-bucket index for O(log n) lookup.
+        bucket_years = {}
+        for (tc, d, s, y) in par_map.keys():
+            bucket_years.setdefault((tc, d, s), []).append(y)
+        for k in bucket_years:
+            bucket_years[k].sort()
+
+        def lookup_par(tc, d, s, target_year):
+            """Find par time AS-OF target_year using strict less-than search.
+            Returns par from most recent year strictly < target_year, or None.
+            """
+            years = bucket_years.get((tc, d, s))
+            if not years:
+                return None
+            import bisect
+            idx = bisect.bisect_left(years, target_year)
+            if idx == 0:
+                return None  # no prior-year data
+            return par_map.get((tc, d, s, years[idx - 1]))
 
         # Step 3: Compute speed ratings with condition + lengths adj
         logger.info(
@@ -154,7 +199,8 @@ def main():
                           track_condition, final_time,
                           finish_position, lengths_behind,
                           fraction_1, call_1_lengths,
-                          fraction_2, call_2_lengths
+                          fraction_2, call_2_lengths,
+                          race_date
                    FROM past_performances
                    WHERE final_time > 0
                      AND final_time < 200
@@ -171,12 +217,14 @@ def main():
 
             updates = []
             for r in rows:
-                key = (
+                # REPAIR-5 AS-OF: par from prior years only
+                row_year = int(r['race_date'].year)
+                par = lookup_par(
                     r['track_code'],
                     float(r['distance_furlongs']),
-                    r['surface']
+                    r['surface'],
+                    row_year,
                 )
-                par = par_map.get(key)
                 if par is None:
                     continue
 
@@ -359,10 +407,17 @@ def main():
 
         logger.info(f"Adjusted figures: {total_figured:,}")
 
-        # Step 6: Normalize to Beyer scale
-        logger.info("Step 6: Normalizing to Beyer scale...")
+        # Step 6: Normalize to Beyer scale — PER-YEAR (REPAIR-5 AS-OF fix)
+        #
+        # Substrate-fix: normalization constants (median + std) computed
+        # PER YEAR using ONLY data from years strictly BEFORE the target
+        # year. Substrate-pragmatic-parallel to Step 2 par-time fix.
+        # Substrate-effect: a 2024 row gets normalized using 2023's median/std,
+        # not the cross-year aggregate that would substrate-leak future years.
+        logger.info("Step 6: Per-year Beyer normalization (REPAIR-5 AS-OF)...")
 
-        # Diagnostic: inspect speed_rating_raw distribution before norm
+        # Diagnostic: substrate-shows cross-year aggregate for human eye only;
+        # NOT used for normalization
         raw_stats = execute_one(
             conn,
             """SELECT
@@ -376,45 +431,107 @@ def main():
                FROM past_performances
                WHERE speed_rating_raw IS NOT NULL"""
         )
-        logger.info("speed_rating_raw stats (DB):")
+        logger.info("speed_rating_raw cross-year stats (DIAGNOSTIC ONLY):")
         logger.info(f"  mean:   {float(raw_stats['mean']):.2f}")
         logger.info(f"  median: {float(raw_stats['median']):.2f}")
         logger.info(f"  std:    {float(raw_stats['std']):.2f}")
-        logger.info(f"  min:    {float(raw_stats['min_val']):.2f}")
-        logger.info(f"  max:    {float(raw_stats['max_val']):.2f}")
         logger.info(f"  count:  {int(raw_stats['cnt']):,}")
 
-        import numpy as np
-        arr = np.array(all_adjusted)
-        logger.info("all_adjusted stats (in-memory):")
-        logger.info(f"  mean:   {float(np.mean(arr)):.2f}")
-        logger.info(f"  median: {float(np.median(arr)):.2f}")
-        logger.info(f"  std:    {float(np.std(arr)):.2f}")
-        logger.info(f"  min:    {float(np.min(arr)):.2f}")
-        logger.info(f"  max:    {float(np.max(arr)):.2f}")
-        logger.info(f"  count:  {len(arr):,}")
-
-        median_fig = float(np.median(arr))
-        std_fig = float(np.std(arr))
-        logger.info(
-            f"Pre-norm: median={median_fig:.2f}, "
-            f"std={std_fig:.2f}"
+        # Substrate-fix: build per-year normalization stats from
+        # computed_speed_figure (post Step 5 variant-adjustment, pre-Beyer).
+        # Each year's stats are computed from THAT YEAR's data; row from
+        # year Y is normalized with (Y-1)'s stats.
+        per_year_stats = execute_query(
+            conn,
+            """SELECT
+                 EXTRACT(YEAR FROM race_date)::int as norm_year,
+                 PERCENTILE_CONT(0.5) WITHIN GROUP
+                   (ORDER BY computed_speed_figure)::float as median,
+                 STDDEV(computed_speed_figure)::float       as std,
+                 COUNT(*)                                   as cnt
+               FROM past_performances
+               WHERE computed_speed_figure IS NOT NULL
+               GROUP BY EXTRACT(YEAR FROM race_date)
+               HAVING COUNT(*) >= 1000
+               ORDER BY norm_year"""
         )
+        norm_map = {}
+        for r in per_year_stats:
+            norm_map[int(r['norm_year'])] = (
+                float(r['median']),
+                float(r['std']),
+            )
+            logger.info(
+                f"  y{int(r['norm_year'])}: "
+                f"median={float(r['median']):.2f} "
+                f"std={float(r['std']):.2f} "
+                f"n={int(r['cnt']):,}"
+            )
 
+        # Fallback: if year Y-1 missing, use most-recent-prior year available
+        norm_years_sorted = sorted(norm_map.keys())
+
+        def lookup_norm(target_year):
+            """Most recent year strictly < target_year with norm stats.
+            Returns (median, std) or None if no prior data."""
+            import bisect
+            idx = bisect.bisect_left(norm_years_sorted, target_year)
+            if idx == 0:
+                return None
+            return norm_map[norm_years_sorted[idx - 1]]
+
+        # Apply per-year normalization via UPDATE-per-year loop
+        # Substrate-pragmatic: small number of years (5-10) so cost is minimal.
+        # Per-year UPDATE filters by race_date range.
         with conn.cursor() as cur:
             cur.execute(
-                """UPDATE past_performances
-                   SET computed_speed_figure = ROUND(
-                     LEAST(130, GREATEST(0,
-                       (computed_speed_figure - %s) / %s
-                       * 12 + 80
-                     ))::numeric, 1
-                   )
-                   WHERE computed_speed_figure IS NOT NULL""",
-                (median_fig, std_fig)
+                """SELECT EXTRACT(YEAR FROM race_date)::int as y, COUNT(*)
+                   FROM past_performances
+                   WHERE computed_speed_figure IS NOT NULL
+                   GROUP BY EXTRACT(YEAR FROM race_date)
+                   ORDER BY y"""
             )
-        conn.commit()
-        logger.info("Normalization complete")
+            target_years = [int(row[0]) for row in cur.fetchall()]
+
+        normalized_rows = 0
+        for target_year in target_years:
+            norm = lookup_norm(target_year)
+            if norm is None:
+                logger.warning(
+                    f"  y{target_year}: no prior-year stats; "
+                    f"rows skipped (substrate-cold-start)"
+                )
+                continue
+            median_fig, std_fig = norm
+            if std_fig <= 0:
+                logger.warning(
+                    f"  y{target_year}: std<=0 from y{target_year-1}; skipping"
+                )
+                continue
+            with conn.cursor() as cur:
+                cur.execute(
+                    """UPDATE past_performances
+                       SET computed_speed_figure = ROUND(
+                         LEAST(130, GREATEST(0,
+                           (computed_speed_figure - %s) / %s
+                           * 12 + 80
+                         ))::numeric, 1
+                       )
+                       WHERE computed_speed_figure IS NOT NULL
+                         AND EXTRACT(YEAR FROM race_date) = %s""",
+                    (median_fig, std_fig, target_year)
+                )
+                normalized_rows += cur.rowcount
+            conn.commit()
+            logger.info(
+                f"  y{target_year}: normalized {cur.rowcount:,} rows "
+                f"with y<{target_year} stats (m={median_fig:.2f} s={std_fig:.2f})"
+            )
+
+        logger.info(
+            f"Per-year normalization complete: "
+            f"{normalized_rows:,} rows normalized"
+        )
 
         # Step 7: Validation
         logger.info("=" * 50)
