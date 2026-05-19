@@ -1768,3 +1768,129 @@ Substrate-evidence basis:
 
 ---
 
+## SECTION 9 — REPAIR-4 AS-OF DISCIPLINE + AGGREGATE-HISTORY (2026-05-19)
+
+### 9.1 Substrate-origin
+
+REPAIR-4 dispatch addressed substrate-divergent findings discovered during
+β arc supplemental investigation (supp-2 Item 2): **D4 AS-OF discipline
+violation in past_performances at race-fire-time inference**.
+
+Root cause: `entry_repository.get_entries_by_race(race_id)` queried
+`past_performances` with NO date filter. The race-being-predicted + any
+newer races for the same horse were returned as "past performances" with
+`finish_position` populated, leaking ground truth into feature_engineering.
+Race d50e069c case substrate-quantified: 9 of 12 horses had their own race
+in returned pps.
+
+Concurrent finding: `angle_stats` aggregate table substrate-refreshed
+in-place by ingestion Lambda — for backtest/training, this leaks future
+aggregate state.
+
+### 9.2 Substrate-state of repository changes (committed)
+
+**Commit chain**:
+- 76cd8b0  REPAIR-4 Step B: AS-OF discipline + ON CONFLICT DO NOTHING
+- f38adff  REPAIR-4 Step C: angle_stats AS-OF snapshot history + speed-fig marker
+- 76de48a  REPAIR-4 Steps E+F: regression test suite + run
+
+**Step B Tier-1 (12 files, 161+/134-)**:
+- `backend/repositories/entry_repository.py`
+  - `get_entries_by_race(race_id, as_of_date=None)` — `as_of_date` REQUIRED
+    (raises ValueError if missing per § 4.32 #18 prophylactic discipline)
+  - `get_entry_by_id(entry_id, as_of_date=None)` — same pattern
+  - SQL: `AND race_date < %s` on past_performances queries
+- 7 callsites plumbed with `race.race_date`:
+  - `backend/services/multicohort_inference_service.py:306`
+  - `backend/services/inference_service.py:231`
+  - `backend/services/ls_inference_service.py:509`
+  - `backend/services/pl_inference_service.py:240`
+  - `backend/services/wr_inference_service.py:443`
+  - `model/ensemble/option_c_inference.py:427`
+  - `model/training/train.py:158`
+- pp_count subquery AS-OF predicates added (ls/pl/wr inference services)
+- ON CONFLICT DO UPDATE → DO NOTHING (4 prediction repositories + ls
+  inference INSERT path)
+- result_repository.py INTENTIONALLY retains DO UPDATE (legitimate DQ /
+  payout corrections; NOT prediction leakage)
+
+**Step C Tier-2**:
+- Audit verdict: `data_loader.py` / `trajectory/train.py` /
+  `class_tiers.py` / `time_series_eval.py` / `training/train.py`
+  ALREADY substrate-AS-OF clean (per-row helpers filter
+  `prior < race_date`; sequence-builder uses iloc slicing; LAG via shift;
+  SQL predicate explicit; Step B fixed)
+- `compute_speed_figures.py` rolling-window par-time leakage: SUBSTRATE-
+  MARKER added in docstring; substantial pipeline rewrite DEFERRED to
+  REPAIR-5+. Retrain rules REMAIN DISABLED (UNFUCK-3 Step A) so leakage
+  class cannot propagate into new model versions.
+- `angle_stats` AS-OF snapshot history:
+  - Migration `012_angle_stats_history.sql` APPLIED to production:
+    - CREATE TABLE `angle_stats_history` (orig cols + `snapshot_date date`)
+    - UNIQUE index (angle_name, trainer_name, track_code, snapshot_date)
+      `NULLS NOT DISTINCT` (PG 16 semantics)
+    - Lookup indexes for AS-OF query pattern
+    - Backfill from current `angle_stats`: 3314 rows seeded with
+      `snapshot_date = CURRENT_DATE` (1 row dedup'd under NULLS NOT DISTINCT)
+  - `ingestion/handler.py refresh_angle_stats` now DUAL-WRITES: refreshes
+    `angle_stats` (latest) THEN INSERTs snapshot into history with
+    `CURRENT_DATE` (ON CONFLICT DO NOTHING for re-run idempotency)
+  - `_score_angles(row, ml_odds, race_date)` queries
+    `angle_stats_history` WHERE `snapshot_date <= race_date` ORDER BY DESC
+    LIMIT 1 (substrate-AS-OF aggregate state)
+  - `model/angles/scorer.py query_angle_stats(conn, angle, trainer,
+    race_date=None)` substrate-required race_date param; `score_entry_
+    angles` plumbs through
+
+**Step E regression suite** at `tests/repair_4/`:
+- test_as_of_discipline.py (3 tests) — guard + filter verification
+- test_angle_stats_history.py (5 tests) — schema + index + AS-OF semantics
+- test_conflict_handling.py (6 tests) — DO NOTHING enforcement
+- test_inference_callsite_plumbing.py (3 tests) — all callsites + history
+- test_d4_regression.py (1 test, SKIPPED) — race d50e069c structural check
+- Run: 17 passed, 1 skipped, 0.69s
+
+### 9.3 Substrate-state of deployed image
+
+Per REPAIR-4 Step H: deployed via `cdk deploy EquineComputeStack
+--require-approval never` (Tony's canonical 20x/day mechanism). Dockerfiles
+COPY backend/ + model/ at build time — all 8 Lambda images rebuilt with
+substrate-patched code. Migration 012 applied to production Aurora BEFORE
+code deploy (substrate-precondition: history table exists when first
+inference fire occurs against new code).
+
+### 9.4 Substrate-blast-radius pre-fix vs post-fix
+
+**Pre-fix substrate-vulnerability surfaces** (substrate-honest enumeration):
+- D4 past_performances leakage: substrate-actual at every race-fire-time
+  inference; substrate-magnitude varied (race d50e069c case: 9/12 horses).
+  Effect: feature_engineering computed features against a corpus that
+  INCLUDED the target race + same-day races. Substrate-magnitude in model
+  output substrate-pragmatic-non-trivial but not substrate-quantified.
+- ON CONFLICT DO UPDATE on predictions: substrate-vulnerability not
+  EXPLOITED yet (production substrate-coherent per UNFUCK-1 Step C audit)
+  but substrate-permanently lurking. Step B closed.
+- angle_stats refreshed in-place: substrate-mostly-OK at race-fire-time
+  (refreshed nightly with prior day's results); substrate-leaky for
+  backtest/training replay against historical races.
+
+**Post-fix substrate-state**:
+- D4: substrate-closed via mandatory as_of_date + race_date < predicate
+- ON CONFLICT DO NOTHING: substrate-closed for predictions
+- angle_stats: substrate-closed via angle_stats_history + AS-OF reads;
+  cold-start substrate-acceptable (only today's snapshot exists initially;
+  history accumulates over time)
+
+### 9.5 Deferred to REPAIR-5+
+
+- Rolling-window par times in `compute_speed_figures.py` (training-only
+  leakage class; retrain rules disabled prevents propagation)
+- 39 contaminated models retrain post-rolling-window fix
+- δ.2 re-measurement against substrate-clean training cohort
+- β arc re-adjudication post-retrain (β arc was substrate-fiction at
+  activation layer per supp-2 finding; specialist_style sprint sub-
+  booster never substrate-actually routed to in production because
+  `predict_race_with_routing` has ZERO production callers)
+
+---
+
