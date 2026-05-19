@@ -108,7 +108,7 @@ def dump_dataset_only(specialist: str = 'gonzo_sauce') -> int:
         features_df, labels_df = build_feature_matrix(
             conn=conn,
             start_year=2022,
-            end_year=2025,
+            end_year=2026,
             include_odds=True,
             pps_filter=pp_filter,
         )
@@ -220,6 +220,37 @@ def save_artifacts(model: xgb.Booster, feature_names: list[str],
         except Exception as e:
             logger.warning(f'S3 upload failed for {local_path.name}: {e}')
 
+    # § 4.33: register in model_versions post-S3-upload
+    try:
+        from training.registration import register_trained_artifact
+        # REPAIR-5-RESCUE: pass model_type=None so register_trained_artifact
+        # invokes derive_model_type(version_name) → substrate-canonical mapping
+        # (wp_core_lean58_X → win_prob_core_X). Passing raw version_suffix as
+        # model_type bypassed derive_model_type, producing model_type values
+        # that didn't match production inference service queries.
+        register_trained_artifact(
+            version_name=version,
+            model_type=None,
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': feature_names,
+                'xgb_params': params,
+                'top1_accuracy': eval_results.get('top1_win_rate'),
+                'calibration_score': eval_results.get('calibration'),
+                'exacta_hit_rate': eval_results.get('exacta_hit_rate'),
+                'trifecta_hit_rate': eval_results.get('trifecta_hit_rate'),
+                'flat_bet_roi': eval_results.get('flat_bet_roi'),
+                'kelly_roi': eval_results.get('kelly_roi'),
+                'value_bet_win_rate': eval_results.get('value_bet_win_rate'),
+                'notes': (
+                    f'win_prob per-layer training; model_type={model_type}; '
+                    f'specialist={specialist}; objective=binary:logistic'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
+
 
 def train_core(features_df: pd.DataFrame, labels_df: pd.DataFrame,
                binary_labels: np.ndarray, feature_names: list[str],
@@ -233,8 +264,8 @@ def train_core(features_df: pd.DataFrame, labels_df: pd.DataFrame,
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
     version = f'{version_suffix}_{timestamp}'
 
-    train_mask = labels_df['race_date'].dt.year <= 2024
-    val_mask   = labels_df['race_date'].dt.year == 2025
+    train_mask = labels_df['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_df['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_df['race_date'] <= pd.Timestamp('2026-05-01'))
 
     X_train = features_df.loc[train_mask, feature_names].values.astype(np.float32)
     y_train = binary_labels[train_mask]
@@ -343,8 +374,8 @@ def train_workout_layer(features_df: pd.DataFrame, labels_df: pd.DataFrame,
     binary_labels_w = binary_labels[workout_mask]
     labels_w = labels_df[workout_mask].reset_index(drop=True)
 
-    train_mask = labels_w['race_date'].dt.year <= 2024
-    val_mask   = labels_w['race_date'].dt.year == 2025
+    train_mask = labels_w['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_w['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_w['race_date'] <= pd.Timestamp('2026-05-01'))
     n_train = int(train_mask.sum())
     n_val = int(val_mask.sum())
 
@@ -414,8 +445,17 @@ def train_full_model(features_df: pd.DataFrame, labels_df: pd.DataFrame,
     """
     lean_tag = os.environ.get("LEAN_TAG", "").strip()
     if specialist == 'gonzo_sauce':
-        # Phase A3: lean53 base (53) + 14 Gonzo Sauce features = 67 features.
-        full_features = get_gonzo_sauce_features()
+        if lean_tag == "lean58":
+            # Phase 3 (2026-05-16): Phase B Top-5 + Gonzo = 72 features
+            from shared.feature_definitions import get_gonzo_sauce_plus_top5_features
+            full_features = get_gonzo_sauce_plus_top5_features()
+        else:
+            # Phase A3: lean53 base (53) + 14 Gonzo Sauce features = 67 features.
+            full_features = get_gonzo_sauce_features()
+    elif lean_tag == "lean58":
+        # Phase 3 (2026-05-16): lean53 + 5 Phase B Top-5 = 58 features
+        from shared.feature_definitions import get_lean53_plus_top5_features
+        full_features = get_lean53_plus_top5_features()
     elif lean_tag == "lean53":
         full_features = get_lean53_features()  # 53 features
     else:
@@ -481,10 +521,10 @@ def train_core_model_only(specialist: str = 'general'):
     )
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     pps_filter = get_pp_filter(specialist)
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True,
+        conn, start_year=2022, end_year=2026, include_odds=True,
         pps_filter=pps_filter,
     )
 
@@ -500,12 +540,21 @@ def train_core_model_only(specialist: str = 'general'):
     n_losers = int((binary_labels == 0.0).sum())
     spw = n_losers / n_winners if n_winners > 0 else 1.0
 
-    # Use lean53_core (47 features) — workout-blind, market-blind
-    from shared.feature_definitions import get_lean53_core_features
-    feat_core = get_lean53_core_features()
-    logger.info(
-        f"wp_core lean53 feature set: {len(feat_core)} features (lean53_core)"
+    # Feature set per LEAN_TAG (lean53 = 47; lean58 = 52 with Phase B Top-5)
+    lean_tag_inner = os.environ.get("LEAN_TAG", "").strip()
+    from shared.feature_definitions import (
+        get_lean53_core_features, get_lean53_core_plus_top5_features,
     )
+    if lean_tag_inner == "lean58":
+        feat_core = get_lean53_core_plus_top5_features()  # 52
+        logger.info(
+            f"wp_core lean58 feature set: {len(feat_core)} features (lean53_core + Top-5)"
+        )
+    else:
+        feat_core = get_lean53_core_features()  # 47
+        logger.info(
+            f"wp_core lean53 feature set: {len(feat_core)} features (lean53_core)"
+        )
 
     params = dict(XGB_PARAMS)
     params['scale_pos_weight'] = spw
@@ -542,10 +591,10 @@ def train_full_model_only(specialist: str = 'general'):
     logger.info(f"Win Probability FULL model daily retrain starting (specialist={specialist})")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     pps_filter = get_pp_filter(specialist)
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True,
+        conn, start_year=2022, end_year=2026, include_odds=True,
         pps_filter=pps_filter,
     )
 
@@ -574,9 +623,9 @@ def main():
     logger.info("Win Probability Model (Layer 1) training starting — binary:logistic")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True
+        conn, start_year=2022, end_year=2026, include_odds=True
     )
     conn.close()
 

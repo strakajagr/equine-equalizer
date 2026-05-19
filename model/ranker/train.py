@@ -97,6 +97,34 @@ def save_artifacts(model: xgb.Booster, feature_names: list[str],
         except Exception as e:
             logger.warning(f'S3 upload failed for {local_path.name}: {e}')
 
+    # § 4.33: register in model_versions post-S3-upload
+    # REPAIR-5-RESCUE: pass model_type=None so derive_model_type maps
+    # lean58 prefixes → canonical model_type names (rk_full_lean58_X → rk_full_X)
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type=None,
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': feature_names,
+                'xgb_params': {k: v for k, v in params.items() if not callable(v)},
+                'top1_accuracy': eval_results.get('top1_win_rate'),
+                'calibration_score': eval_results.get('calibration'),
+                'exacta_hit_rate': eval_results.get('exacta_hit_rate'),
+                'trifecta_hit_rate': eval_results.get('trifecta_hit_rate'),
+                'flat_bet_roi': eval_results.get('flat_bet_roi'),
+                'kelly_roi': eval_results.get('kelly_roi'),
+                'value_bet_win_rate': eval_results.get('value_bet_win_rate'),
+                'notes': (
+                    f'ranker per-layer training; model_type={model_type}; '
+                    f'specialist={specialist}; objective=rank:pairwise'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
+
 
 def train_ranker(features_df: pd.DataFrame, labels_df: pd.DataFrame,
                  rank_labels: np.ndarray, feature_names: list[str],
@@ -121,8 +149,8 @@ def train_ranker(features_df: pd.DataFrame, labels_df: pd.DataFrame,
         sample_weight_sorted = None
 
     # Temporal split
-    train_mask = labels_sorted['race_date'].dt.year <= 2024
-    val_mask   = labels_sorted['race_date'].dt.year == 2025
+    train_mask = labels_sorted['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_sorted['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_sorted['race_date'] <= pd.Timestamp('2026-05-01'))
 
     X_train = features_sorted.loc[train_mask, feature_names].values.astype(np.float32)
     y_train = rank_labels_sorted[train_mask.values]
@@ -239,10 +267,10 @@ def train_full_model_only(specialist: str = 'general'):
     logger.info(f"Ranker FULL model daily retrain starting (specialist={specialist})")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     pps_filter = get_pp_filter(specialist)
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True,
+        conn, start_year=2022, end_year=2026, include_odds=True,
         pps_filter=pps_filter,
     )
 
@@ -261,6 +289,11 @@ def train_full_model_only(specialist: str = 'general'):
             f"rk_full feature set: {len(full_features)} features "
             f"(specialist=gonzo_sauce, lean53 + 14 Phase A3)"
         )
+    elif lean_tag == "lean58":
+        # Phase 3 (2026-05-16): lean53 + 5 Phase B Top-5 = 58 features
+        from shared.feature_definitions import get_lean53_plus_top5_features
+        full_features = get_lean53_plus_top5_features()
+        logger.info(f"rk_full feature set: {len(full_features)} (lean58 = lean53 + Top-5)")
     elif lean_tag == "lean53":
         full_features = get_lean53_features()
         logger.info(f"rk_full feature set: {len(full_features)} (lean53)")
@@ -300,9 +333,9 @@ def main():
     logger.info("Finish Position Ranker (Layer 2) training starting — rank:pairwise")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True
+        conn, start_year=2022, end_year=2026, include_odds=True
     )
     conn.close()
 

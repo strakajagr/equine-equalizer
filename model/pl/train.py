@@ -113,6 +113,34 @@ def save_artifacts(model: xgb.Booster, feature_names: list[str],
         except Exception as e:
             logger.warning(f'S3 upload failed for {local_path.name}: {e}')
 
+    # § 4.33: register in model_versions post-S3-upload
+    # REPAIR-5-RESCUE: pass model_type=None so derive_model_type maps
+    # lean58 prefixes → canonical model_type names (pl_core_lean58_X → pl_core_X)
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type=None,
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': feature_names,
+                'xgb_params': params,
+                'top1_accuracy': eval_results.get('top1_win_rate'),
+                'calibration_score': eval_results.get('calibration'),
+                'exacta_hit_rate': eval_results.get('exacta_hit_rate'),
+                'trifecta_hit_rate': eval_results.get('trifecta_hit_rate'),
+                'flat_bet_roi': eval_results.get('flat_bet_roi'),
+                'kelly_roi': eval_results.get('kelly_roi'),
+                'value_bet_win_rate': eval_results.get('value_bet_win_rate'),
+                'notes': (
+                    f'pl per-layer training; model_type={model_type}; '
+                    f'specialist={specialist}'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
+
 
 def has_real_workout_data(features_df: pd.DataFrame) -> np.ndarray:
     """True for rows where workout data is real (not defaults)."""
@@ -137,9 +165,9 @@ def train_full_model_only(specialist: str = 'general'):
     pps_filter = get_pp_filter(specialist)  # None unless sprint/route
 
     conn = _get_conn()
-    logger.info("Building feature matrix (2022-2025, odds-aware)...")
+    logger.info("Building feature matrix (2022-2026, odds-aware)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True,
+        conn, start_year=2022, end_year=2026, include_odds=True,
         pps_filter=pps_filter,
     )
 
@@ -171,7 +199,11 @@ def train_full_model_only(specialist: str = 'general'):
     logger.info("=" * 60)
 
     lean_tag = os.environ.get("LEAN_TAG", "").strip()
-    if lean_tag == "lean53":
+    if lean_tag == "lean58":
+        # Phase 3 (2026-05-16): lean53_core + 5 Phase B Top-5 = 52 features
+        from shared.feature_definitions import get_lean53_core_plus_top5_features
+        feature_names = get_lean53_core_plus_top5_features()
+    elif lean_tag == "lean53":
         feature_names = get_lean53_core_features()  # 47 features
     else:
         feature_names = get_core_features(include_odds=True)  # 58
@@ -179,8 +211,8 @@ def train_full_model_only(specialist: str = 'general'):
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
     version_l1 = f'{suffix_l1}_{timestamp}'
 
-    train_mask = labels_df['race_date'].dt.year <= 2024
-    val_mask   = labels_df['race_date'].dt.year == 2025
+    train_mask = labels_df['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_df['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_df['race_date'] <= pd.Timestamp('2026-05-01'))
 
     X_train = features_df.loc[train_mask, feature_names].values.astype(np.float32)
     y_train = ev_labels[train_mask]
@@ -286,8 +318,8 @@ def train_full_model_only(specialist: str = 'general'):
         # Slice sample_weight to workout-only subset (specialist-aware)
         sw_w = sample_weight[workout_mask] if sample_weight is not None else None
 
-        l2_train_mask = labels_w['race_date'].dt.year <= 2024
-        l2_val_mask   = labels_w['race_date'].dt.year == 2025
+        l2_train_mask = labels_w['race_date'] <= pd.Timestamp('2026-04-24')
+        l2_val_mask   = (labels_w['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_w['race_date'] <= pd.Timestamp('2026-05-01'))
         n_train = int(l2_train_mask.sum())
         n_val   = int(l2_val_mask.sum())
 

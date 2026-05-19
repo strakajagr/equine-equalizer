@@ -107,6 +107,31 @@ def save_artifacts(model: xgb.Booster, feature_names: list[str],
         except Exception as e:
             logger.warning(f'S3 upload failed for {local_path.name}: {e}')
 
+    # § 4.33: register in model_versions post-S3-upload
+    # REPAIR-5-RESCUE: pass model_type=None so derive_model_type maps
+    # lean58 prefixes → canonical model_type names
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type=None,
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': feature_names,
+                'xgb_params': params,
+                'top1_accuracy': eval_results.get('top1_win_rate'),
+                'calibration_score': eval_results.get('calibration'),
+                'exacta_hit_rate': eval_results.get('exacta_hit_rate'),
+                'trifecta_hit_rate': eval_results.get('trifecta_hit_rate'),
+                'flat_bet_roi': eval_results.get('flat_bet_roi'),
+                'kelly_roi': eval_results.get('kelly_roi'),
+                'value_bet_win_rate': eval_results.get('value_bet_win_rate'),
+                'notes': f'wr per-layer training; model_type={model_type}',
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
+
 
 def train_core(features_df: pd.DataFrame, labels_df: pd.DataFrame,
                ev_labels: np.ndarray, feature_names: list[str],
@@ -118,8 +143,8 @@ def train_core(features_df: pd.DataFrame, labels_df: pd.DataFrame,
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
     version = f'{version_suffix}_{timestamp}'
 
-    train_mask = labels_df['race_date'].dt.year <= 2024
-    val_mask   = labels_df['race_date'].dt.year == 2025
+    train_mask = labels_df['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_df['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_df['race_date'] <= pd.Timestamp('2026-05-01'))
 
     X_train = features_df.loc[train_mask, feature_names].values.astype(np.float32)
     y_train = ev_labels[train_mask]
@@ -214,8 +239,8 @@ def train_workout_layer(features_df: pd.DataFrame, labels_df: pd.DataFrame,
     labels_w = labels_df[workout_mask].reset_index(drop=True)
 
     # Temporal split within workout-available data
-    train_mask = labels_w['race_date'].dt.year <= 2024
-    val_mask   = labels_w['race_date'].dt.year == 2025
+    train_mask = labels_w['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask   = (labels_w['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_w['race_date'] <= pd.Timestamp('2026-05-01'))
 
     n_train = int(train_mask.sum())
     n_val = int(val_mask.sum())
@@ -274,9 +299,9 @@ def main():
     logger.info("WR Model training starting (two-layer architecture)")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True
+        conn, start_year=2022, end_year=2026, include_odds=True
     )
     conn.close()
 
