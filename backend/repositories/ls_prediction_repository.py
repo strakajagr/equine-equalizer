@@ -298,25 +298,8 @@ class LSPredictionRepository(BaseRepository):
                  %s,%s,%s,%s,%s,%s,%s,%s,%s,
                  %s,%s,%s,%s,%s,%s,%s
                )
-               ON CONFLICT (entry_id) DO UPDATE SET
-                 final_win_probability =
-                   EXCLUDED.final_win_probability,
-                 longshot_alert = EXCLUDED.longshot_alert,
-                 confidence = EXCLUDED.confidence,
-                 kelly_fraction = EXCLUDED.kelly_fraction,
-                 predicted_rank = EXCLUDED.predicted_rank,
-                 xgb_rank_score = EXCLUDED.xgb_rank_score,
-                 rf_longshot_prob =
-                   EXCLUDED.rf_longshot_prob,
-                 lstm_trajectory = EXCLUDED.lstm_trajectory,
-                 calibrated_win_prob =
-                   EXCLUDED.calibrated_win_prob,
-                 bayesian_angle_ev =
-                   EXCLUDED.bayesian_angle_ev,
-                 angle_description =
-                   EXCLUDED.angle_description,
-                 feature_importance =
-                   EXCLUDED.feature_importance
+               -- REPAIR-4: DO NOTHING substrate-protects clean writes
+               ON CONFLICT (entry_id) DO NOTHING
                RETURNING prediction_id""",
             (
                 prediction_data['entry_id'],

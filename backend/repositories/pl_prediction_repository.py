@@ -269,26 +269,8 @@ class PLPredictionRepository(BaseRepository):
                  %s,%s,%s,%s,%s,%s,%s,%s,
                  %s,%s
                )
-               ON CONFLICT (race_id, entry_id, style) DO UPDATE SET
-                 win_probability =
-                   EXCLUDED.win_probability,
-                 predicted_ev = EXCLUDED.predicted_ev,
-                 confidence_score =
-                   EXCLUDED.confidence_score,
-                 predicted_rank = EXCLUDED.predicted_rank,
-                 is_top_pick = EXCLUDED.is_top_pick,
-                 closing_odds = EXCLUDED.closing_odds,
-                 implied_probability =
-                   EXCLUDED.implied_probability,
-                 edge_pct = EXCLUDED.edge_pct,
-                 is_value_bet = EXCLUDED.is_value_bet,
-                 is_strong_value = EXCLUDED.is_strong_value,
-                 kelly_fraction = EXCLUDED.kelly_fraction,
-                 kelly_bet_size = EXCLUDED.kelly_bet_size,
-                 feature_importance =
-                   EXCLUDED.feature_importance,
-                 handicapping_prob = EXCLUDED.handicapping_prob,
-                 market_prob = EXCLUDED.market_prob
+               -- REPAIR-4: DO NOTHING substrate-protects clean writes
+               ON CONFLICT (race_id, entry_id, style) DO NOTHING
                RETURNING prediction_id""",
             (
                 prediction_data['entry_id'],

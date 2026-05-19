@@ -227,10 +227,11 @@ class InferenceService:
                 with self.conn.cursor() as cur:
                     cur.execute("SAVEPOINT race_sp")
 
-                # Load entries with PPs
+                # Load entries with PPs (REPAIR-4: AS-OF predicate enforced)
                 race.entries = (
                     entry_repo.get_entries_by_race(
-                        race.race_id
+                        race.race_id,
+                        as_of_date=race.race_date,
                     )
                 )
 

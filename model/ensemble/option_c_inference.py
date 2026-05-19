@@ -424,7 +424,7 @@ def main():
                 continue
             try:
                 race = race_repo.get_race_by_id(race_id)
-                race.entries = entry_repo.get_entries_by_race(race_id)
+                race.entries = entry_repo.get_entries_by_race(race_id, as_of_date=race.race_date)
                 if len(race.entries) < 4:
                     n_skip += 1; continue
                 fdf = fe.build_feature_matrix(race, include_odds=True)

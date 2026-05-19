@@ -236,9 +236,11 @@ class PLInferenceService:
                 with self.conn.cursor() as cur:
                     cur.execute("SAVEPOINT pl_race_sp")
 
+                # REPAIR-4: AS-OF predicate enforced
                 race.entries = (
                     entry_repo.get_entries_by_race(
-                        race.race_id
+                        race.race_id,
+                        as_of_date=race.race_date,
                     )
                 )
 
@@ -349,12 +351,14 @@ class PLInferenceService:
         # them to the field base rate (1/field_size) so they don't dominate.
         field_size = len(feature_df)
         horse_ids = [str(feature_df.iloc[idx].get('horse_id', '')) for idx in range(field_size)]
+        # REPAIR-4: AS-OF predicate prevents pp_count substrate-leakage
         with self.conn.cursor() as cur:
             cur.execute(
                 "SELECT horse_id::text AS hid, COUNT(*) AS n "
                 "FROM past_performances WHERE horse_id::text = ANY(%s) "
+                "  AND race_date < %s "
                 "GROUP BY horse_id",
-                (horse_ids,),
+                (horse_ids, race.race_date),
             )
             pp_counts = {r['hid']: r['n'] for r in cur.fetchall()}
         for idx in range(field_size):

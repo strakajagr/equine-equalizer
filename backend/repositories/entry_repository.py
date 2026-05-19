@@ -12,17 +12,30 @@ from shared.constants import PP_LOOKBACK_STARTS
 class EntryRepository(BaseRepository):
 
     def get_entries_by_race(
-        self, race_id: str
+        self, race_id: str, as_of_date=None
     ) -> list[Entry]:
         """
         Load all entries for a race.
         Each entry includes:
         - Nested Horse, Trainer, Jockey objects
-        - Last PP_LOOKBACK_STARTS past performances
-          ordered by race_date DESC
+        - Last PP_LOOKBACK_STARTS past performances ordered by race_date DESC,
+          STRICTLY PRIOR to as_of_date (substrate-AS-OF discipline per REPAIR-4)
         Excludes scratched entries.
         Orders by post_position.
+
+        Substrate-discipline: as_of_date is REQUIRED to prevent ground-truth
+        leakage. Pass race.race_date from the calling context. The substrate-
+        actual race itself + any newer races for these horses are EXCLUDED
+        from past_performances. Per D4 finding (race d50e069c substrate-leakage
+        case): without this, past_performances returns the race-being-predicted
+        as a "past performance" with finish_position populated, leaking ground
+        truth into feature_engineering.
         """
+        if as_of_date is None:
+            raise ValueError(
+                "as_of_date is required to prevent past_performances ground-truth "
+                "leakage (REPAIR-4 / D4). Pass race.race_date from calling context."
+            )
         entry_rows = self._query(
             """SELECT
                  e.*,
@@ -79,9 +92,10 @@ class EntryRepository(BaseRepository):
             pp_rows = self._query(
                 """SELECT * FROM past_performances
                    WHERE horse_id = %s
+                     AND race_date < %s
                    ORDER BY race_date DESC
                    LIMIT %s""",
-                (row['horse_id'], PP_LOOKBACK_STARTS)
+                (row['horse_id'], as_of_date, PP_LOOKBACK_STARTS)
             )
             past_performances = [
                 transform_past_performance(pp)
@@ -98,9 +112,19 @@ class EntryRepository(BaseRepository):
         return entries
 
     def get_entry_by_id(
-        self, entry_id: str
+        self, entry_id: str, as_of_date=None
     ) -> Optional[Entry]:
-        """Single entry with full nested objects."""
+        """Single entry with full nested objects.
+
+        Substrate-discipline: as_of_date is REQUIRED to prevent past_performances
+        ground-truth leakage (REPAIR-4 / D4). Pass race.race_date from calling
+        context. Same substrate-discipline as get_entries_by_race.
+        """
+        if as_of_date is None:
+            raise ValueError(
+                "as_of_date is required to prevent past_performances ground-truth "
+                "leakage (REPAIR-4 / D4). Pass race.race_date from calling context."
+            )
         row = self._query_one(
             """SELECT
                  e.*,
@@ -142,9 +166,10 @@ class EntryRepository(BaseRepository):
         pp_rows = self._query(
             """SELECT * FROM past_performances
                WHERE horse_id = %s
+                 AND race_date < %s
                ORDER BY race_date DESC
                LIMIT %s""",
-            (row['horse_id'], PP_LOOKBACK_STARTS)
+            (row['horse_id'], as_of_date, PP_LOOKBACK_STARTS)
         )
         past_performances = [
             transform_past_performance(pp)

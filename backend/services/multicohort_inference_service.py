@@ -303,7 +303,7 @@ class MultiCohortInferenceService:
         if race is None:
             logger.warning(f"race {race_id} not found")
             return None
-        race.entries = self.entry_repo.get_entries_by_race(race_id)
+        race.entries = self.entry_repo.get_entries_by_race(race_id, as_of_date=race.race_date)
         if len(race.entries) < 4:
             return None
 

@@ -198,23 +198,8 @@ class PredictionRepository(BaseRepository):
                  %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
                  %s,%s,%s,%s,%s,%s::uuid[]
                )
-               ON CONFLICT (entry_id) DO UPDATE SET
-                 win_probability = EXCLUDED.win_probability,
-                 place_probability =
-                   EXCLUDED.place_probability,
-                 show_probability =
-                   EXCLUDED.show_probability,
-                 predicted_rank = EXCLUDED.predicted_rank,
-                 confidence_score =
-                   EXCLUDED.confidence_score,
-                 is_top_pick = EXCLUDED.is_top_pick,
-                 is_value_flag = EXCLUDED.is_value_flag,
-                 overlay_pct = EXCLUDED.overlay_pct,
-                 feature_importance =
-                   EXCLUDED.feature_importance,
-                 recommended_bet_type =
-                   EXCLUDED.recommended_bet_type,
-                 exotic_partners = EXCLUDED.exotic_partners
+               -- REPAIR-4: DO NOTHING substrate-protects clean writes
+               ON CONFLICT (entry_id) DO NOTHING
                RETURNING prediction_id""",
             (
                 prediction_data['entry_id'],

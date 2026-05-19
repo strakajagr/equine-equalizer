@@ -156,7 +156,7 @@ def load_training_data(
                     # Load entries
                     entry_repo = EntryRepository(conn)
                     race.entries = entry_repo \
-                        .get_entries_by_race(race.race_id)
+                        .get_entries_by_race(race.race_id, as_of_date=race.race_date)
 
                     if len(race.entries) < 4:
                         races_skipped += 1

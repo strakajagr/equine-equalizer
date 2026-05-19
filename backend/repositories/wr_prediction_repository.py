@@ -310,34 +310,8 @@ class WRPredictionRepository(BaseRepository):
                  %s,%s,%s,%s,%s,%s,%s,
                  %s,%s
                )
-               ON CONFLICT (race_id, entry_id, style) DO UPDATE SET
-                 win_probability = EXCLUDED.win_probability,
-                 place_probability =
-                   EXCLUDED.place_probability,
-                 show_probability =
-                   EXCLUDED.show_probability,
-                 predicted_rank = EXCLUDED.predicted_rank,
-                 confidence_score =
-                   EXCLUDED.confidence_score,
-                 is_top_pick = EXCLUDED.is_top_pick,
-                 is_value_flag = EXCLUDED.is_value_flag,
-                 morning_line_implied_prob =
-                   EXCLUDED.morning_line_implied_prob,
-                 overlay_pct = EXCLUDED.overlay_pct,
-                 feature_importance =
-                   EXCLUDED.feature_importance,
-                 recommended_bet_type =
-                   EXCLUDED.recommended_bet_type,
-                 exotic_partners = EXCLUDED.exotic_partners,
-                 raw_win_prob = EXCLUDED.raw_win_prob,
-                 rank_score = EXCLUDED.rank_score,
-                 edge_pct = EXCLUDED.edge_pct,
-                 kelly_fraction = EXCLUDED.kelly_fraction,
-                 kelly_bet = EXCLUDED.kelly_bet,
-                 has_workout_data = EXCLUDED.has_workout_data,
-                 model_used = EXCLUDED.model_used,
-                 handicapping_prob = EXCLUDED.handicapping_prob,
-                 market_prob = EXCLUDED.market_prob
+               -- REPAIR-4: DO NOTHING substrate-protects clean writes
+               ON CONFLICT (race_id, entry_id, style) DO NOTHING
                RETURNING prediction_id""",
             (
                 prediction_data['entry_id'],
