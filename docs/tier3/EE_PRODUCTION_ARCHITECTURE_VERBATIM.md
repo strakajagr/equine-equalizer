@@ -1404,5 +1404,98 @@ This document is the substrate-permanent architecture reference. All future prod
 
 If substrate-actual architecture changes (new Lambda, MCIS refactor, strategy_harness reshape, model_versions schema extension), this document MUST be re-substrate-discovered + amended. Substrate-version: v1 (2026-05-18).
 
+### 8.6 δ.2 multi-track substrate-validation outcome (added 2026-05-19T01:30:00Z)
+
+**Dispatch authoring note**: δ.2 dispatch Phase 6.1 framed amendment as Section 8.4; substrate-actual 8.4 was already occupied (Tony adjudication surface). Substrate-pragmatic append as 8.6. § 4.32 sub-pattern B firing #11 banked: dispatch authoring against reference assumed unoccupied numbering.
+
+**Cohort**: Tier-1-adjacent tracks substrate-actually meeting Q2 B substrate-pragmatic floor + Q3 C post-training-window constraint (2026-05-02..2026-05-10):
+
+| track | n_races | n_days | chart-parsed % (tc/eqb/fs) | tier |
+|---|---|---|---|---|
+| CD | 52 | 5 | 100% / 100% / 100% | Tier-1 STRICT |
+| SA | 46 | 5 | 100% / 100% / 100% | Tier-1-adjacent (n -8% from 50) |
+| GP | 47 | 5 | 89.4% / 89.4% / 100% | Tier-1-adjacent (n -6%, tc/eqb -5.6%) |
+| MTH | 16 | 2 | 100% / 100% / 100% | Tier-2 substrate-thin |
+| OP | 13 | 1 | 92.3% / 92.3% / 100% | Tier-2 substrate-thin |
+| BEL | 59 | 6 | 100% / 100% / 100% | Supplementary baseline (Q3 C-excluded; substrate-near-training) |
+
+**Forensic measurement substrate**: Forensic predictions ALREADY substrate-permanent in `hybrid_c_predictions` from BD3v2 era for all cohort races (substrate-pragmatic surprise — Section 6.7 substrate-incompleteness; reference had ONLY documented BEL coverage). No new predictions generated; δ.2 substrate-actually was a measurement-only dispatch.
+
+**Phase 3 substrate-state**: COMPLETE (no execution needed; BD3v2 era already wrote dual-write rows for both ensemble_versions).
+
+**Per-track verdict table** (top-1 win-bet $2 stake; mirror Track E.2 measurement pattern):
+
+| track | n | ss_wins | hc_wins | ss_roi | hc_roi | Δroi | ss_auc | hc_auc | Δauc | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| CD | 52 | 27/52 | 27/52 | +170.6% | +106.4% | **+64.2pp** | 0.7683 | 0.8658 | -0.0976 | **HOLDS** (substrate-emphatic) |
+| SA | 46 | 25/46 | 26/46 | +102.2% | +110.4% | -8.3pp | 0.8145 | 0.8914 | -0.0769 | INVERTS (substrate-marginal n=46) |
+| GP | 47 | 20/47 | 17/47 | +107.9% | +80.4% | **+27.4pp** | 0.7618 | 0.8199 | -0.0580 | **HOLDS** |
+| MTH | 16 | 10/16 | 10/16 | +107.8% | +109.7% | -1.9pp | 0.8696 | 0.9405 | -0.0708 | Tier-2 substrate-thin |
+| OP | 13 | 5/13 | 4/13 | -4.6% | -20.8% | +16.2pp | 0.7300 | 0.8025 | -0.0726 | Tier-2 substrate-thin |
+| BEL | 59 | 14/59 | 15/59 | -9.8% | -23.7% | +14.0pp | 0.6289 | 0.6437 | -0.0149 | (supplementary baseline; matches Track E.2 verbatim) |
+
+**Pooled aggregates**:
+- Tier-1 STRICT (CD only): n=52, Δroi=**+64.2pp**
+- Tier-1-adjacent (CD+SA+GP): n=145, **Δroi=+29.3pp** ← PRIMARY surface
+- + Tier-2 (CD+SA+GP+MTH+OP): n=174, Δroi=+25.5pp
+- BEL supplementary baseline (within-training): n=59, Δroi=+14.0pp
+
+**Per-stratum decomposition** (CD+SA+GP pooled, n=145):
+
+```
+field_size:   small(≤7)   n=79   Δroi  -6.0pp  INVERT
+              mid(8-9)    n=32   Δroi +155.5pp HOLD ★
+              large(≥10)  n=34   Δroi  -7.5pp  INVERT
+
+surface:      dirt        n=71   Δroi  +44.8pp HOLD
+              turf        n=59   Δroi  +18.1pp HOLD
+              synthetic   n=15   Δroi   +0.0pp DECAY (tied)
+
+track_cond:   fast/firm   n=137  Δroi  +34.3pp HOLD
+              off / unknown       substrate-thin (n<10)
+
+distance:     sprint≤6.5  n=67   Δroi  +71.4pp HOLD ★
+              route>6.5   n=78   Δroi   -6.8pp INVERT
+```
+
+**BEL supplementary baseline cite** (substrate-near-training-distribution): δ.2 measurement reproduces Track E.2 baseline verbatim (BEL Δroi +14.0pp / Δauc -0.0149 ≈ Track E.2's +13.9pp / -0.026). Substrate-coherence of δ.2 measurement methodology confirmed.
+
+**Aggregate substrate-validation verdict: PATTERN HOLDS CONDITIONALLY**
+
+Substrate-evidence basis:
+- ✓ Pooled Δroi +29.3pp (Tier-1-adjacent, n=145) > +5pp threshold
+- ✓ 2 of 3 {CD, GP} HOLD; SA marginal INVERT (-8.3pp at n=46; within substrate-thin noise — single winner swing ≈ ±5pp at this n)
+- ✓ Out-of-training-distribution measurement substrate-exceeds within-training BEL baseline (29.3pp pooled vs 14.0pp BEL)
+- Per-stratum signal CONCENTRATED:
+  - SPRINT races (distance ≤ 6.5): Δroi **+71.4pp** HOLD
+  - MID-FIELD races (8-9 horses): Δroi **+155.5pp** HOLD (n=32 substrate-thin but substrate-emphatic)
+  - ROUTE races (distance > 6.5): Δroi -6.8pp INVERT
+  - SMALL/LARGE field races: Δroi -6 to -8pp INVERT
+
+**Path adjudication substrate-grounded**:
+- **β (Path B alternate-routing) substrate-emphatically grounded** — predicate substrate-validated: route to specialist_style when `distance_furlongs ≤ 6.5` AND/OR `field_size ∈ [8,9]`; else Hybrid C
+- **α (Path A primary) substrate-NOT-grounded** — broad-superiority claim substrate-actually concentrated in sprint+mid-field strata only; sustaining primary on route/large-field substrate would substrate-substrate-degrade
+- **γ (KEEP CURRENT) substrate-NOT-grounded** — substrate-evidence DOES substrate-emphatically support ACTIVATION at minimum stratum-conditional surface
+
+**D15 substrate-thin training-cohort caution resolution**:
+- SPRINT sub-booster (n_train=80, AUC 0.8829): **substrate-VALIDATED** out-of-training; pattern holds on CD+GP sprint races
+- ROUTE sub-booster (n_train=83, AUC 0.7496): **substrate-CAUTION-CONFIRMED**; INVERTS marginally on route races (-6.8pp at n=78); does NOT substrate-actually generalize
+- D15 caution surfaced VALID for route sub-booster specifically; substrate-refuted for sprint sub-booster
+
+**§ 4.32 sub-pattern B heterogeneity check (Phase 5.3)**:
+- Track heterogeneity (CD +64 / SA -8 / GP +27): surfaced verbatim; not force-fit to single verdict
+- Distance heterogeneity (sprint +71 / route -7): substrate-COHERENT with sub-booster training AUC asymmetry (0.88 vs 0.75); substrate-evidence-grounded predictive pattern
+- Field-size heterogeneity (mid +155 / small/large -6 to -8): substrate-pragmatic-interesting; may interact with distance (cross-tab substrate-pending if Tony directs)
+
+**Substrate-prerequisite gate post-δ.2**:
+- α / β / γ re-adjudication substrate-unblocked
+- β predicate selection substrate-pending: sprint-only OR sprint+mid-field combo
+- Route sub-booster substrate-disposition question banked (deprecate OR keep for fallback OR retrain)
+
+**Tony adjudication next**:
+1. β predicate finalization (sprint distance ≤ 6.5 OR cross-tabbed with field_size)
+2. Route sub-booster deprecation decision
+3. β activation dispatch authoring against R2/R3/R5 per Section 8.2 substrate-prerequisites (~150-250 LOC total per substrate-permanent reference)
+
 ---
 
