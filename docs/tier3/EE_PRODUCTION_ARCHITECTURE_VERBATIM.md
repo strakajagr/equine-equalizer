@@ -512,7 +512,7 @@ Add `primary_ensemble: str` config (env var OR DB column). Strategies read `RANK
 Column                         Type                      Nullable  Default
 ─────────────────────────────────────────────────────────────────────────────
 model_version_id               uuid                      NO        uuid_generate_v4()  [PK]
-version_name                   varchar(50)               NO        —
+version_name                   varchar(80)               NO        —     ← was varchar(50) pre-σ-2-extension
 training_date                  timestamp with time zone  NO        —
 training_data_start            date                      NO        —
 training_data_end              date                      NO        —
@@ -543,12 +543,45 @@ varchar(30) → varchar(60) per σ-2 ratification (δ.1 substrate-prerequisite).
 § 4.32 sub-pattern B firing #8 banked: substrate-permanent reference itself
 substrate-incomplete; remediated this amendment.
 
-**Latent substrate-bug banked (separate scope)**: `version_name` varchar(50)
-substrate-collides with `train_specialist_architectures.py:196` version_name
-construction `f'specialist_{variant}_{partition_name}_{timestamp}'` worst-case
-= 53 chars (`specialist_field_size_specialist_xlarge_YYYYMMDD_HHMM`). Fires
-only for field_size_specialist variant; δ.1 style_specialist substrate-
-unaffected. Deferred to separate adjudication.
+**Substrate-amendment 2026-05-19T01:00:00Z** (per σ-2 extension Q1 α surface):
+§ 4.32 sub-pattern B firing #9 lesson applied: broad-scope substrate-grep
+across ALL constraint-bearing columns + producers (not just immediate bug
+column). Phase 2 substrate-grep enumeration verbatim:
+
+  Column                                            curr  max_obs  prop  alter
+  ────────────────────────────────────────────────────────────────────────────
+  model_versions.version_name                       50    53       80    YES
+    worst: train_specialist_architectures.py:196 field_size_specialist+xlarge
+           specialist_field_size_specialist_xlarge_YYYYMMDD_HHMM = 53c
+    2nd:   train_context_conditional.py:160 large__high_claim
+           context_conditional_large__high_claim_YYYYMMDD_HHMM   = 51c
+  model_versions.s3_artifact_path                   500   ~99      —     NO
+  model_versions.model_type                         60    48       —     NO
+  hybrid_c_predictions.ensemble_version             100   ~62      —     NO
+  strategy_pnl.strategy_name                        100   ~38      —     NO
+  strategy_pnl.bet_type                             50    15       —     NO
+  strategy_recommendations.strategy_name            100   ~38      —     NO
+  strategy_recommendations.bet_type                 50    15       —     NO
+
+ALTER applied: `version_name` varchar(50) → varchar(80) per Tony Q1 α.
+Substrate-pragmatic headroom: 80 / 53 max_observed ≈ 1.5× (substrate-coherent
+50% margin for future variants). All indexes preserved substrate-coherent
+(no index references version_name).
+
+Final ceilings substrate-actual post-σ-2-extension:
+  model_type                  varchar(60)   (σ-2 substrate-permanent)
+  version_name                varchar(80)   (σ-2 extension Q1 α substrate-permanent)
+  s3_artifact_path            varchar(500)  (substrate-unchanged)
+  ensemble_version            varchar(100)  (adjacent table; substrate-unchanged)
+  strategy_name               varchar(100)  (adjacent table; substrate-unchanged)
+  bet_type                    varchar(50)   (adjacent table; substrate-unchanged)
+
+§ 4.32 sub-pattern B firing #9 codification candidate: **substrate-discovery
+dispatch scope discipline** — broad-scope substrate-grep across ALL
+constraint-bearing-column producers vs narrow per-bug scope. σ-2 was scope-
+narrow (model_type only) + Phase B incidentally surfaced version_name bug;
+σ-2 extension applied broad-scope per lesson. Banked for next codification
+cycle.
 
 **PK**: `model_version_id` (NOT `model_uuid` as memory said)
 **Indexes**:
