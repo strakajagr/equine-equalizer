@@ -45,6 +45,7 @@ class HorsePrediction:
     longshot_alert: bool = False
     trajectory_score: Optional[float] = None
     hybrid_c_win_prob: Optional[float] = None    # Hybrid C culled-rebuilt ensemble output
+    specialist_style_sprint_win_prob: Optional[float] = None  # β.1/β.2 sprint sub-booster output (Q1 P1 SPRINT-ONLY routing; populated only when distance ≤ 6.5 AND ensemble_version='specialist_style_sprint_20260518_0252' rows present post-β.4)
     angle_name: Optional[str] = None
     angle_posterior: Optional[float] = None
     angle_ev: Optional[float] = None
@@ -117,6 +118,7 @@ class BetRecommendation:
 RANKING_LAYER_FIELDS = {
     'ensemble': 'ensemble_win_prob',
     'ensemble_hybrid_option_c': 'hybrid_c_win_prob',
+    'specialist_style_sprint': 'specialist_style_sprint_win_prob',  # β.2 sprint sub-booster (Q1 P1; sub-booster-specific tag per Q-pre-β-1 Option B)
     'wr': 'win_probability',
     'pl': 'pl_win_probability',
     'ranker': 'rank_score',
@@ -368,6 +370,20 @@ def load_race_predictions(
     for hp in rp.horses:
         if hp.horse_id in hc_map:
             hp.hybrid_c_win_prob = hc_map[hp.horse_id]
+    # β.2 specialist_style sprint sub-booster predictions (parallel SELECT;
+    # substrate-additive; substrate-coherent with substrate-permanent reference
+    # Section 1.10 ensemble_version write convention + Section 5 D12 multi-version
+    # native dual-write). Returns empty result set pre-β.4 activation (production
+    # sprint writes substrate-deferred); sprint_win_prob remains None until then.
+    rows.execute("""
+        SELECT horse_id, hybrid_c_win_probability
+        FROM hybrid_c_predictions
+        WHERE race_id = %s AND ensemble_version = 'specialist_style_sprint_20260518_0252'
+    """, (race_id,))
+    sprint_map = {str(r['horse_id']): float(r['hybrid_c_win_probability']) for r in rows.fetchall()}
+    for hp in rp.horses:
+        if hp.horse_id in sprint_map:
+            hp.specialist_style_sprint_win_prob = sprint_map[hp.horse_id]
     rows.close()
     return rp
 
