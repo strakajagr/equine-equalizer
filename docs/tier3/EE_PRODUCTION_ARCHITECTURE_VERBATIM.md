@@ -2011,19 +2011,53 @@ wr_base                        a9397b4a-3a6e-4b75-b2cd-dd69a414acef
 wr_odds                        f14f2902-4414-4b5b-b06e-c4d120a66993
 ```
 
-### 10.4 Substrate-precondition for retrain wave execution
+### 10.4 Deployed substrate-state (Step E complete 2026-05-19T15:57 UTC)
 
-1. CDK deploy EquineComputeStack — TrainingTaskDef image rebuild with
-   compute_speed_figures.py Step A + trainer_stats_history Step B code
-2. EventBridge retrain rules REMAIN DISABLED until cutover completes
-3. Tony or dedicated session triggers:
+CDK deploy EquineComputeStack EXIT=0; total wall-clock 501.8s.
+
+TrainingTaskDef revision: 117 → 118
+Training image hash:
+  584812014683.dkr.ecr.us-east-1.amazonaws.com/
+    cdk-hnb659fds-container-assets-584812014683-us-east-1:
+    a4b1ec0ff4f839f9dbea47d618fbfa57b862f7465658dddc536b291288361d81
+
+8 image assets Published:
+  IngestionFunction               584812014683-us-east-1-797cdaa4
+  InferenceFunction               584812014683-us-east-1-4aba0968
+  ResultsFunction                 584812014683-us-east-1-c1b23349
+  WRInferenceFunction             584812014683-us-east-1-08e7a85e
+  PLInferenceFunction             584812014683-us-east-1-e29797ee
+  SubstrateHealthMonitorFunction  584812014683-us-east-1-cd65314a
+  TrainingTaskDef/training        584812014683-us-east-1-b4a22471
+  LSInferenceFunction             584812014683-us-east-1-df529da4
+
+Lambda LastModified post-deploy (all Successful):
+  equine-inference                  2026-05-19T15:57:05Z
+  equine-ls-inference               2026-05-19T15:57:06Z
+  equine-pl-inference               2026-05-19T15:57:05Z
+  equine-wr-inference               2026-05-19T15:57:06Z
+  equine-ingestion                  2026-05-19T15:57:37Z
+  equine-results                    2026-05-19T15:57:05Z
+  equine-substrate-health-monitor   2026-05-19T15:57:05Z
+
+Substrate-effect: production inference Lambdas now substrate-actually
+substrate-include Step B trainer_stats_history AS-OF reads + Step A
+rolling-window code (training-side; deployed for retrain wave).
+
+### 10.5 Substrate-precondition for retrain wave (Step F)
+
+1. EventBridge retrain rules REMAIN DISABLED until cutover completes
+   (substrate-prevents cron-fired contaminated retrain mid-wave)
+2. Tony or dedicated session triggers:
    `python3 scripts/repair_5_retrain_wave.py --execute`
-4. Wall-clock: 2-5+ hours expected
-5. On wave completion: review /tmp/repair_5_training_metrics.jsonl;
-   execute scripts/repair_5_cutover.sql (substitute clean_tag);
-   re-enable EventBridge rules
+3. Wall-clock: 2-5+ hours expected
+4. On wave completion:
+   - Review /tmp/repair_5_training_metrics.jsonl
+   - Capture substrate-actual clean_tag printed at wave start
+   - Substitute clean_tag in scripts/repair_5_cutover.sql; execute
+   - Re-enable EventBridge rules
 
-### 10.5 Deferred to REPAIR-6+
+### 10.6 Deferred to REPAIR-6+
 
 - δ.2 + every prior forensic claim substrate-re-measurement against
   clean substrate
