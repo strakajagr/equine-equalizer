@@ -1894,3 +1894,146 @@ inference fire occurs against new code).
 
 ---
 
+## SECTION 10 — REPAIR-5 CLEAN TRAINING COHORT + RETRAIN INFRASTRUCTURE (2026-05-19)
+
+### 10.1 Substrate-origin
+
+REPAIR-5 dispatch addressed the final code-class leakage surface flagged
+in REPAIR-4 Step C.3 (deferred): **rolling-window par times in
+compute_speed_figures.py** + the substrate-newly-discovered **trainer_stats
+aggregate-without-history** class (substrate-parallel to angle_stats from
+REPAIR-4 C.5).
+
+Concurrent infrastructure: retrain orchestration script + cutover SQL
+authored for the 39 contaminated models trained pre-REPAIR-4.
+
+### 10.2 Substrate-state of repository changes
+
+Commit chain (REPAIR-5):
+- 17e9486  Step A: compute_speed_figures.py rolling-window AS-OF fix
+- 5a94197  Step B: trainer_stats AS-OF snapshot history
+- [pending] Steps C+D: retrain orchestration + cutover SQL + test suite
+
+**Step A — compute_speed_figures.py rolling-window**:
+- Step 2 par times: GROUP BY (track, distance, surface, year);
+  par_map keyed by 4-tuple including year
+- lookup_par(tc, d, s, target_year) via bisect_left strict-less-than:
+  returns par from most recent year < target_year, or None
+- Step 3 callsite: row_year = int(r['race_date'].year); par = lookup_par(...)
+- Steps 4-5 unchanged (same-day variants substrate-correct)
+- Step 6 per-year Beyer normalization: per_year_stats query GROUP BY year;
+  norm_map + norm_years_sorted index; lookup_norm() strict-less-than;
+  per-year UPDATE filtered by EXTRACT(YEAR FROM race_date)
+
+**Step B — trainer_stats AS-OF snapshot history**:
+- Migration 013_trainer_stats_history.sql APPLIED:
+  CREATE TABLE trainer_stats_history (orig cols + snapshot_date + created_at);
+  UNIQUE (trainer_name, snapshot_date) + lookup index
+- Backfill: 1141 rows seeded with CURRENT_DATE snapshot
+- feature_engineering_service._get_trainer_stats(trainer_name, race_date):
+  race_date REQUIRED (raises ValueError if missing); queries history
+  WHERE snapshot_date <= race_date ORDER BY DESC LIMIT 1; substrate-
+  cold-start fallback to current trainer_stats
+- ingestion/handler.py adds 'refresh_trainer_stats' action: REFRESH
+  MATERIALIZED VIEW trainer_stats + dual-write snapshot to history
+  with CURRENT_DATE (ON CONFLICT DO NOTHING for idempotency)
+- compute_trainer_features signature + _build_entry_features callsite
+  plumb race.race_date through
+
+**Step C — Retrain orchestration**:
+- scripts/repair_5_retrain_wave.py: 4-phase dependency graph
+  - Phase 1 (parallel, 30 tasks): pl/win_prob/ranker specialist variants
+  - Phase 2 (1 task): ensemble/train_hybrid_c.py
+  - Phase 3 (4 tasks): ensemble + trajectory + longshot + wr
+  - Phase 4 (2 tasks): ranker + win_prob singletons
+- Per-phase: launch ECS Fargate → poll completion → verify exit 0 +
+  S3 artifact + new model_versions row → tag notes with
+  'clean_post_repair5_<YYYYMMDD>'
+- HALT entire wave on first task failure
+- Metrics log: /tmp/repair_5_training_metrics.jsonl
+
+**Step C — Cutover SQL**:
+- scripts/repair_5_cutover.sql: single BEGIN/COMMIT transaction
+- Deactivates 39 contaminated rows by verbatim PK list
+  (substrate-grounded against production model_versions 2026-05-19)
+- Activates newest clean row per model_type via ROW_NUMBER() OVER
+  PARTITION BY model_type ORDER BY created_at DESC
+- Read-back verification before COMMIT
+
+**Step D — Test suite (tests/repair_5/)**:
+- test_rolling_window_as_of.py (5): per-year SQL + bisect strict-less-than
+- test_trainer_stats_history.py (6): schema + AS-OF query + handler dual-write
+- test_retrain_orchestration.py (8): 4 phases + 39 verbatim PKs + clean-row
+  activation pattern
+- Combined REPAIR-4 + REPAIR-5: 36 passed, 1 skipped, 1.04s
+
+### 10.3 Verbatim 39 contaminated model_version_ids (pre-retrain)
+
+```
+ensemble                       42e796ae-c590-4110-a3d5-4b81647ba52f
+ensemble_hybrid_option_c       2d34b010-f17a-492e-8f7c-270bd393731d
+longshot_rf                    ae0320ed-8028-45d5-bc92-9fd5465ca55e
+pl_core_class_dropper          a862da1e-83bb-47e2-b5d8-0df9523e9756
+pl_core_class_riser            f97e0d34-0b42-45ee-9be4-3dee0f1c8dbd
+pl_core_closer                 91fa3b23-6368-4045-9df3-f64a54a393e9
+pl_core_general                7eb7f476-6b44-4250-88a7-e4fd695ec3bc
+pl_core_route                  73d257ca-8054-42b6-87e0-e25dde339a0f
+pl_core_speed                  c914389b-a1f6-40ed-82fd-250f8e6452a4
+pl_core_sprint                 a6eef6cd-5144-41a7-90e4-96a51c2619dc
+ranker_core                    e5ec560b-a910-4a07-bef7-d9897be5a052
+ranker_full                    a7d71718-b3e3-4935-975c-d768c490b582
+rk_full_class_dropper          143404a6-99ef-4db4-a085-76ff7427d8b0
+rk_full_class_riser            504b82a8-dec2-4d86-959d-7f3f1179bf5d
+rk_full_closer                 a28b3683-61a9-475d-8fa5-b255c91c9238
+rk_full_general                ef13f650-f2da-43c2-a256-440482eda8ce
+rk_full_gonzo_sauce            a6977e6a-1343-4ee8-b27b-11a9d824a288
+rk_full_route                  c77aa2e9-b680-49e0-878d-543d1e01b433
+rk_full_speed                  e915c375-beb7-4400-8eca-35277959a10c
+rk_full_sprint                 414f41dc-59ee-4f40-b299-ea50cd757aca
+trajectory_lstm                8d6684cc-4364-4b7f-8d31-a19359cfab03
+win_prob_core_class_dropper    543e9b66-7c54-465e-8ea1-b5c2420b8cef
+win_prob_core_class_riser      660e8705-3a58-4454-bf54-6f2cb1ca1bb4
+win_prob_core_closer           5a652692-1126-4644-8f61-f5f1c2e1cc42
+win_prob_core_general          fa1543b2-a67e-4f85-b243-502bf5290f12
+win_prob_core_route            5fd06c78-8769-4de3-8bf0-207f15c3e476
+win_prob_core_speed            ea21b258-c429-4c36-9de9-52898935ab8e
+win_prob_core_sprint           0be6a440-f08e-4010-be18-418ae38b848b
+win_prob_full                  d1702c76-8bd3-48c4-81c7-92dce5274861
+wp_full_class_dropper          16d63aba-0d9c-4108-8e5e-185f97be9620
+wp_full_class_riser            c85bd29b-60a2-45c1-b81d-fc990eaa79c9
+wp_full_closer                 44fea74d-8ff5-49fa-8081-b2f694a767d1
+wp_full_general                93e9cccb-f9f2-40c5-9833-79e5ee2ad0da
+wp_full_gonzo_sauce            30f9b663-77c2-4cde-b8fd-9fe4dbfd88d0
+wp_full_route                  85eacd05-dcb9-40c6-885a-e0b545854b10
+wp_full_speed                  eca2056e-d3d4-421f-867e-219ac4045fd2
+wp_full_sprint                 68220742-1bc7-489c-a956-86c6c90311a7
+wr_base                        a9397b4a-3a6e-4b75-b2cd-dd69a414acef
+wr_odds                        f14f2902-4414-4b5b-b06e-c4d120a66993
+```
+
+### 10.4 Substrate-precondition for retrain wave execution
+
+1. CDK deploy EquineComputeStack — TrainingTaskDef image rebuild with
+   compute_speed_figures.py Step A + trainer_stats_history Step B code
+2. EventBridge retrain rules REMAIN DISABLED until cutover completes
+3. Tony or dedicated session triggers:
+   `python3 scripts/repair_5_retrain_wave.py --execute`
+4. Wall-clock: 2-5+ hours expected
+5. On wave completion: review /tmp/repair_5_training_metrics.jsonl;
+   execute scripts/repair_5_cutover.sql (substitute clean_tag);
+   re-enable EventBridge rules
+
+### 10.5 Deferred to REPAIR-6+
+
+- δ.2 + every prior forensic claim substrate-re-measurement against
+  clean substrate
+- β arc re-adjudication (substrate-design new experiment against
+  substrate-actual production inference path; pre-REPAIR-4 β arc was
+  substrate-fiction)
+- Cross-project audit (Kalshi V2 + Dynasty Dugout)
+- model/shared/data_loader.py training-cohort _load_trainer_stats AS-OF
+  fix (substrate-marker in commit 5a94197; substrate-not-blocking
+  until retrain rules re-enable)
+
+---
+
