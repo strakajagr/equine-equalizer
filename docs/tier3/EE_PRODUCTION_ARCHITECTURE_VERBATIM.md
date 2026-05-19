@@ -664,6 +664,113 @@ class SS_Sprint_Top1_Win(_RawLayerWin):
 
 **Substrate-coherence note**: β.3 produces only ONE Top1 win Strategy initially; full β.3 scope (multi-leg spreads, exa/tri/sf boxes, etc.) substrate-pragmatic extensible via parameterized factory pattern per Section 3.2 (_DD_Spread / _P3_Spread / etc. substrate-already in production).
 
+### 3.10 — Box-bet pattern verbatim bodies (added 2026-05-19T04:00:00Z; per Q-pre-β-3.5 Option C step 4)
+
+**Amendment scope**: β.3 substrate-augmented authoring substrate-pragmatic-consumed cites from baseline e788d59 NOT substrate-cited in substrate-permanent reference at commit 15891fa Section 3.9 + supporting subsections. Pattern-citation completeness at Section 3.9 (HybridC_Top1_Win + _RawLayerWin verbatim) substrate-pragmatic-sufficient for Top1_Win mirror BUT substrate-thin for box-bet pattern mirror (β.3 Top2_ExaBox + Top3_TriBox + Top4_SFBox substrate-actually require _EnsembleBox + _HybridCBox + HybridC_Top<N>_*Box verbatim bodies).
+
+**Substrate-evidence basis**: § 4.32 firings #10/#11/#12/#13/#14 5-instance multi-instance accrual substrate-emphatic. Methodology refinement substrate-actuated: *"Per-sub-dispatch verification dispatches substrate-actually substrate-discover BODY-LEVEL substrate-needs per sub-dispatch's specific code-mutation scope, not just pattern-citation completeness."*
+
+**β.3 commit substrate-evidence**: 2f604ae (β.3 strategy_registry sprint extension; substrate-augmented from these cites).
+
+**Substrate-source**: `backend/services/strategy_registry.py` at baseline e788d59 (γ substrate-gap closure commit).
+
+---
+
+#### 3.10.1 — _EnsembleBox base class verbatim body
+
+Source: `backend/services/strategy_registry.py` lines 239-265 at e788d59
+
+```python
+class _EnsembleBox(StrategyBase):
+    """Generic boxed bet on ensemble top-N. N + bet_type derived from subclass."""
+    category = 'raw_layer'
+    ranking_layer = 'ensemble'
+    n_horses: int = 3
+    bet_kind: str = 'exacta'  # 'exacta' / 'trifecta' / 'superfecta'
+    base_unit: float = 1.0    # $2 for exacta, $1 for tri, $0.10 for sf
+
+    def recommend(self, rp, ctx):
+        if ctx.field_size < self.n_horses: return None
+        top = self.top_n(rp, self.n_horses)
+        if len(top) < self.n_horses: return None
+        n = self.n_horses
+        if self.bet_kind == 'exacta':
+            combos = n * (n - 1)
+        elif self.bet_kind == 'trifecta':
+            combos = n * (n - 1) * (n - 2)
+        else:  # superfecta
+            combos = n * (n - 1) * (n - 2) * (n - 3)
+        stake = combos * self.base_unit
+        return BetRecommendation(
+            strategy_name=self.name, race_id=rp.race_id,
+            bet_type=f'{self.bet_kind}_box_{n}',
+            horses=[h.horse_name for h in top], stake=stake,
+            confidence=top[0].ensemble_win_prob,
+            rationale=f'{self.bet_kind}_box_{n} on ensemble top {n}',
+        )
+```
+
+---
+
+#### 3.10.2 — _HybridCBox class verbatim body
+
+Source: `backend/services/strategy_registry.py` lines 425-426 at e788d59
+
+```python
+class _HybridCBox(_EnsembleBox):
+    ranking_layer = 'ensemble_hybrid_option_c'
+```
+
+**Substrate-finding**: _HybridCBox is substrate-minimal 2-line subclass. `recommend()` inherited verbatim from _EnsembleBox. NO `ensemble_version` class attribute (β.2 strategy_harness `load_race_predictions` handles ensemble_version SELECT discrimination; class itself uses `ranking_layer` dispatch via RANKING_LAYER_FIELDS).
+
+**Substrate-pragmatic β.3 mirror pattern** (substrate-permanent at 2f604ae):
+```python
+class _SpecialistStyleSprintBox(_EnsembleBox):
+    ranking_layer = 'specialist_style_sprint'
+```
+
+---
+
+#### 3.10.3 — HybridC box exemplars verbatim body
+
+Source: `backend/services/strategy_registry.py` lines 429-450 at e788d59 (HybridC_Top2_ExaBox + HybridC_Top3_TriBox + HybridC_Top4_SFBox)
+
+```python
+class HybridC_Top2_ExaBox(_HybridCBox):
+    name = 'hybrid_c_top2_exa_box'
+    description = 'Exacta box top-2 from Hybrid C (ticket $4)'
+    n_horses = 2; bet_kind = 'exacta'; base_unit = 2.0
+
+
+class HybridC_Top3_TriBox(_HybridCBox):
+    name = 'hybrid_c_top3_tri_box'
+    description = 'Trifecta box top-3 from Hybrid C (ticket $6)'
+    n_horses = 3; bet_kind = 'trifecta'; base_unit = 1.0
+
+
+class HybridC_Top4_SFBox(_HybridCBox):
+    name = 'hybrid_c_top4_sf_box'
+    description = 'Superfecta box top-4 from Hybrid C (ticket $2.40)'
+    n_horses = 4; bet_kind = 'superfecta'; base_unit = 0.10
+```
+
+---
+
+**§ 4.32 firings codification candidate banking** (5-instance multi-instance accrual substrate-emphatic; § 4.36 threshold substrate-met):
+
+| # | Dispatch | Pattern | Substrate-finding |
+|---|---|---|---|
+| #10 | δ.2 | Reference CLI invocation incompleteness | Section 6 substrate-pragmatic-cited dispatch internals but NOT CLI surface |
+| #11 | δ.1 | Section 4 duplicate 4.7 numbering RECURRENCE | δ.1 dispatch appended 4.7 over existing 4.7 (substrate-divergence flag); recurrence at Phase 6 |
+| #12 | Phase 6 | Verbatim function-body transcription discipline | substrate-actuated as codification candidate in firing #12 |
+| #13 | pre-β.3 | Coverage-verdict-substrate-divergence at sub-dispatch granularity | BET_TYPE pattern-citation COMPLETE but specific-value top1_place substrate-missing |
+| #14 | β.3 Phase 1.4 | Per-sub-dispatch BODY-LEVEL substrate-needs surface granularly | Box-bet pattern-vs-body substrate-thin; reference cites HybridC_Top1_Win body but NOT _EnsembleBox/_HybridCBox/HybridC_Top<N>_Box bodies |
+
+**Methodology refinement candidate substrate-emphatic-priority** (for next codification cycle):
+> *"Per-sub-dispatch verification dispatches substrate-actually substrate-discover BOTH pattern-citation completeness AND specific-value-availability + body-level substrate-completeness per sub-dispatch substrate-specific code-mutation scope substrate-target."*
+
+Next codification cycle substrate-pragmatic substrate-actuates methodology refinement substrate-permanent in bible (v3-patched-h OR substrate-coherent version increment per substrate-pragmatic cadence).
+
 ---
 
 ## SECTION 4 — model_versions table
