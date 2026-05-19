@@ -148,6 +148,13 @@ def _parse_s3(s3_path: str) -> Tuple[str, str]:
 class MultiCohortInferenceService:
     """Production service that runs all 32 L1 layers + Hybrid C ensemble per race."""
 
+    # β.1 sprint extension constants (per Q1 P1 + Q-pre-β-1 Option B; substrate-grounded
+    # against substrate-permanent reference Sections 1.10 + 6.2 at commit 15891fa)
+    SPRINT_MODEL_VERSION_ID = '1202021f-2937-46eb-a1fd-0dd9b0d1fe20'
+    SPRINT_ENSEMBLE_VERSION = 'specialist_style_sprint_20260518_0252'
+    SPRINT_S3_PATH = 's3://equine-model-artifacts/ensemble/test/specialist_style_specialist_sprint_20260518_0252.json'
+    SPRINT_DISTANCE_THRESHOLD_FURLONGS = 6.5
+
     # Class-level cache to keep loaded artifacts across Lambda warm-starts
     _instance_cache: Dict[str, Any] = {}
 
@@ -171,6 +178,7 @@ class MultiCohortInferenceService:
         self._l1_artifacts: List[L1Artifact] = []
         self._hybrid_c_booster: Optional[xgb.Booster] = None
         self._hybrid_c_feature_names: List[str] = []
+        self._sprint_booster: Optional[xgb.Booster] = None
 
     def initialize(self) -> Dict[str, Any]:
         """Load all 32 L1 artifacts + Hybrid C ensemble. Idempotent."""
@@ -255,6 +263,32 @@ class MultiCohortInferenceService:
         if art.artifact_format == 'pkl_sklearn':
             return joblib.load(local_path)
         raise RuntimeError(f"Unsupported artifact_format={art.artifact_format} for {art.column_name}")
+
+    def _load_sprint_sub_booster(self) -> xgb.Booster:
+        """β.1 sprint sub-booster lazy-load. Substrate-grounded against substrate-permanent
+        reference Section 1.9 _load_artifact verbatim + Section 6.2 sprint S3 path verbatim.
+
+        Substrate-pragmatic: artifact_format=xgb_json (per Section 6.2 .json extension);
+        same load + idempotent S3 download pattern as Hybrid C ensemble (initialize() lines
+        222-227). Route sub-booster NEVER loaded per Q2 R1 deprecation.
+        """
+        if self._sprint_booster is not None:
+            return self._sprint_booster
+        if 'sprint_booster' in self._instance_cache:
+            self._sprint_booster = self._instance_cache['sprint_booster']
+            return self._sprint_booster
+
+        local_path = '/tmp/specialist_style_sprint_20260518_0252.json'
+        bucket, key = _parse_s3(self.SPRINT_S3_PATH)
+        if not os.path.exists(local_path):
+            self.s3.download_file(bucket, key, local_path)
+        booster = xgb.Booster()
+        booster.load_model(local_path)
+        self._sprint_booster = booster
+        self._instance_cache['sprint_booster'] = booster
+        logger.info(f"Sprint sub-booster loaded ({len(booster.feature_names)} features) "
+                    f"version={self.SPRINT_ENSEMBLE_VERSION}")
+        return booster
 
     def predict_race(self, race_id: str) -> Optional[Dict[str, Any]]:
         """Generate 32 L1 predictions + Hybrid C ensemble for one race.
@@ -364,6 +398,91 @@ class MultiCohortInferenceService:
                 DO UPDATE SET hybrid_c_win_probability = EXCLUDED.hybrid_c_win_probability,
                               predicted_at = NOW()
             """, (race_id, hid, float(p), len(self._l1_artifacts), HYBRID_C_VERSION_NAME))
+            rows_inserted += 1
+        return rows_inserted
+
+    def predict_race_with_routing(self, race_id: str) -> Optional[Dict[str, Any]]:
+        """β.1 sprint-routing extension. Substrate-grounded against substrate-permanent
+        reference Sections 1.10 (ensemble_version convention) + 6.5 (distance dispatch
+        boundary) at commit 15891fa.
+
+        Routing semantics (Q1 P1 + Q2 R1):
+          - Hybrid C canonical always computed (production path UNCHANGED)
+          - Distance ≤ 6.5 furlongs → sprint sub-booster invoked; result tagged
+            'route_dispatch'='sprint'; specialist_style_sprint_win_probability populated
+          - Distance > 6.5 furlongs OR NULL → 'route_dispatch'='hybrid_c_canonical';
+            specialist_style_sprint_win_probability=None
+          - Route sub-booster DEPRECATED per Q2 R1; never invoked
+
+        Returns predict_race result dict augmented with:
+          - 'specialist_style_sprint_win_probability': List[float] | None
+          - 'specialist_style_sprint_raw': List[float] | None
+          - 'route_dispatch': 'sprint' | 'hybrid_c_canonical'
+        None if race ineligible per predict_race substrate.
+        """
+        result = self.predict_race(race_id)
+        if result is None:
+            return None
+
+        race = self.race_repo.get_race_by_id(race_id)
+        distance = race.distance_furlongs if race is not None else None
+
+        if distance is not None and distance <= self.SPRINT_DISTANCE_THRESHOLD_FURLONGS:
+            sprint_booster = self._load_sprint_sub_booster()
+            l1_outputs = result['l1_outputs']
+            n_horses = len(result['horse_ids'])
+            sprint_feature_names = sprint_booster.feature_names
+            # Sprint sub-booster consumes same 32 L1 inputs as Hybrid C per
+            # substrate-permanent reference Section 6.3 verbatim
+            X = np.column_stack([
+                np.asarray(l1_outputs.get(name, [0.0] * n_horses), dtype=np.float64)
+                for name in sprint_feature_names
+            ])
+            dmat = xgb.DMatrix(X, feature_names=sprint_feature_names)
+            raw_sprint = sprint_booster.predict(dmat)
+            # Race-normalize sprint to sum-to-1 per race (mirrors Hybrid C convention)
+            if raw_sprint.sum() > 0:
+                sprint_probs = raw_sprint / raw_sprint.sum()
+            else:
+                sprint_probs = raw_sprint
+            result['specialist_style_sprint_win_probability'] = sprint_probs.tolist()
+            result['specialist_style_sprint_raw'] = raw_sprint.tolist()
+            result['route_dispatch'] = 'sprint'
+        else:
+            result['specialist_style_sprint_win_probability'] = None
+            result['specialist_style_sprint_raw'] = None
+            result['route_dispatch'] = 'hybrid_c_canonical'
+
+        return result
+
+    def write_specialist_style_sprint(self, result: Dict[str, Any]) -> int:
+        """β.1 sprint dual-write to hybrid_c_predictions. Substrate-grounded against
+        substrate-permanent reference Section 1.10 ensemble_version convention +
+        Section 5 D12 UNIQUE constraint (dual-write substrate-coherent natively).
+
+        Idempotent: ON CONFLICT (race_id, horse_id, ensemble_version) DO UPDATE.
+        Writes ONLY when result contains sprint predictions (route_dispatch='sprint').
+        Substrate-coherent no-op when route_dispatch='hybrid_c_canonical' OR result None.
+        """
+        if not result:
+            return 0
+        sprint_probs = result.get('specialist_style_sprint_win_probability')
+        if sprint_probs is None:
+            return 0
+        race_id = result['race_id']
+        horse_ids = result['horse_ids']
+        rows_inserted = 0
+        for hid, p in zip(horse_ids, sprint_probs):
+            execute_write(self.conn, """
+                INSERT INTO hybrid_c_predictions
+                  (race_id, horse_id, hybrid_c_win_probability,
+                   l1_input_count, ensemble_version)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (race_id, horse_id, ensemble_version)
+                DO UPDATE SET hybrid_c_win_probability = EXCLUDED.hybrid_c_win_probability,
+                              predicted_at = NOW()
+            """, (race_id, hid, float(p), len(self._l1_artifacts),
+                  self.SPRINT_ENSEMBLE_VERSION))
             rows_inserted += 1
         return rows_inserted
 
