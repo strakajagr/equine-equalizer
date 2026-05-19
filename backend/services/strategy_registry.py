@@ -487,6 +487,41 @@ class _HybridC_P5_Spread(_HybridC_MultiLegSpread):
 
 
 # ════════════════════════════════════════════════════════════════
+# specialist_style sprint sub-booster strategies (β.3; Q-pre-β-3 Option A)
+# Substrate-evidence: δ.2 multi-track +71.4pp ΔROI on sprint stratum
+# (distance ≤ 6.5f); Q1 P1 SPRINT-ONLY routing; Q2 R1 route DEPRECATED.
+# Substrate-isolated from production routing pre-β.4 activation.
+# ════════════════════════════════════════════════════════════════
+
+class _SpecialistStyleSprintBox(_EnsembleBox):
+    ranking_layer = 'specialist_style_sprint'
+
+
+class SpecialistStyleSprint_Top1_Win(_RawLayerWin):
+    name = 'specialist_style_sprint_top1_win'
+    description = 'Sprint sub-booster top-1 → $2 win (distance ≤ 6.5f routing)'
+    ranking_layer = 'specialist_style_sprint'
+
+
+class SpecialistStyleSprint_Top2_ExaBox(_SpecialistStyleSprintBox):
+    name = 'specialist_style_sprint_top2_exa_box'
+    description = 'Exacta box top-2 from sprint sub-booster (ticket $4)'
+    n_horses = 2; bet_kind = 'exacta'; base_unit = 2.0
+
+
+class SpecialistStyleSprint_Top3_TriBox(_SpecialistStyleSprintBox):
+    name = 'specialist_style_sprint_top3_tri_box'
+    description = 'Trifecta box top-3 from sprint sub-booster (ticket $6)'
+    n_horses = 3; bet_kind = 'trifecta'; base_unit = 1.0
+
+
+class SpecialistStyleSprint_Top4_SFBox(_SpecialistStyleSprintBox):
+    name = 'specialist_style_sprint_top4_sf_box'
+    description = 'Superfecta box top-4 from sprint sub-booster (ticket $2.40)'
+    n_horses = 4; bet_kind = 'superfecta'; base_unit = 0.10
+
+
+# ════════════════════════════════════════════════════════════════
 # Specialist standalone strategies (per F2 substrate evidence)
 # Style filtering applied via wr_predictions.style; ranker layer via rank_score.
 # ════════════════════════════════════════════════════════════════
@@ -693,6 +728,13 @@ STRATEGIES: List[StrategyBase] = [
     Wp55featOddsBlindOrphan_Top1_Win(),
     Wp55featOddsBlindOrphan_Top3_TriBox(),
     Wp55featOddsBlindOrphan_Top5_SFBox(),
+
+    # ── specialist_style sprint sub-booster (4; β.3 Q-pre-β-3 Option A) ──
+    # Substrate-isolated from production routing pre-β.4 activation.
+    SpecialistStyleSprint_Top1_Win(),
+    SpecialistStyleSprint_Top2_ExaBox(),
+    SpecialistStyleSprint_Top3_TriBox(),
+    SpecialistStyleSprint_Top4_SFBox(),
 ]
 
 
