@@ -10,6 +10,25 @@ Computes Beyer-equivalent speed figures with:
   - Beyer-scale normalization (0-130, median ~80)
 
 Usage: python compute_speed_figures.py
+
+REPAIR-4 SUBSTRATE-LEAKAGE MARKER (Step C.3, deferred to REPAIR-5+):
+  Par times (Step 2 query) + Beyer normalization constants (Step 6
+  median+std) are computed from the FULL past_performances corpus then
+  applied uniformly to every row — including rows from race dates that
+  PRECEDE the data used in the aggregate. This is substrate-leakage of
+  AGGREGATE statistics into earlier rows: a 2022 horse's computed_speed_
+  figure is normalized against par times that include 2024-2026 races.
+
+  For PRODUCTION INFERENCE at race-fire-time this is substrate-mostly
+  acceptable — figures on past PPs reflect par times up to roughly
+  yesterday. For TRAINING the leakage is substrate-actual: models trained
+  on 2022-2024 data see speed figures normalized against 2025-2026 data.
+
+  Substrate-correct fix (rolling-window par times per race_date) is a
+  substrate-substantial pipeline rewrite. Deferred to REPAIR-5 when
+  retrain rules re-enable + 39 contaminated models get retrained. Until
+  then, retrain rules REMAIN DISABLED (UNFUCK-3 Step A) so this leakage
+  class cannot propagate into new model versions.
 """
 
 import logging

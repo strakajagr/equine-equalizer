@@ -104,23 +104,38 @@ def detect_angles(entry, pps, race) -> list[str]:
 
 
 def query_angle_stats(conn, angle_name: str,
-                      trainer_name: Optional[str] = None) -> dict:
+                      trainer_name: Optional[str] = None,
+                      race_date=None) -> dict:
     """
-    Query historical angle performance.
+    Query historical angle performance with AS-OF discipline (REPAIR-4 C.5).
+
+    Reads angle_stats_history WHERE snapshot_date <= race_date ORDER BY
+    DESC LIMIT 1. race_date is REQUIRED to prevent substrate-leakage from
+    aggregate angle_stats that includes future races.
+
     Returns {wins, starts} for this angle + optional trainer filter.
     """
+    if race_date is None:
+        raise ValueError(
+            "race_date is required for angle stats AS-OF discipline "
+            "(REPAIR-4 C.5). Pass race.race_date from calling context."
+        )
     from shared.db import execute_one
     try:
         if trainer_name:
             row = execute_one(conn,
-                "SELECT wins, starts FROM angle_stats "
-                "WHERE angle_name = %s AND trainer_name = %s",
-                (angle_name, trainer_name))
+                "SELECT wins, starts FROM angle_stats_history "
+                "WHERE angle_name = %s AND trainer_name = %s "
+                "  AND snapshot_date <= %s "
+                "ORDER BY snapshot_date DESC LIMIT 1",
+                (angle_name, trainer_name, race_date))
         else:
             row = execute_one(conn,
-                "SELECT wins, starts FROM angle_stats "
-                "WHERE angle_name = %s AND trainer_name IS NULL",
-                (angle_name,))
+                "SELECT wins, starts FROM angle_stats_history "
+                "WHERE angle_name = %s AND trainer_name IS NULL "
+                "  AND snapshot_date <= %s "
+                "ORDER BY snapshot_date DESC LIMIT 1",
+                (angle_name, race_date))
         if row:
             return {'wins': int(row['wins']), 'starts': int(row['starts'])}
     except Exception:
@@ -144,12 +159,15 @@ def score_entry_angles(entry, pps, race, conn, odds: float = 5.0) -> dict:
     trainer_name = entry.trainer.trainer_name if entry.trainer else None
     best = None
 
+    # REPAIR-4 C.5: race.race_date is the AS-OF anchor for angle_stats_history
+    race_date = getattr(race, 'race_date', None)
+
     for angle in angles:
-        # Try trainer-specific first
-        stats = query_angle_stats(conn, angle, trainer_name)
+        # Try trainer-specific first (AS-OF race_date)
+        stats = query_angle_stats(conn, angle, trainer_name, race_date=race_date)
         if stats['starts'] < 5 and trainer_name:
-            # Fall back to global
-            stats = query_angle_stats(conn, angle)
+            # Fall back to global (AS-OF)
+            stats = query_angle_stats(conn, angle, race_date=race_date)
 
         scored = score_angle(stats['wins'], stats['starts'], odds)
         scored['angle_name'] = angle

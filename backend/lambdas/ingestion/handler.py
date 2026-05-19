@@ -8,6 +8,7 @@ from services.ingestion_service import (
     IngestionService
 )
 
+logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -177,11 +178,37 @@ def handler(event, context):
                           )
                     """)
                 conn.commit()
+
+                # REPAIR-4 C.5: snapshot today's refreshed angle_stats into
+                # angle_stats_history for AS-OF inference reads. ON CONFLICT
+                # DO NOTHING handles the idempotency case where this action
+                # runs more than once per day.
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO angle_stats_history (
+                            angle_name, trainer_name, track_code,
+                            wins, starts, snapshot_date
+                        )
+                        SELECT angle_name, trainer_name, track_code,
+                               wins, starts, CURRENT_DATE
+                        FROM angle_stats
+                        ON CONFLICT DO NOTHING
+                    """)
+                conn.commit()
+
                 with conn.cursor() as cur:
                     cur.execute("SELECT COUNT(*) as cnt FROM angle_stats")
                     count = cur.fetchone()
+                    cur.execute(
+                        "SELECT COUNT(*) as cnt FROM angle_stats_history "
+                        "WHERE snapshot_date = CURRENT_DATE"
+                    )
+                    hist_count = cur.fetchone()
             return {'statusCode': 200, 'body': json.dumps({
-                'refreshed': True, 'rows': count['cnt'] if isinstance(count, dict) else count[0]})}
+                'refreshed': True,
+                'rows': count['cnt'] if isinstance(count, dict) else count[0],
+                'history_snapshot_rows': hist_count['cnt'] if isinstance(hist_count, dict) else hist_count[0],
+            })}
         except Exception as e:
             logger.error(f"refresh_angle_stats failed: {e}", exc_info=True)
             return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}

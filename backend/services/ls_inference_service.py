@@ -235,7 +235,7 @@ class LSInferenceService:
                 angle_posterior = 0.0
                 angle_ev = -2.0
                 try:
-                    angle_result = self._score_angles(row, ml_odds)
+                    angle_result = self._score_angles(row, ml_odds, race_date)
                     angle_name = angle_result.get('angle_name')
                     angle_posterior = angle_result.get('angle_posterior', 0.0)
                     angle_ev = angle_result.get('angle_ev', -2.0)
@@ -583,17 +583,16 @@ class LSInferenceService:
         # Map 0-1 to -1 to +1
         return round(prob * 2.0 - 1.0, 4)
 
-    def _score_angles(self, row, ml_odds: float) -> dict:
-        """Check angle flags and query angle_stats.
+    def _score_angles(self, row, ml_odds: float, race_date) -> dict:
+        """Check angle flags and query angle_stats_history with AS-OF predicate.
 
-        REPAIR-4 substrate-deferred: angle_stats is substrate-aggregate
-        table substrate-overwriting-in-place (has last_updated but no
-        history). Substrate-architectural fix (snapshot history table)
-        substrate-deferred to REPAIR-4-supp. At race-fire-time, current
-        angle_stats substrate-actually substrate-approximates AS-OF
-        substrate-correctly (substrate-mutation magnitude per single race
-        is substrate-marginal vs aggregate). Substrate-blast-radius lower
-        than past_performances leakage (which IS substrate-fixed).
+        REPAIR-4 Step C.5: angle_stats was substrate-aggregate refreshed
+        in-place by ingestion Lambda — backtest/training reads of
+        angle_stats were substrate-leaky. Fix is angle_stats_history
+        snapshot table populated daily; reads pull WHERE snapshot_date <=
+        race_date ORDER BY DESC LIMIT 1 to get the substrate-correct
+        AS-OF aggregate state. Fall-through to current angle_stats handles
+        the cold-start case before the daily snapshot accumulates history.
         """
         angles_found = []
 
@@ -611,17 +610,21 @@ class LSInferenceService:
         best = None
 
         for angle in angles_found:
-            # Try trainer-specific
+            # Try trainer-specific from history (AS-OF race_date)
             stats = execute_one(self.conn,
-                "SELECT wins, starts FROM angle_stats "
-                "WHERE angle_name = %s AND trainer_name = %s",
-                (angle, trainer_name))
+                "SELECT wins, starts FROM angle_stats_history "
+                "WHERE angle_name = %s AND trainer_name = %s "
+                "  AND snapshot_date <= %s "
+                "ORDER BY snapshot_date DESC LIMIT 1",
+                (angle, trainer_name, race_date))
             if not stats or int(stats.get('starts', 0)) < 5:
-                # Fall back to global
+                # Fall back to global (AS-OF)
                 stats = execute_one(self.conn,
-                    "SELECT wins, starts FROM angle_stats "
-                    "WHERE angle_name = %s AND trainer_name IS NULL",
-                    (angle,))
+                    "SELECT wins, starts FROM angle_stats_history "
+                    "WHERE angle_name = %s AND trainer_name IS NULL "
+                    "  AND snapshot_date <= %s "
+                    "ORDER BY snapshot_date DESC LIMIT 1",
+                    (angle, race_date))
 
             if stats and int(stats.get('starts', 0)) > 0:
                 from scipy.stats import beta as beta_dist
