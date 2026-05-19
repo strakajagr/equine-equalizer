@@ -128,7 +128,21 @@ PHASE_PLAN = [
 
 
 def launch_task(cmd, region=REGION, cluster=CLUSTER, task_def=TASK_DEFINITION):
-    """Launch one ECS Fargate task with command override. Returns task ARN."""
+    """Launch one ECS Fargate task with command override. Returns task ARN.
+
+    REPAIR-5-RESCUE: env override LEAN_TAG=lean58 substrate-required for
+    training scripts to produce version_names with _lean58_ infix, which
+    derive_model_type() maps to production-canonical model_type names
+    (win_prob_core_*, pl_core_<spec>, etc.). Without this override, bare
+    version_names bypass derive_model_type's prefix_map and store raw
+    model_type='wp_core' / 'pl_core' / etc. — mismatching production
+    inference service queries.
+
+    Substrate-NOTE: equine-training-daily-full task def has LEAN_TAG=lean53
+    hardcoded (substrate-divergent from current production lean58). Future
+    cron-driven retrains using that task def will produce lean53 models;
+    REPAIR-6 substrate-tracks reconciling daily-full to lean58.
+    """
     ecs = boto3.client('ecs', region_name=region)
     resp = ecs.run_task(
         cluster=cluster,
@@ -146,6 +160,9 @@ def launch_task(cmd, region=REGION, cluster=CLUSTER, task_def=TASK_DEFINITION):
             'containerOverrides': [{
                 'name': 'training',
                 'command': cmd,
+                'environment': [
+                    {'name': 'LEAN_TAG', 'value': 'lean58'},
+                ],
             }],
         },
     )
