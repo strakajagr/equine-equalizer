@@ -80,18 +80,19 @@ PHASE_PLAN = [
             {'cmd': ['model/pl/train.py', '--specialist', s], 'expects': [f'pl_core_{s}']}
             for s in ('general', 'speed', 'closer', 'class_riser', 'class_dropper', 'sprint', 'route')
         ] + [
-            # win_prob_core_* (7 models)
-            {'cmd': ['model/win_prob/train.py', '--specialist', s], 'expects': [f'win_prob_core_{s}']}
+            # win_prob_core_* (7 models) — substrate-correct: --core-only toggles
+            # win_prob/train.py from default full to core mode
+            {'cmd': ['model/win_prob/train.py', '--specialist', s, '--core-only'],
+             'expects': [f'win_prob_core_{s}']}
             for s in ('general', 'speed', 'closer', 'class_riser', 'class_dropper', 'sprint', 'route')
         ] + [
             # rk_full_* (8 models — adds gonzo_sauce)
             {'cmd': ['model/ranker/train.py', '--specialist', s], 'expects': [f'rk_full_{s}']}
             for s in ('general', 'speed', 'closer', 'class_riser', 'class_dropper', 'sprint', 'route', 'gonzo_sauce')
         ] + [
-            # wp_full_* (8 models — adds gonzo_sauce; full mode via env or flag if needed)
-            # Substrate-NOTE: substrate-check if wp_full uses different script or
-            # same with --full flag. Adjusted at execution time per discovery.
-            {'cmd': ['model/win_prob/train.py', '--specialist', s, '--full'], 'expects': [f'wp_full_{s}']}
+            # wp_full_* (8 models — adds gonzo_sauce). Default mode for
+            # win_prob/train.py is full; no --core-only means wp_full path.
+            {'cmd': ['model/win_prob/train.py', '--specialist', s], 'expects': [f'wp_full_{s}']}
             for s in ('general', 'speed', 'closer', 'class_riser', 'class_dropper', 'sprint', 'route', 'gonzo_sauce')
         ],
     },
