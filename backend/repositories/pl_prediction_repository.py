@@ -249,8 +249,17 @@ class PLPredictionRepository(BaseRepository):
 
     def insert_prediction(
         self, prediction_data: dict
-    ) -> str:
-        """Insert P&L prediction. Returns prediction_id."""
+    ):
+        """Insert P&L prediction.
+
+        Returns the new prediction_id (str) on a fresh insert. Returns
+        None if the row already existed (ON CONFLICT DO NOTHING fires,
+        RETURNING yields no row). The PL daily pipeline doesn't use the
+        return value, but earlier code would crash here with
+        `TypeError: 'NoneType' object is not subscriptable` on every
+        race re-run (manual smoke test, backfill of a date that already
+        has predictions) — surfaced 2026-05-20 on a 5/17 backfill smoke.
+        """
         row = self._write_returning(
             """INSERT INTO pl_predictions (
                  entry_id, race_id, horse_id,
@@ -297,6 +306,12 @@ class PLPredictionRepository(BaseRepository):
                 prediction_data.get('market_prob'),
             )
         )
+        # ON CONFLICT DO NOTHING + RETURNING produces no row when the
+        # (race_id, entry_id, style) tuple already exists. Treat as a
+        # silent no-op (existing prediction stays). Caller doesn't use
+        # the return value in the daily pipeline.
+        if row is None:
+            return None
         return str(row['prediction_id'])
 
     def get_track_record(self, window_days: int) -> dict:
