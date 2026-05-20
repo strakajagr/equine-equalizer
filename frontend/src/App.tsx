@@ -15,6 +15,7 @@ import DashboardPage from './pages/DashboardPage';
 import BetBuilderPage from './pages/BetBuilderPage';
 import PerformancePage from './pages/PerformancePage';
 import ComparePage from './pages/ComparePage';
+import DailyReportPage from './pages/DailyReportPage';
 
 function App() {
   return (
@@ -31,6 +32,8 @@ function App() {
           <Route path="/performance" element={<PerformancePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/reports/daily" element={<DailyReportPage />} />
+          <Route path="/reports/daily/:date" element={<DailyReportPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
