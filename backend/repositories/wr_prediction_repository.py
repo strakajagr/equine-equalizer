@@ -287,8 +287,17 @@ class WRPredictionRepository(BaseRepository):
 
     def insert_prediction(
         self, prediction_data: dict
-    ) -> str:
-        """Insert WR prediction. Returns prediction_id."""
+    ):
+        """Insert WR prediction.
+
+        Returns the new prediction_id (str) on a fresh insert. Returns
+        None if the row already existed (ON CONFLICT DO NOTHING fires,
+        RETURNING yields no row). Same bug class as the PL fix
+        (commit 821eae2) — surfaced 2026-05-20 post-cutover when the
+        new WR active model re-ran on 5/17 (a date that already had
+        WR predictions stored). Caller `_store_prediction` doesn't use
+        the return value in the daily pipeline.
+        """
         row = self._write_returning(
             """INSERT INTO wr_predictions (
                  entry_id, race_id, horse_id,
@@ -344,6 +353,12 @@ class WRPredictionRepository(BaseRepository):
                 prediction_data.get('market_prob'),
             )
         )
+        # ON CONFLICT DO NOTHING + RETURNING → row=None when (race_id,
+        # entry_id, style) already exists. Same fix as pl_prediction_
+        # repository.py (commit 821eae2). Caller doesn't use the return
+        # in the daily pipeline; silent no-op preserves existing row.
+        if row is None:
+            return None
         return str(row['prediction_id'])
 
     def update_prediction_result(

@@ -182,8 +182,14 @@ class PredictionRepository(BaseRepository):
 
     def insert_prediction(
         self, prediction_data: dict
-    ) -> str:
-        """Insert prediction. Returns prediction_id."""
+    ):
+        """Insert prediction.
+
+        Returns the new prediction_id (str) on a fresh insert, or None
+        when ON CONFLICT DO NOTHING fires (entry already has a
+        predictions row). Same bug class as the PL fix (commit 821eae2),
+        the WR fix, and the LS fix in this commit.
+        """
         row = self._write_returning(
             """INSERT INTO predictions (
                  entry_id, race_id, horse_id,
@@ -221,6 +227,8 @@ class PredictionRepository(BaseRepository):
                 prediction_data.get('exotic_partners', [])
             )
         )
+        if row is None:
+            return None
         return str(row['prediction_id'])
 
     def update_prediction_result(

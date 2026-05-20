@@ -281,8 +281,15 @@ class LSPredictionRepository(BaseRepository):
 
     def insert_prediction(
         self, prediction_data: dict
-    ) -> str:
-        """Insert LS prediction. Returns prediction_id."""
+    ):
+        """Insert LS prediction.
+
+        Returns the new prediction_id (str) on a fresh insert, or None
+        when ON CONFLICT DO NOTHING fires (entry already has an
+        ls_predictions row). Same bug class as the PL fix (commit
+        821eae2) and the WR fix in this commit — prevents
+        TypeError on every same-entry re-run.
+        """
         row = self._write_returning(
             """INSERT INTO ls_predictions (
                  entry_id, race_id, horse_id,
@@ -323,6 +330,8 @@ class LSPredictionRepository(BaseRepository):
                     'feature_importance') or {})
             )
         )
+        if row is None:
+            return None
         return str(row['prediction_id'])
 
     def get_track_record(self, window_days: int) -> dict:
