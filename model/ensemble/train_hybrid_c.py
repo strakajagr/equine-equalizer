@@ -77,7 +77,10 @@ def find_matching_columns(df_columns, prefix_patterns):
 
 
 def main():
-    train_dir = '/tmp/option_c_predictions_train'
+    # REPAIR-5-INTERLEAVED-β.1: train_dir + window patched for full
+    # substrate-window training against substrate-clean L1 outputs.
+    # Original 7-day window substrate-incoherent for multi-year ensemble.
+    train_dir = os.environ.get('HYBRID_C_TRAIN_DIR', '/tmp/option_c_predictions_full')
     files = glob.glob(f'{train_dir}/*.parquet')
     print(f"Loading {len(files)} training-window parquets...")
     dfs = []
@@ -101,16 +104,21 @@ def main():
         print(f"  missing Phase B.x patterns: {missing_px}")
         print(f"  missing PRIOR patterns: {missing_pr}")
 
-    # Pull actuals for training window
+    # REPAIR-5-INTERLEAVED-β.1: actuals window patched to full substrate-clean
+    # range matching full-window inference parquets at /tmp/option_c_predictions_full/.
+    # Env override HYBRID_C_ACTUALS_START / HYBRID_C_ACTUALS_END for further tuning.
+    actuals_start = os.environ.get('HYBRID_C_ACTUALS_START', '2022-01-01')
+    actuals_end = os.environ.get('HYBRID_C_ACTUALS_END', '2026-05-17')
+    print(f"Actuals window: {actuals_start} → {actuals_end}")
     with get_db() as conn:
         actuals = pd.DataFrame(execute_query(conn, """
             SELECT res.race_id::text AS race_id,
                    res.horse_id::text AS horse_id,
                    (res.finish_position = 1)::int AS is_winner
             FROM results res JOIN races r USING(race_id)
-            WHERE r.race_date BETWEEN '2026-04-25' AND '2026-05-01'
+            WHERE r.race_date BETWEEN %s AND %s
               AND res.finish_position IS NOT NULL
-        """))
+        """, (actuals_start, actuals_end)))
     print(f"Actuals rows: {len(actuals)}")
 
     merged = all_preds.merge(actuals, on=['race_id', 'horse_id'], how='inner')
