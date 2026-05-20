@@ -2,7 +2,7 @@
 
 Document: ml_layer_architecture_bible
 Phase: 1 (Bible) — deliverable 5 of 7 (drafting-order numbering per BIBLE_STRUCTURE_SPEC v6 § 8.2)
-Status: v1 LOCKED 2026-05-07
+Status: v1-patched-a LOCKED 2026-05-12 (Phase A D6 bundled bible patches per F.4 surgical-patch pattern under Tier 2 ceremony cap; 5 patches landed; supersedes v1 LOCKED 2026-05-07)
 Author: CC (Drafting CC, parallel cohort with feature_provenance_bible)
 Date drafted: 2026-05-06
 
@@ -14,6 +14,7 @@ latent → output composition → calibration / bypass state.
 
 ## Revision history
 
+- v1-patched-a (2026-05-12): Phase A D6 bundled bible patches dispatch. **Override disclosure (Q5 ratification):** D6 surgical patches per F.4 pattern under Tier 2 ceremony cap per Phase A entry directive. UC § 7.2 step 4 per-bible patch-CC convention explicitly overridden by ceremony cap. Rationale: D6 documents Phase A operational findings into bibles per Phase A re-dispatch venue; not a running cross-bible-cross-reference-freeze UC cycle. **5 patches applied** per Phase A handoff `docs/operations/PHASE_A_HANDOFF_2026-05-12.md` §§ 2.9, 2.10, 2.11, 2.14, 2.16: ML-1 NEW § 4.2.3 LS second-pass enrichment SQL substrate (per Phase A handoff § 2.11); ML-2 NEW § 4.2.4 Per-pipeline multi-style inventory (per Phase A handoff § 2.9 WR 8 / PL 7 / LS 1); ML-3 NEW § 4.3 Inference monitoring substrate — DLQ + predictions-deficit alarm pattern (per Phase A handoff § 2.10 A.5 deliverable); ML-4 NEW § 8.1 Train-test skew Phase B substrate review flag (per Phase A handoff § 2.14 A.5.3 inference-only scope); ML-5 NEW § 8.2 build_entry_features exception cause beyond gonzo (Phase B input candidate per Phase A handoff § 2.16). Cross-bible cross-references created: § 4.3 ML-3 cross-link `architecture_overview:3.10` (predictions-deficit alarms 26→29 extension) + `data_pipeline_bible:4.6` (predict_race filter + PREDICT_RACE_TOLERANCE=5) + `data_pipeline_bible:4.5` (AWS API validation discipline applied to A.5 inference Lambda DLQ wiring); § 8.1 ML-4 cross-link `data_pipeline_bible:4.6` upstream-gap-flagged-section. Cross-bible cross-reference freeze status: NOT re-engaged for D6 (Tier 2 ceremony cap pattern); per-bible audit-CC tier not invoked at D6 scope.
 - v1 LOCKED 2026-05-07: Phase 1 Cohort corpus-audit-gate sequential lock cycle, step 2 of 3 (MLA second per Handoff § 5.2 dependency order, after FP v1 LOCKED 2026-05-07). Per corpus-audit Tony Decision 1 (DEFER architecture_overview:4.1 refinement). MLA v1-draft AUTHORIZE-CORPUS-AUDIT substrate-grounded; calibration state distribution 2 CALIBRATED + 4 UNCALIBRATED + 5 BYPASS + 0 UNVERIFIED across 11-entity gallery (8 trained + 3 non-trained per Q6 ratification). Self-audit 9 PASS / 0 FAIL / 0 PARTIAL. 7 PHASE_5_BACKLOG_CANDIDATE entries inline-flagged at row narratives (queued for QB lock-time batch synthesis at MER lock per standing instruction). Per Handoff § 6.1: cross-bible cross-reference freeze ACTIVE since FP v1 lock; MLA's mla:M-N ↔ FP's fp:F-N references frozen across cohort. UPSTREAM-CORRECTION cycle per Handoff § 7 is sole re-open path.
 
 ---
@@ -820,6 +821,95 @@ PL pipeline does NOT participate in cross-pipeline LS enrichment — LS reads `w
 - M-7 (PL arithmetic EV/Kelly overlay) — terminal in trained-model sense; feeds storage + non-ML rank-by-EV logic.
 - M-11 (LS stacking ensemble) — terminal trained model; feeds within-race softmax + storage.
 
+#### § 4.2.3 LS second-pass enrichment SQL substrate (ML-1 D6 v1-patched-a patch per Phase A handoff § 2.11)
+
+**Substrate location.** `backend/services/ls_inference_service.py:144-260`.
+
+**Architectural statement.** LS does NOT iterate races independently — LS is second-pass enrichment reading from `wr_predictions`. The LS handler queries previously-written WR predictions, filters via JOIN to active (non-scratched) entries, then enriches with LS-pipeline-layer model outputs (M-8 RF longshot + M-9 LSTM trajectory + M-10 Bayesian angles + M-11 ensemble) and writes back to `ls_predictions` plus the LS-relevant `wr_predictions` columns (dual-write per F.3 banked at `database_schema_bible:4.1.14`).
+
+**Verbatim SQL block (per Phase A handoff § 2.11):**
+
+```sql
+SELECT wp.prediction_id, wp.horse_id, wp.race_id, wp.entry_id, ...
+FROM wr_predictions wp
+JOIN entries e ON wp.entry_id = e.entry_id
+JOIN races r ON wp.race_id = r.race_id
+...
+WHERE r.race_date = %s
+  AND wp.style = 'general'
+  AND COALESCE(e.is_scratched, FALSE) = FALSE
+```
+
+**Inheritance pattern.** LS inherits WR's race set minus scratched entries. WR pipeline's three filter components (F-race-type SQL + F-claim-price SQL + F-field-size in-memory per `architecture_overview:4.4` D6 patch) are applied at WR inference time; LS's race set is the WR-survivors set. LS then adds the `is_scratched=FALSE` JOIN-filter at second-pass time, removing entries scratched between WR-inference-time and LS-inference-time.
+
+**Architectural distinction from WR + PL primary inference.** WR + PL inference services iterate races independently from `race_repository.py:66-94` SQL filter output. LS inference service does NOT iterate races; it iterates over already-written WR predictions. This means:
+
+- **LS field-size dependency:** LS inherits WR's race set, so if WR's `if len(race.entries) < 4: continue` filter excluded a race, LS will not write a prediction for that race either.
+- **LS upstream-dependency:** if WR upstream fails (Lambda error, async drop, or A.5.3-class entry-drop), the corresponding LS predictions are also absent. The composite alarm `equine-ls-predictions-deficit` (per § 4.3 below) catches this cascading-failure mode via Expected > 0, Actual = 0 even when LS Lambda itself succeeds (LS clean-exit-empty when WR upstream produces 0).
+
+**Cross-reference.** `architecture_overview:4.4` (race-eligibility filter architecture; D6 v3-patched-d patch) + § 4.3 below (inference monitoring substrate; D6 ML-3 patch).
+
+#### § 4.2.4 Per-pipeline multi-style inventory (ML-2 D6 v1-patched-a patch per Phase A handoff § 2.9)
+
+The three inference pipelines (WR + PL + LS) emit predictions in per-style variants. Style values are stored in the `style` column of `wr_predictions` / `pl_predictions`; LS pipeline does NOT use `style` (no `style` column in `ls_predictions` and LS handler doesn't accept style per A.6.b finding):
+
+| Pipeline | Style count | Styles |
+|---|---|---|
+| WR (`equine-wr-inference`) | 8 | `general` + 7 specialized variants |
+| PL (`equine-pl-inference`) | 7 | `general` + 6 specialized variants |
+| LS (`equine-ls-inference`) | 1 | (no style column; LS handler doesn't accept style per A.6.b finding) |
+
+**Substrate verification (per Phase A handoff § 1.5 Predictions spot-check 8 dates).** WR = PL = LS row counts exactly when the pipeline is healthy. The multi-style asymmetry (WR 8, PL 7) is intentional — each pipeline's specialized styles map to per-pipeline model dispatch logic at training time + inference time.
+
+**LS handler no-style behavior (A.6.b finding).** `equine-ls-inference` handler does NOT accept a `style` key in the invocation payload. Manual recovery tool `scripts/rerun_inference.py` (per Phase A handoff § 1.5) consumes a `--style` argument but the LS payload omits the style key per `rerun_inference.py:159-166` argparse + handler logic ("LS handler does not accept style; key omitted from LS payload").
+
+**Cross-reference.** `database_schema_bible:4.1.12` (wr_predictions `style` column) + `database_schema_bible:4.1.13` (pl_predictions `style` column) + `database_schema_bible:4.1.14` (ls_predictions; no `style` column).
+
+### § 4.3 Inference monitoring substrate (ML-3 D6 v1-patched-a patch per Phase A handoff § 2.10)
+
+Per Phase A A.5 dispatch 2026-05-12: 4-Lambda inference DLQ wiring + 3 per-pipeline predictions-deficit composite alarms deployed.
+
+#### § 4.3.1 Inference Lambda DLQ wiring
+
+3 inference Lambdas (`equine-wr-inference` + `equine-pl-inference` + `equine-ls-inference`) wired to shared SQS DLQ `equine-async-failure-dlq` (ARN `arn:aws:sqs:us-east-1:584812014683:equine-async-failure-dlq`) via `lambda put-function-event-invoke-config`:
+
+- `OnFailure → arn:aws:sqs:us-east-1:584812014683:equine-async-failure-dlq`
+- `MaximumRetryAttempts=2`
+- `MaximumEventAgeInSeconds=3600`
+
+Execution roles (per `architecture_overview:3.10` 6-Lambda DLQ coverage final tally table):
+
+- `equine-wr-inference` → `EquineComputeStack-WRInferenceFunctionServiceRole50-3h7rtE6J9Zwg`
+- `equine-pl-inference` → `EquineComputeStack-PLInferenceFunctionServiceRoleE9-AicisfzONYB9`
+- `equine-ls-inference` → `EquineComputeStack-LSInferenceFunctionServiceRoleAC-ogxzjOvAqKNG`
+
+All 3 roles carry inline policy `AsyncDLQSend` granting `sqs:SendMessage` on the DLQ ARN. AWS API validation discipline (per `data_pipeline_bible:4.5` D6 patch): IAM grant precedes event-invoke-config to satisfy Lambda `PutFunctionEventInvokeConfig` API-time validation.
+
+**DLQ depth alarm:** `equine-async-dlq-messages-present` (shared with other 3 Lambdas in the 6-Lambda coverage class per `architecture_overview:3.10`). Pages within ≤ 5 min of first drop. ORPHAN classification — CLI deploy; not in CDK source.
+
+#### § 4.3.2 Per-pipeline predictions-deficit alarm pattern (3 alarms)
+
+Deliberate per-Lambda non-conflation (3 distinct alarms, not 1 composite-of-3) per Tony's prior anti-conflation directive:
+
+- `equine-wr-predictions-deficit`
+- `equine-pl-predictions-deficit`
+- `equine-ls-predictions-deficit`
+
+**Math expression per alarm:** `IF(m1 > 0, m1 - m2, 0) > 0` where:
+
+- m1 = Expected metric (`EquineExpectedWRPredictionsToday` / `EquineExpectedPLPredictionsToday` / `EquineExpectedLSPredictionsToday`)
+- m2 = Actual metric (`EquineActualWRPredictionsToday` / `EquineActualPLPredictionsToday` / `EquineActualLSPredictionsToday`)
+
+Threshold > 0; Period 300 s; EvaluationPeriods 1; TreatMissingData=breaching; SNS `equine-equalizer-alerts`.
+
+**6 new metrics** (added to existing `equine-entries-tracks-publisher` Lambda via A.5-α extension): 3 Expected + 3 Actual, namespace `EquineEqualizer/Inference`.
+
+**Cascading-failure detection.** Alarm fires even when inference Lambda itself succeeds with empty output (e.g., LS clean-exit-empty when WR/PL upstream produces 0 — alarm catches via Expected > 0, Actual = 0). This closes a gap that the invocation-class alarms cannot detect: a successful Lambda invocation producing no output is operationally a deficit, not a success.
+
+**Expected calculation** (per A.5.1 refinement per Phase A handoff § 2.10): SQL mirrors the A.6.c race-eligibility filter (per `architecture_overview:4.4`) + applies `PREDICT_RACE_TOLERANCE=5` post-fetch (per `data_pipeline_bible:4.6`). The tolerance constant accommodates the entry-level drops that the `predict_race` internal filter (A.5.3 fix scope) may still produce; A.5.4 reduction candidate post-2-4-week observation per `data_pipeline_bible:4.6`.
+
+**Cross-reference.** `architecture_overview:3.10` (Inference-Lambda predictions-deficit alarm extension; 26→29 alarm count) + `data_pipeline_bible:4.6` (predict_race internal filter + A.5.3 fix + PREDICT_RACE_TOLERANCE=5) + `data_pipeline_bible:4.5` (AWS API validation discipline applied to A.5 DLQ wiring) + AUDIT_METHODOLOGY § 4.30 (dispatch-text step ordering vs API dependency requirements lesson).
+
 ---
 
 ## § 5. Calibration Findings Summary
@@ -1101,5 +1191,59 @@ Reconciliation result:
 **Total: 11 entities. Final per Tony SP-1 ratification.** Spec § 3.1 enumerated 7 buckets at inheritance-summary granularity; substrate verification surfaced 11 distinct production model entities. All 4 expansions/additions (Findings 5A, 5B, 5C; plus the implicit dual-ranker expansion at M-3 + M-4 which is part of 5A) ratified by Tony at SP-1 resolution.
 
 ---
+
+## § 8. Phase B Substrate Review Candidates (D6 v1-patched-a NEW section per Phase A handoff)
+
+This section banks substrate-review candidates surfaced during Phase A operational cycle for evaluation at Phase B entry. Each candidate is observation-only (no disposition recommendation at runbook/bible scope per Phase A handoff § 4 discipline). Phase B substrate review classifies + dispositions each.
+
+### § 8.1 Train-test skew flag (ML-4 D6 v1-patched-a patch per Phase A handoff § 2.14)
+
+**Substrate observation.** `model/shared/gonzo_features.py` is shared between the ECS Fargate training pipeline (per `architecture_overview:3.2` task families) and the inference Lambdas (`equine-wr-inference` + `equine-pl-inference` + `equine-ls-inference`). The A.5.3 surgical fix (commit `e1d6d4a` per `data_pipeline_bible:4.6`) extended the `compute_gonzo_class_features` filter at `gonzo_features.py:558` with `not pd.isna(pp_finishes[i])` NaN-guard.
+
+**A.5.3 fix scope.** Inference-only per F3 ratification at A.5.3 dispatch. The training-side semantics of the same NaN-guard are NOT substrate-verified at v1-patched-a lock.
+
+**Phase B substrate review items.**
+
+(a) Whether training pipeline exercises `compute_gonzo_class_features` at all (the helper may be exclusively inference-time-called; training-time codepath unverified at A.5.3 fix scope).
+
+(b) Data shape at training time — specifically whether `pp_finishes` array at training-time joins exercise the same NaN-coercion mechanism as inference-time `pd.read_sql_query` reads.
+
+(c) Whether NaN finish_positions are present in training inputs at all OR pre-filtered upstream by the training-data assembly path.
+
+(d) Train-test skew characterization — if training-time exercises the helper but receives non-NaN inputs while inference-time receives NaN inputs, the A.5.3 fix produces train-test skew (training-time and inference-time produce different feature values for the same input substrate).
+
+(e) Re-train decision — based on (a)-(d), whether retraining of the WR/PL/LS models is required to incorporate the A.5.3 fix's defense-in-depth behavior at training time.
+
+**Annotation per producer-attribution refinement (per AUDIT_METHODOLOGY § 4.31 application).** At A.5.3 checkpoint #11, CC claimed "training-time same-helper run will silently filter same NaN rows" from code-symmetry between training and inference. Methodology refinement applied prophylactically: claim recognized as inference-from-code-symmetry, NOT substrate-direct-verified; deferred to Phase B substrate review rather than promoted to fact at A.5.3 scope. Phase B verifies via substrate-direct trace.
+
+**Cross-reference.** `data_pipeline_bible:4.6` (predict_race internal filter + A.5.3 fix substrate; upstream gap flagged for Phase B). AUDIT_METHODOLOGY § 4.31 (producer-attribution methodology refinement; 5-case-study banking).
+
+### § 8.2 build_entry_features exception cause beyond gonzo (ML-5 D6 v1-patched-a patch per Phase A handoff § 2.16)
+
+**Substrate observation.** Phase A A.5.2 trace identified ALL 9 affected horses on the `rerun_inference` invocation hit the same exception: `compute_gonzo_class_features int(NaN)`. A.5.3 (commit `e1d6d4a`) fixed this exception class. But the broader `_build_entry_features` catch-all exception handler at `feature_engineering_service.py:110` (within `build_feature_matrix` per `data_pipeline_bible:4.6`) still suppresses any future heterogeneous failure mode silently.
+
+The exception-suppression behavior is non-architectural / F-side-effect filter class (per `data_pipeline_bible:4.6`). It captures defects in compute helpers as silent entry drops without log surface above DEBUG.
+
+**Phase B investigation items.**
+
+(a) Inventory of compute_* helpers called from `_build_entry_features`: the 11 compute_* helpers per Phase A handoff context (`compute_pace_features`, `compute_gonzo_class_features`, ...). Each helper's NaN-vulnerability surface unverified post-A.5.3.
+
+(b) Characterize each compute_* helper's NaN-vulnerability: does it call `int()` on potentially-NaN values? Does it perform arithmetic that produces NaN-propagation? Does it call dict-key access that may raise KeyError on NaN-keyed indexes?
+
+(c) Per-helper explicit handling vs catch-all retention decision. Two architectural options:
+- Option α: replace catch-all `except Exception: continue` with per-helper try/except + explicit error logging at WARN level. Surface each helper's failure mode + frequency.
+- Option β: retain catch-all as defense-in-depth; add log surface above DEBUG to capture the entry-drop count + the exception class per drop. Less invasive; preserves the catch-all's safety property.
+
+(d) Defense-in-depth interaction with `PREDICT_RACE_TOLERANCE=5` interim constant (per `data_pipeline_bible:4.6`): how the per-helper handling decision interacts with the tolerance reduction candidate.
+
+**Phase B input candidate disposition.** Not a methodology refinement (no banked rule); pure substrate-review candidate. Phase B classifies + dispositions.
+
+**Cross-reference.** `data_pipeline_bible:4.6` (predict_race internal filter substrate + A.5.3 fix + PREDICT_RACE_TOLERANCE=5 interim defense-in-depth) + § 4.3 above (inference monitoring substrate; cascading-failure detection via predictions-deficit alarms catches entry-drop classes that exceed tolerance).
+
+---
+
+End of ML Layer Architecture Bible v1-patched-a (LOCKED 2026-05-12 via Phase A D6 bundled bible patches dispatch under Tier 2 ceremony cap; 5 D6 patches landed: ML-1 NEW § 4.2.3 + ML-2 NEW § 4.2.4 + ML-3 NEW § 4.3 + ML-4 NEW § 8.1 + ML-5 NEW § 8.2; supersedes v1 LOCKED 2026-05-07). UC § 7.2 step 4 per-bible patch-CC convention overridden by Phase A entry directive ceremony cap; override disclosure per revision-history v1-patched-a entry above. Cross-bible cross-reference freeze NOT re-engaged for D6 (Tier 2 ceremony cap pattern). v1 footer historical content preserved below for substrate-evolution audit trail per AUDIT_METHODOLOGY § 4.17.
+
+### v1 footer (historical retention per AUDIT_METHODOLOGY § 4.17)
 
 End of ML Layer Architecture Bible v1 LOCKED 2026-05-07 (POST-AUDIT).
