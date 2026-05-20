@@ -1,0 +1,9 @@
+FROM public.ecr.aws/lambda/python:3.11
+
+COPY backend/lambdas/substrate_health_monitor/ ${LAMBDA_TASK_ROOT}/
+
+RUN pip install --no-cache-dir \
+  psycopg2-binary==2.9.9 \
+  boto3==1.34.0
+
+CMD ["handler.handler"]

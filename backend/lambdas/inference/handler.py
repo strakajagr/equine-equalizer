@@ -179,6 +179,27 @@ def handler(event, context):
         )
         return race_router.get_race_by_date(event, context)
 
+    # ── PB.4 Daily report routes ──
+    if path == '/api/reports/strategy/list' or path == '/reports/strategy/list':
+        from routers.daily_report_router import get_strategy_list
+        return get_strategy_list(event, context)
+
+    if path == '/api/reports/strategy_pnl/range' or path == '/reports/strategy_pnl/range':
+        from routers.daily_report_router import get_strategy_pnl_range
+        return get_strategy_pnl_range(event, context)
+
+    # GET /api/reports/strategy/{name}/history
+    strat_hist_match = re.match(r'(?:/api)?/reports/strategy/([^/]+)/history$', path)
+    if strat_hist_match:
+        from routers.daily_report_router import get_strategy_history
+        return get_strategy_history(event, context)
+
+    # GET /api/reports/daily/{race_date}
+    daily_match = re.match(r'(?:/api)?/reports/daily/(\d{4}-\d{2}-\d{2})$', path)
+    if daily_match:
+        from routers.daily_report_router import get_daily_report
+        return get_daily_report(event, context)
+
     return {
         'statusCode': 404,
         'headers': {
