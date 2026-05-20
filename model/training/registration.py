@@ -62,6 +62,25 @@ def derive_model_type(version_name: str) -> str:
         'wp_core_lean58':    'win_prob_core_general',
         'wp_full_lean58':    'wp_full_general',
         'rk_full_lean58':    'rk_full_general',
+        # REPAIR-5 retrain wave (2026-05-20): trainers now emit bare-prefix
+        # artifact names without the _lean58_/_lean53_ infix the older
+        # patterns above carried. Substrate-verified mapping (each new
+        # artifact name maps to the same model_type as the contaminated
+        # model it supersedes, per existing model_versions rows):
+        #   rk_core / rk_full     → matches ranker_core / ranker_full active rows
+        #   v_base_core / v_odds_core / v_base_workout / v_odds_workout
+        #                         → matches wr_base / wr_odds / wr_base_workout / wr_odds_workout rows
+        #   wp_base / wp_odds     → matches win_prob_base (1 inactive) / win_prob_odds (2 of 3 inactive)
+        #   wp_full               → matches win_prob_full (3 of 3 prior inactive — unanimous prefix→type pattern)
+        'rk_core':           'ranker_core',
+        'rk_full':           'ranker_full',
+        'v_base_core':       'wr_base',
+        'v_odds_core':       'wr_odds',
+        'v_base_workout':    'wr_base_workout',
+        'v_odds_workout':    'wr_odds_workout',
+        'wp_base':           'win_prob_base',
+        'wp_odds':           'win_prob_odds',
+        'wp_full':           'win_prob_full',
     }
 
     if name in bare_map:
