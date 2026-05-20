@@ -19,6 +19,9 @@ from repositories.entry_repository import EntryRepository
 from services.feature_engineering_service import (
     FeatureEngineeringService
 )
+from services.feature_contract import (
+    get_model_features, predict_with_contract,
+)
 from model.shared.feature_definitions import (
     get_core_features
 )
@@ -523,17 +526,22 @@ class WRInferenceService:
             )
             return []
 
-        # Phase A3: select feature set per style. gonzo_sauce uses the
-        # 67-feature lean53+14 set; all other styles use lean53 (53).
-        if self.style == 'gonzo_sauce':
-            full_feats = GONZO_FULL_FEATURES
-            ranker_feats = GONZO_FULL_FEATURES
-        else:
-            full_feats = FULL_FEATURES
-            ranker_feats = RANKER_FULL_FEATURES
-
-        # Ensure all feature columns exist
-        for col in full_feats:
+        # REPAIR-5: per-booster feature contract replaces hardcoded
+        # style-based feature lists. Each loaded XGBoost booster exposes
+        # its training-time feature_names; predict_with_contract reads
+        # them and selects feature_df columns in the right order. The
+        # scattered full_feats / ranker_feats / CORE_FEATURES / wp_core_features
+        # selection logic is no longer needed.
+        loaded_boosters = [
+            m for m in (
+                self.wp_full_model, self.wp_core_model,
+                self.rk_full_model, self.rk_core_model,
+            ) if m is not None
+        ]
+        needed_features: set = set()
+        for m in loaded_boosters:
+            needed_features.update(get_model_features(m))
+        for col in needed_features:
             if col not in feature_df.columns:
                 feature_df[col] = 0.0
 
@@ -551,32 +559,26 @@ class WRInferenceService:
         for idx in range(len(feature_df)):
             row_features = feature_df.iloc[[idx]]
             if has_workout[idx] and self.wp_full_model is not None:
-                # wp_full feature set per style (lean53=53; gonzo_sauce=67)
-                X = row_features[full_feats].fillna(0.0)
-                dm = xgb.DMatrix(X.values, feature_names=full_feats)
-                raw_probs[idx] = float(self.wp_full_model.predict(dm)[0])
+                raw_probs[idx] = float(
+                    predict_with_contract(self.wp_full_model, row_features)[0]
+                )
                 if self.rk_full_model:
-                    X_rk = row_features[ranker_feats].fillna(0.0)
-                    dm_rk = xgb.DMatrix(X_rk.values, feature_names=ranker_feats)
-                    rank_scores[idx] = float(self.rk_full_model.predict(dm_rk)[0])
+                    rank_scores[idx] = float(
+                        predict_with_contract(self.rk_full_model, row_features)[0]
+                    )
                 elif self.rk_core_model:
-                    X_core = row_features[CORE_FEATURES].fillna(0.0)
-                    dm_rk = xgb.DMatrix(X_core.values, feature_names=CORE_FEATURES)
-                    rank_scores[idx] = float(self.rk_core_model.predict(dm_rk)[0])
+                    rank_scores[idx] = float(
+                        predict_with_contract(self.rk_core_model, row_features)[0]
+                    )
                 model_used[idx] = 'full'
             else:
-                # Use core model. Feature set + calibration switch with the
-                # loaded artifact (lean53 → 47 features + isotonic calibration;
-                # legacy → 58 features, no calibration).
-                core_feats = self.wp_core_features
-                X = row_features[core_feats].fillna(0.0)
-                dm = xgb.DMatrix(X.values, feature_names=core_feats)
-                raw_probs[idx] = float(self.wp_core_model.predict(dm)[0])
+                raw_probs[idx] = float(
+                    predict_with_contract(self.wp_core_model, row_features)[0]
+                )
                 if self.rk_core_model:
-                    # rk_core remains 58-feature legacy
-                    X_rk = row_features[CORE_FEATURES].fillna(0.0)
-                    dm_rk = xgb.DMatrix(X_rk.values, feature_names=CORE_FEATURES)
-                    rank_scores[idx] = float(self.rk_core_model.predict(dm_rk)[0])
+                    rank_scores[idx] = float(
+                        predict_with_contract(self.rk_core_model, row_features)[0]
+                    )
 
         # ─── Ranker-as-probability architecture (post-2026-05-01 fix) ─────
         # The wp_* models are binary classifiers: per-horse independent

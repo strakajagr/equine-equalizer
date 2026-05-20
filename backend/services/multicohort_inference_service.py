@@ -28,6 +28,9 @@ import xgboost as xgb
 
 from shared.db import execute_query, execute_write
 from services.feature_engineering_service import FeatureEngineeringService
+from services.feature_contract import (
+    get_model_features, predict_with_contract,
+)
 from repositories.race_repository import RaceRepository
 from repositories.entry_repository import EntryRepository
 from model.shared.feature_definitions import (
@@ -314,31 +317,36 @@ class MultiCohortInferenceService:
         horse_ids = feature_df['horse_id'].astype(str).tolist()
         n_horses = len(horse_ids)
 
-        # Build per-feature-path DMatrix slices once
-        dmatrix_cache: Dict[str, xgb.DMatrix] = {}
+        # REPAIR-5: pad feature_df with columns required by ANY xgb_json L1
+        # artifact so predict_with_contract doesn't raise on substrate-coverage
+        # gaps. sklearn artifacts still use the per-feature-path positional
+        # array (pickled models depend on training-time feature ordering).
+        xgb_arts = [
+            a for a in self._l1_artifacts
+            if a.artifact_format == 'xgb_json' and a.model is not None
+        ]
+        needed_xgb_features: set = set()
+        for art in xgb_arts:
+            needed_xgb_features.update(get_model_features(art.model))
+        for col in needed_xgb_features:
+            if col not in feature_df.columns:
+                feature_df[col] = 0.0
+
+        # Build per-feature-path array slices for sklearn artifacts only.
+        # xgb_json uses booster.feature_names via predict_with_contract.
         array_cache: Dict[str, np.ndarray] = {}
         for fpath, feats in self._features.items():
             slice_df = pd.DataFrame()
             for c in feats:
                 slice_df[c] = feature_df[c] if c in feature_df.columns else 0.0
-            arr = slice_df.fillna(0.0).values.astype(np.float64)
-            array_cache[fpath] = arr
-            try:
-                dmatrix_cache[fpath] = xgb.DMatrix(arr, feature_names=feats)
-            except Exception as e:
-                logger.warning(f"DMatrix build failed for {fpath}: {e}")
-                dmatrix_cache[fpath] = None
+            array_cache[fpath] = slice_df.fillna(0.0).values.astype(np.float64)
 
         # Generate L1 predictions per artifact
         l1_outputs: Dict[str, np.ndarray] = {}
         for art in self._l1_artifacts:
             try:
                 if art.artifact_format == 'xgb_json':
-                    dm = dmatrix_cache.get(art.feature_path)
-                    if dm is None:
-                        l1_outputs[art.column_name] = np.zeros(n_horses)
-                        continue
-                    raw = art.model.predict(dm)
+                    raw = predict_with_contract(art.model, feature_df)
                     # Apply softmax for win-prob style outputs (matches training pipeline)
                     if (art.model_type.startswith(('win_prob', 'wp_full_', 'wp_core_', 'pl_'))
                             or art.model_type in ('wr_odds', 'wr_base')):

@@ -257,6 +257,13 @@ class FeatureEngineeringService:
                 entry, race, all_pps, workouts, par_dict
             )
         )
+        # ── Phase B Tier 1 2F Top-5 features (Tony substrate-recoverable audit) ──
+        # Ride-along like Gonzo features. NOT in FEATURE_DEFS yet — Tony
+        # adjudicates re-training authorization gate to integrate into L1
+        # layer schemas. Available downstream for ad-hoc forensic.
+        features.update(
+            self.compute_phase_b_top5_features(entry, race, all_pps)
+        )
         return features
 
     # ═══════════════════════════════════════════
@@ -1089,6 +1096,117 @@ class FeatureEngineeringService:
     # ═══════════════════════════════════════════
     # PRIVATE: Field context
     # ═══════════════════════════════════════════
+
+    # ═══════════════════════════════════════════
+    # PUBLIC: Phase B Tier 1 2F Top-5 features (2026-05-16)
+    # Substrate-recoverable feature engineering gap audit findings.
+    # Estimated +0.017-0.042 AUC contribution if all 5 land.
+    # ═══════════════════════════════════════════
+
+    def compute_phase_b_top5_features(
+        self,
+        entry: Entry,
+        race: Race,
+        all_pps: list,
+    ) -> dict:
+        """5 substrate-recoverable features per Tier 1 2F audit + sentinel refinement (Decision 4).
+
+        Tony substrate-pragmatic gap surface:
+          1. surface_win_rate: horse's win rate on current surface (0.0-1.0; defaults to 0 for no-PP-on-surface)
+          2. pace_pressure_score: pre-race aggregate of E-runner early pace figures (0.0-1.0)
+          3. class_drop_flag: 1 if dropping in purse from last race (1=drop, 0=same/up, -1=no_PP)
+          4. shipped_from_flag: 1 if shipped from different track (0=same, 1=shipped, -1=no_PP)
+          5. layoff_off_bucket: -1=no_PP, 0=fresh(≤14d), 1=short(15-30), 2=medium(31-60),
+             3=long(61-180), 4=very_long(>180)
+
+        Decision 4 sentinel: -1 disambiguates "no PP history" from 0 (true zero/fresh/same-track).
+        XGBoost handles -1 as discrete numeric; downstream model splits learn the sentinel boundary.
+        """
+        feats: dict = {
+            'surface_win_rate': 0.0,           # natural 0 = no surface PP (substrate-real default)
+            'pace_pressure_score': 0.0,        # natural 0 = no pressure detected (substrate-real default)
+            'class_drop_flag': -1.0,           # sentinel: no PP history (overridden below if PP present)
+            'shipped_from_flag': -1.0,         # sentinel: no PP history
+            'layoff_off_bucket': -1.0,         # sentinel: no PP history
+        }
+
+        # ── Feature 1: surface_win_rate ──
+        if all_pps and race.surface:
+            surface_pps = [
+                pp for pp in all_pps
+                if getattr(pp, 'surface', None)
+                and str(pp.surface).lower() == str(race.surface).lower()
+                and pp.finish_position is not None
+            ]
+            if surface_pps:
+                wins = sum(1 for pp in surface_pps if pp.finish_position == 1)
+                feats['surface_win_rate'] = wins / len(surface_pps)
+
+        # ── Feature 2: pace_pressure_score ──
+        # Aggregate early-pace figures across entries; count E-runners (top quartile)
+        e_pace_figs = []
+        for other in race.entries:
+            if other.is_scratched: continue
+            other_pps = other.past_performances
+            if not other_pps: continue
+            recent = [
+                getattr(pp, 'early_pace_figure', None) for pp in other_pps[:3]
+                if getattr(pp, 'early_pace_figure', None) is not None
+            ]
+            if recent:
+                e_pace_figs.append(sum(recent) / len(recent))
+        if e_pace_figs:
+            avg_pace = sum(e_pace_figs) / len(e_pace_figs)
+            n_e_runners = sum(1 for p in e_pace_figs if p > avg_pace + 1)
+            feats['pace_pressure_score'] = n_e_runners / max(1, len(e_pace_figs))
+
+        # ── Feature 3: class_drop_flag (with sentinel for no-PP) ──
+        if all_pps:
+            last_pp = all_pps[0]
+            last_purse = getattr(last_pp, 'purse', None)
+            this_purse = getattr(race, 'purse', None)
+            if last_purse and this_purse and last_purse > 0:
+                purse_ratio = float(this_purse) / float(last_purse)
+                feats['class_drop_flag'] = 1.0 if purse_ratio < 0.85 else 0.0
+            else:
+                feats['class_drop_flag'] = 0.0  # PP present but no purse data
+        # else: keeps -1 sentinel (no PP history)
+
+        # ── Feature 4: shipped_from_flag (with sentinel for no-PP) ──
+        if all_pps:
+            last_pp = all_pps[0]
+            last_track = getattr(last_pp, 'track_code', None)
+            this_track = (
+                race.track.track_code
+                if hasattr(race, 'track') and race.track else None
+            )
+            if last_track and this_track:
+                feats['shipped_from_flag'] = 0.0 if last_track == this_track else 1.0
+            else:
+                feats['shipped_from_flag'] = 0.0  # PP present but track data missing — treat as same-track
+        # else: keeps -1 sentinel (no PP history)
+
+        # ── Feature 5: layoff_off_bucket (with sentinel for no-PP) ──
+        if all_pps:
+            last_pp = all_pps[0]
+            last_date = getattr(last_pp, 'race_date', None)
+            if last_date and race.race_date:
+                days_off = (race.race_date - last_date).days
+                if days_off <= 14:
+                    feats['layoff_off_bucket'] = 0.0  # fresh
+                elif days_off <= 30:
+                    feats['layoff_off_bucket'] = 1.0  # short
+                elif days_off <= 60:
+                    feats['layoff_off_bucket'] = 2.0  # medium
+                elif days_off <= 180:
+                    feats['layoff_off_bucket'] = 3.0  # long
+                else:
+                    feats['layoff_off_bucket'] = 4.0  # very_long
+            else:
+                feats['layoff_off_bucket'] = 0.0  # PP present but date missing — substrate-pragmatic default
+        # else: keeps -1 sentinel (no PP history)
+
+        return feats
 
     def _compute_field_context(
         self, race: Race

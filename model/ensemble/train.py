@@ -98,9 +98,9 @@ def main():
     logger.info("CRITICAL: Training on 2025 held-out data ONLY")
 
     conn = _get_conn()
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True
+        conn, start_year=2022, end_year=2026, include_odds=True
     )
     conn.close()
 
@@ -157,8 +157,8 @@ def main():
     if 'field_size' not in features_df.columns:
         features_df['field_size'] = labels_df['field_size'].values
 
-    # CRITICAL: Use ONLY 2025 data for ensemble training
-    val_mask = labels_df['race_date'].dt.year == 2025
+    # Phase B.x: ensemble stacker trained on 2026 substrate prior to Derby (2026-05-02 excluded)
+    val_mask = (labels_df['race_date'] >= pd.Timestamp('2026-01-01')) & (labels_df['race_date'] <= pd.Timestamp('2026-05-01'))
     X_2025 = features_df[val_mask].copy().reset_index(drop=True)
     y_2025 = (labels_df[val_mask]['finish_position'] == 1).astype(float).values
 
@@ -263,6 +263,32 @@ def main():
             logger.info(f'Uploaded s3://{S3_BUCKET}/{s3_key}')
         except Exception as e:
             logger.warning(f'S3 upload failed: {e}')
+
+    # § 4.33: register in model_versions post-S3-upload
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type='ensemble',
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': ENSEMBLE_FEATURES,
+                'hyperparameters': {'weights': weights},
+                'top1_accuracy': eval_results.get('top1_win_rate'),
+                'exacta_hit_rate': eval_results.get('exacta_hit_rate'),
+                'trifecta_hit_rate': eval_results.get('trifecta_hit_rate'),
+                'flat_bet_roi': eval_results.get('flat_bet_roi'),
+                'kelly_roi': eval_results.get('kelly_roi'),
+                'ensemble_accuracy': acc,
+                'ensemble_roc_auc': auc,
+                'notes': (
+                    f'ensemble training; accuracy={acc:.3f} '
+                    f'auc={auc:.3f}'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
 
     logger.info(f"Ensemble training complete: {version}")
 

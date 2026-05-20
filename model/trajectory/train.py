@@ -78,7 +78,7 @@ def build_sequences(conn) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
             WHERE computed_speed_figure IS NOT NULL
               AND finish_position IS NOT NULL
               AND finish_position < 90
-              AND EXTRACT(YEAR FROM race_date) BETWEEN 2022 AND 2025
+              AND EXTRACT(YEAR FROM race_date) BETWEEN 2022 AND 2026
             ORDER BY horse_id, race_date
         """)
         rows = cur.fetchall()
@@ -145,9 +145,9 @@ def main():
     logger.info(f"Built {len(sequences):,} sequences. "
                 f"Improved: {n_pos:,} ({n_pos/len(labels)*100:.1f}%)")
 
-    # Temporal split
-    train_mask = years <= 2024
-    val_mask = years == 2025
+    # Temporal split (years is per-sequence; 2026 substrate ends 2026-05-10)
+    train_mask = years <= 2025
+    val_mask = years == 2026
 
     X_train_raw = sequences[train_mask]
     y_train = labels[train_mask]
@@ -311,6 +311,32 @@ def main():
             logger.info(f'Uploaded s3://{S3_BUCKET}/{s3_key}')
         except Exception as e:
             logger.warning(f'S3 upload failed: {e}')
+
+    # § 4.33: register in model_versions post-S3-upload
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type='trajectory_lstm',
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': SEQUENCE_FEATURES,
+                'hyperparameters': {
+                    'input_size': FEATURES_PER_STEP, **LSTM_PARAMS,
+                },
+                'training_race_count': len(X_train_raw),
+                'trajectory_accuracy': acc,
+                'trajectory_correlation': corr,
+                'trajectory_top_q_improve': top_q_rate,
+                'trajectory_val_loss': float(best_val_loss),
+                'notes': (
+                    f'trajectory LSTM training; accuracy={acc:.3f} '
+                    f'correlation={corr:.3f} val_loss={best_val_loss:.4f}'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
 
     logger.info(f"LSTM Trajectory training complete: {version}")
 

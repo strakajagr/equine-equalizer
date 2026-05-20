@@ -96,10 +96,17 @@ FEATURE_DEFS = [
     FeatureDef('jockey_win_rate',            'jockey', True, 0.10),
     FeatureDef('jockey_trainer_combo_win_rate','jockey', True, 0.10),
     FeatureDef('jockey_change_flag',         'jockey', True, 0.0),
+
+    # ── Phase B Tier 1 Top-5 (5) — Decision 2 ratified 2026-05-16 ──
+    FeatureDef('surface_win_rate',           'phase_b_top5', True,  0.0),
+    FeatureDef('pace_pressure_score',        'phase_b_top5', True,  0.0),
+    FeatureDef('class_drop_flag',            'phase_b_top5', True, -1.0),
+    FeatureDef('shipped_from_flag',          'phase_b_top5', True, -1.0),
+    FeatureDef('layoff_off_bucket',          'phase_b_top5', True, -1.0),
 ]
 
-assert len(FEATURE_DEFS) == 66, f"Expected 66 features, got {len(FEATURE_DEFS)}"
-assert len({f.name for f in FEATURE_DEFS}) == 66, "Duplicate feature names detected"
+assert len(FEATURE_DEFS) == 71, f"Expected 71 features (66 base + 5 Phase B Top-5), got {len(FEATURE_DEFS)}"
+assert len({f.name for f in FEATURE_DEFS}) == 71, "Duplicate feature names detected"
 
 
 def get_feature_names(include_odds: bool = True) -> list[str]:
@@ -107,12 +114,12 @@ def get_feature_names(include_odds: bool = True) -> list[str]:
 
 def get_odds_blind_features() -> list[str]:
     result = get_feature_names(include_odds=False)
-    assert len(result) == 63, f"Expected 63 odds-blind features, got {len(result)}"
+    assert len(result) == 68, f"Expected 68 odds-blind features (63 base + 5 Phase B Top-5), got {len(result)}"
     return result
 
 def get_odds_aware_features() -> list[str]:
     result = get_feature_names(include_odds=True)
-    assert len(result) == 66, f"Expected 66 odds-aware features, got {len(result)}"
+    assert len(result) == 71, f"Expected 71 odds-aware features (66 base + 5 Phase B Top-5), got {len(result)}"
     return result
 
 def get_feature_defaults() -> dict[str, float]:
@@ -191,6 +198,13 @@ LEAN53_CULL: tuple[str, ...] = (
     "jockey_win_rate", "jockey_trainer_combo_win_rate", "jockey_change_flag",
     # r=1.000 duplicate of workout_count_30d (1)
     "workout_frequency_score",
+    # ── Phase B Top-5 (5) — added 2026-05-16 Decision 2 ──
+    # Excluded from lean53 to preserve existing 53/47 model invariants.
+    # Phase 3 retraining explicitly uses get_lean53_plus_top5_features()
+    # (58/52) so new models pick up phase_b_top5 signal while existing
+    # lean53 models continue working.
+    "surface_win_rate", "pace_pressure_score", "class_drop_flag",
+    "shipped_from_flag", "layoff_off_bucket",
 )
 
 
@@ -208,6 +222,39 @@ def get_lean53_core_features() -> list[str]:
     result = [f for f in get_core_features(include_odds=True)
               if f not in LEAN53_CULL]
     assert len(result) == 47, f"Expected 47 lean core features, got {len(result)}"
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Phase B Tier 1 (2026-05-16) — Top-5 substrate-recoverable features
+# Decision 2 ratified. Phase 3 retraining uses get_lean53_plus_top5_*
+# getters so new models include phase_b_top5 signal; existing lean53
+# models continue working off get_lean53_features() (53 / 47 unchanged).
+# ─────────────────────────────────────────────────────────────────────
+PHASE_B_TOP5_NAMES: tuple[str, ...] = (
+    "surface_win_rate", "pace_pressure_score", "class_drop_flag",
+    "shipped_from_flag", "layoff_off_bucket",
+)
+
+
+def get_lean53_plus_top5_features() -> list[str]:
+    """58-feature list for Phase 3 retrain wp_full / rk_full models."""
+    result = get_lean53_features() + list(PHASE_B_TOP5_NAMES)
+    assert len(result) == 58, f"Expected 58 (53+5), got {len(result)}"
+    return result
+
+
+def get_lean53_core_plus_top5_features() -> list[str]:
+    """52-feature list for Phase 3 retrain pl_core / win_prob_core models."""
+    result = get_lean53_core_features() + list(PHASE_B_TOP5_NAMES)
+    assert len(result) == 52, f"Expected 52 (47+5), got {len(result)}"
+    return result
+
+
+def get_gonzo_sauce_plus_top5_features() -> list[str]:
+    """72-feature list for Phase 3 retrain gonzo_sauce model."""
+    result = get_lean53_plus_top5_features() + [f.name for f in GONZO_FEATURE_DEFS]
+    assert len(result) == 72, f"Expected 72 (58+14), got {len(result)}"
     return result
 
 

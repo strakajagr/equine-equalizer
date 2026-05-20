@@ -19,6 +19,9 @@ from repositories.entry_repository import EntryRepository
 from services.feature_engineering_service import (
     FeatureEngineeringService
 )
+from services.feature_contract import (
+    get_model_features, predict_with_contract,
+)
 from model.shared.feature_definitions import (
     get_core_features,
     get_lean53_core_features,
@@ -318,17 +321,19 @@ class PLInferenceService:
             )
             return []
 
-        for col in PL_FEATURES:
+        # REPAIR-5: per-booster feature contract replaces hardcoded
+        # PL_FEATURES list. Read training-time feature_names from the
+        # loaded booster; select feature_df columns in the right order.
+        model_feats = get_model_features(self.model)
+        for col in model_feats:
             if col not in feature_df.columns:
                 feature_df[col] = 0.0
 
-        X = feature_df[PL_FEATURES].fillna(0.0)
-        dmatrix = xgb.DMatrix(
-            X.values,
-            feature_names=PL_FEATURES
-        )
-
-        raw_scores = self.model.predict(dmatrix)
+        raw_scores = predict_with_contract(self.model, feature_df)
+        # SHAP path below still needs an explicit DMatrix for
+        # pred_contribs=True. Build once and reuse.
+        X = feature_df[model_feats].fillna(0.0)
+        dmatrix = xgb.DMatrix(X.values, feature_names=model_feats)
 
         scaled = (
             (raw_scores - raw_scores.max())
@@ -382,7 +387,7 @@ class PLInferenceService:
             for s_idx in range(len(shap_values)):
                 row_shap = shap_values[s_idx][:-1]
                 importance = {
-                    PL_FEATURES[fi]: round(float(v), 4)
+                    model_feats[fi]: round(float(v), 4)
                     for fi, v in enumerate(row_shap)
                     if abs(v) > 0.001
                 }

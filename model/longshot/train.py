@@ -75,9 +75,9 @@ def main():
     logger.info("RF Longshot Classifier (Layer 4) training starting")
     conn = _get_conn()
 
-    logger.info("Building feature matrix (2022-2025)...")
+    logger.info("Building feature matrix (2022-2026)...")
     features_df, labels_df = build_feature_matrix(
-        conn, start_year=2022, end_year=2025, include_odds=True
+        conn, start_year=2022, end_year=2026, include_odds=True
     )
     conn.close()
 
@@ -120,8 +120,8 @@ def main():
     logger.info(f"Longshot labels: {n_pos:,} positive (10-1+ winners), {n_neg:,} negative")
 
     # Temporal split
-    train_mask = labels_filtered['race_date'].dt.year <= 2024
-    val_mask = labels_filtered['race_date'].dt.year == 2025
+    train_mask = labels_filtered['race_date'] <= pd.Timestamp('2026-04-24')
+    val_mask = (labels_filtered['race_date'] >= pd.Timestamp('2026-04-25')) & (labels_filtered['race_date'] <= pd.Timestamp('2026-05-01'))
 
     X_train = feat_filtered.loc[train_mask, rf_features].fillna(0.0).values
     y_train = longshot_labels[train_mask.values]
@@ -220,6 +220,32 @@ def main():
             logger.info(f'Uploaded s3://{S3_BUCKET}/{s3_key}')
         except Exception as e:
             logger.warning(f'S3 upload failed: {e}')
+
+    # § 4.33: register in model_versions post-S3-upload
+    try:
+        from training.registration import register_trained_artifact
+        register_trained_artifact(
+            version_name=version,
+            model_type='longshot_rf',
+            s3_artifact_path=f's3://{S3_BUCKET}/{S3_PREFIX}/{model_file.name}',
+            training_metadata={
+                'feature_names': rf_features,
+                'hyperparameters': RF_PARAMS,
+                'flat_bet_roi': longshot_roi,
+                'longshot_precision': prec,
+                'longshot_recall': rec,
+                'longshot_f1': f1,
+                'longshot_auc': auc,
+                'longshot_bets_flagged': n_bets,
+                'notes': (
+                    f'longshot RF training; '
+                    f'precision={prec:.3f} recall={rec:.3f} '
+                    f'roi={longshot_roi:+.1%} bets={n_bets}'
+                ),
+            },
+        )
+    except Exception as e:
+        logger.warning(f'model_versions registration failed for {version}: {e}')
 
     logger.info(f"RF Longshot training complete: {version}")
 
