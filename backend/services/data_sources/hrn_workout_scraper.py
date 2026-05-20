@@ -52,8 +52,10 @@ def horse_name_to_hrn_slug(horse_name: str) -> str:
     slug = horse_name.lower()
     slug = re.sub(r"['\u2019\u2018]", '', slug)   # apostrophes
     slug = re.sub(r'[^a-z0-9\s-]', '', slug)       # non-alphanum
-    slug = re.sub(r'\s+', '-', slug.strip())        # spaces → hyphens
-    slug = re.sub(r'-+', '-', slug)                 # collapse hyphens
+    # Bug #7b fix (2026-05-16): HRN switched separator from hyphen to underscore.
+    # Verified 2026-05-02: /horse/right-to-party → 404; /horse/right_to_party → 200.
+    slug = re.sub(r'[\s-]+', '_', slug.strip())     # spaces/hyphens → underscore
+    slug = re.sub(r'_+', '_', slug)                 # collapse underscores
     return slug
 
 
@@ -124,8 +126,10 @@ class HRNWorkoutScraper:
 
         soup = self._fetch_page(url)
         if not soup:
-            logger.debug(
-                f"HRN workout: no page for {horse_name!r} (slug={slug!r})"
+            # Bug #7a fix (2026-05-16): elevated DEBUG→INFO so Lambda surfaces
+            # diagnostic visibility (AWS runtime defaults to INFO level).
+            logger.info(
+                f"HRN workout: no page for {horse_name!r} (slug={slug!r}, url={url})"
             )
             return []
 

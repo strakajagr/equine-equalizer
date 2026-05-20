@@ -140,9 +140,15 @@ def _backfill_entries(target_date: date, dry_run: bool) -> int:
     with get_db() as conn:
         svc = IngestionService(conn)
         result = svc.fetch_daily_entries(target_date)
-    # Return service-reported count (shape varies; defensive parse).
+    # IngestionService.fetch_daily_entries returns
+    # {'date', 'source', 'races_fetched', 'races_stored',
+    #  'races_skipped', 'errors'}. 'races_stored' is the per-race-card
+    # success counter that matches the "Ingestion complete: N stored"
+    # log line. (Column label "Entries" in the summary table is
+    # historical; semantically this counts races stored, not per-horse
+    # entry rows. Future rename optional; key lookup correctness here.)
     if isinstance(result, dict):
-        return int(result.get("entries_inserted", 0) or result.get("count", 0) or 0)
+        return int(result.get("races_stored", 0))
     if isinstance(result, int):
         return result
     return 0
@@ -249,8 +255,8 @@ def _backfill_workouts(target_date: date, dry_run: bool) -> int:
         if not track_slug:
             continue
         try:
-            html = nyra_handler.fetch_track_page(track_slug, target_iso)
-            rows = nyra_handler.parse_nyra_html(html, tc, target_iso)
+            url, html = nyra_handler.fetch_track_page(track_slug, target_iso)
+            rows, stats = nyra_handler.parse_nyra_html(html, tc, target_iso)
             logging.info(
                 f"  NYRA {tc}: {len(rows)} workouts on {target_iso}"
             )

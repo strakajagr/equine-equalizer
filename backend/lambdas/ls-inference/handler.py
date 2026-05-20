@@ -4,6 +4,7 @@ import re
 from datetime import date
 from shared.db import get_db
 from services.ls_inference_service import LSInferenceService
+from services.multicohort_inference_service import MultiCohortInferenceService
 from routers import (
     race_router, horse_router
 )
@@ -11,6 +12,24 @@ from routers import ls_prediction_router
 from routers.health_router import health_check
 
 logger = logging.getLogger(__name__)
+
+
+def _run_daily_pipeline(conn, target_date):
+    """Run LS enrichment + Hybrid C ensemble inference for given date.
+
+    LSInferenceService keeps producing ensemble_win_prob via the legacy 10-feature
+    sklearn ensemble (backward compatible until Hybrid C fully replaces it).
+    MultiCohortInferenceService writes Hybrid C predictions to hybrid_c_predictions.
+    """
+    ls_service = LSInferenceService(conn)
+    ls_summary = ls_service.run_daily_predictions(target_date)
+    try:
+        mci_service = MultiCohortInferenceService(conn)
+        mci_summary = mci_service.run_daily_predictions(target_date)
+    except Exception as e:
+        logger.exception(f"MultiCohortInferenceService failed for {target_date}")
+        mci_summary = {'status': 'error', 'error': str(e)}
+    return {'ls': ls_summary, 'hybrid_c': mci_summary}
 
 
 def _cors_response(status_code=200, body=''):
@@ -53,13 +72,10 @@ def handler(event, context):
             "attempting daily predictions"
         )
         with get_db() as conn:
-            service = LSInferenceService(conn)
-            summary = service.run_daily_predictions(
-                date.today()
-            )
+            summary = _run_daily_pipeline(conn, date.today())
         return {
             'statusCode': 200,
-            'body': json.dumps(summary)
+            'body': json.dumps(summary, default=str)
         }
 
     # Batch trigger (from ingestion Lambda)
@@ -70,13 +86,10 @@ def handler(event, context):
             f"LS batch inference for {target_date}"
         )
         with get_db() as conn:
-            service = LSInferenceService(conn)
-            summary = service.run_daily_predictions(
-                target_date
-            )
+            summary = _run_daily_pipeline(conn, target_date)
         return {
             'statusCode': 200,
-            'body': json.dumps(summary)
+            'body': json.dumps(summary, default=str)
         }
 
     # Manual trigger: {"action":"run_predictions","date":"2026-03-22"}
@@ -86,13 +99,10 @@ def handler(event, context):
         )
         logger.info(f"LS manual run for {target_date}")
         with get_db() as conn:
-            service = LSInferenceService(conn)
-            summary = service.run_daily_predictions(
-                target_date
-            )
+            summary = _run_daily_pipeline(conn, target_date)
         return {
             'statusCode': 200,
-            'body': json.dumps(summary)
+            'body': json.dumps(summary, default=str)
         }
 
     # ── Health ──
@@ -108,17 +118,14 @@ def handler(event, context):
                 params['date']
             )
         with get_db() as conn:
-            service = LSInferenceService(conn)
-            summary = service.run_daily_predictions(
-                target_date
-            )
+            summary = _run_daily_pipeline(conn, target_date or date.today())
         return {
             'statusCode': 200,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            'body': json.dumps(summary)
+            'body': json.dumps(summary, default=str)
         }
 
     # ── LS predictions today ──

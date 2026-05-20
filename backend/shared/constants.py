@@ -3,6 +3,22 @@ QUALIFYING_TRACKS = [
     'GP', 'DMR', 'OP', 'MTH', 'AQU', 'PIM'
 ]
 
+HRN_SLUG_TO_TRACK_CODE = {
+    'churchill-downs': 'CD',
+    'saratoga': 'SAR',
+    'keeneland': 'KEE',
+    'belmont-park': 'BEL',
+    'belmont-at-aqueduct': 'BEL',
+    'belmont-at-the-big-a': 'BEL',
+    'santa-anita-park': 'SA',
+    'gulfstream-park': 'GP',
+    'del-mar': 'DMR',
+    'oaklawn-park': 'OP',
+    'monmouth-park': 'MTH',
+    'aqueduct': 'AQU',
+    'pimlico': 'PIM',
+}
+
 MIN_CLAIMING_PRICE = 15000
 
 QUALIFYING_RACE_TYPES = [
