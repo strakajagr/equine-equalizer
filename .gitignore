@@ -29,6 +29,11 @@ infrastructure/cdk/node_modules/
 infrastructure/cdk/*.js
 infrastructure/cdk/*.d.ts
 !infrastructure/cdk/jest.config.js
+# CDK operational scratch (downloaded templates, import descriptors —
+# regenerable via aws cloudformation get-template / cdk synth).
+infrastructure/cdk/current-stack-template.json
+infrastructure/cdk/*.template.json
+infrastructure/cdk/e4-resources-to-import.json
 
 # AWS / Secrets
 .aws/
@@ -41,9 +46,12 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Model artifacts (stored in S3, not git)
+# Model artifacts (stored in S3, not git). Trainers also drop per-style
+# artifacts under model/{ensemble,longshot,trajectory,...}/artifacts/ —
+# treat the same. Source dirs (no /artifacts/ subdir) remain tracked.
 model/artifacts/*
 !model/artifacts/.gitkeep
+model/*/artifacts/
 /tmp/
 
 # IDE
