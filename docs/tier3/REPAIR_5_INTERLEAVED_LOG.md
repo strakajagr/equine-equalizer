@@ -111,5 +111,77 @@ Fix inline; CC substrate-autonomous discipline extended.
 - actuals query: WHERE r.race_date BETWEEN 2022-01-01 AND 2026-05-17
   (env HYBRID_C_ACTUALS_START/END overridable for further tuning)
 
+### Phase 2.0 Window Inference Completion (2026-05-19 22:15 UTC)
+
+All 9 chunks completed substrate-cleanly:
+  Chunk 1: 3849 races / 7762s wall-clock
+  Chunk 2: 3267 races / 7510s
+  Chunk 3: 3351 races / 7602s
+  Chunk 4: 2081 races / 5831s
+  Chunk 5: 3083 races / 7302s
+  Chunk 6: 1958 races / 5382s
+  Chunk 7: 3144 races / 7370s
+  Chunk 8: 2136 races / 5774s
+  Chunk 9: 2747 races / 6947s
+
+Total: 25,616 parquets at /tmp/option_c_predictions_full/ (57 from prior
+runs + 25,559 from wave). Aggregate wall-clock 2h10m (vs 6.2h estimated
+single-threaded).
+
+### Phase 2.1 — Hybrid C Training SUBSTRATE-SUCCESS (2026-05-19 22:30 UTC)
+
+train_hybrid_c.py completed against full-window substrate-clean parquets:
+  Loading 25,616 parquets → 204,422 rows / 26 columns
+  Actuals window 2022-01-01..2026-05-17 → 201,347 rows
+  Joined: 201,170 rows
+  Train: 20,492 races / 161,040 rows / 20,544 winners (80% race split)
+  Eval:  5,124 races / 40,130 rows / 5,142 winners (20%)
+
+  XGBoost training (500 rounds with early-stopping on eval AUC):
+    [0]   train-auc=0.7789 eval-auc=0.7748
+    [499] train-auc=0.8200 eval-auc=0.8065
+
+  Final metrics:
+    TRAIN AUC=0.8200  Brier=0.0848  top1=47.20%
+    EVAL  AUC=0.8065  Brier=0.0873  top1=45.82%
+
+  Train-eval gap CLOSED to 0.014 (was 0.229 on 7-day window).
+  EVAL AUC 0.8065 PASSES threshold 0.736 (PHASE_BX_BASELINE_AUC=0.786
+  minus 0.05 tolerance).
+
+  Artifact saved + uploaded:
+    Local:  /tmp/option_c_hybrid_ensemble_20260515.json (620,480 bytes)
+    S3:     s3://equine-model-artifacts/ensemble/option_c_hybrid_ensemble_20260515.json
+    S3 mtime: 2026-05-19 22:30:11 UTC
+
+  Substrate-pragmatic substrate-discovery: version_name collision with
+  existing production active row (PK 2d34b010-f17a-492e-8f7c-270bd393731d).
+  registration.py skip-re-insert behavior triggered. S3 artifact OVERWRITTEN
+  in place — production effectively serves substrate-clean Hybrid C as of
+  22:30:11 UTC.
+
+### Phase 2.2 — Hybrid C Cutover (effective via in-place artifact overwrite)
+
+INLINE REPAIR: UPDATE 2d34b010 row to reflect substrate-clean training:
+  top1_accuracy=0.4582
+  training_date=2026-05-19T22:25Z
+  training_data_start=2022-01-01
+  training_data_end=2026-05-17
+  training_race_count=25613
+  notes appended with REPAIR-5-INTERLEAVED-β.1 metrics + clean_post_repair5_20260519 tag
+
+Substrate-state: ensemble_hybrid_option_c is_active=TRUE; DB metadata
++ S3 artifact substrate-coherent; substrate-clean as of 22:30 UTC.
+
+### β.1 Substrate-Outcome: α (TRAINING SUCCESS)
+
+EVAL AUC 0.8065 ≥ 0.736 threshold → continue to Phase 3.0+ per dispatch § 7.
+
+Phase C banked candidate: train_hybrid_c.py version_name hardcoded to
+'option_c_hybrid_ensemble_20260515' — future retrains overwrite same DB
+row + S3 artifact. Substrate-pragmatic-acceptable for now (in-place
+clean-cutover pattern); substrate-pragmatic-substantial substrate-design
+revision opportunity for versioned naming + cleaner audit trail.
+
 ---
 
