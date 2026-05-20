@@ -27,10 +27,17 @@ from sklearn.metrics import (
 )
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+# REPAIR-5-FINAL: feature_contract import — same fix pattern as ensemble.
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'backend'))
 
 from shared.data_loader import build_feature_matrix, _get_conn
 from shared.feature_definitions import get_core_features
 from longshot.config import RF_PARAMS, LONGSHOT_ODDS_THRESHOLD, compute_longshot_labels
+try:
+    from services.feature_contract import predict_with_contract, get_model_features
+except Exception:
+    predict_with_contract = None
+    get_model_features = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
@@ -88,22 +95,32 @@ def main():
     wp_model = load_base_model(['win_prob_odds', 'win_prob_core'], '/tmp/wp-base')
     rk_model = load_base_model(['ranker_core'], '/tmp/rk-base')
 
-    X_core = features_df[core_features].fillna(0.0).values.astype(np.float32)
-    dm = xgb.DMatrix(X_core, feature_names=core_features)
+    # REPAIR-5-FINAL: feature_contract — same fix as ensemble trainer.
+    # L1 boosters retrained 2026-05-20 carry 63 features (Phase B Top-5
+    # added); old hardcoded 58-feature DMatrix crashed predict() with
+    # ValueError: feature_names mismatch. Read booster's feature_names
+    # and pad features_df with missing columns at 0.0.
+    def _l1_predict(model, label, default):
+        if not model:
+            logger.warning(f"No {label} model — using default {default}")
+            return default
+        if predict_with_contract is None:
+            X_core = features_df[core_features].fillna(0.0).values.astype(np.float32)
+            dm = xgb.DMatrix(X_core, feature_names=core_features)
+            return model.predict(dm)
+        needed = get_model_features(model)
+        for col in needed:
+            if col not in features_df.columns:
+                features_df[col] = 0.0
+        return predict_with_contract(model, features_df)
 
+    features_df['l1_win_prob'] = _l1_predict(wp_model, 'Layer 1', 0.12)
     if wp_model:
-        features_df['l1_win_prob'] = wp_model.predict(dm)
         logger.info(f"Layer 1 predictions: mean={features_df['l1_win_prob'].mean():.4f}")
-    else:
-        features_df['l1_win_prob'] = 0.12
-        logger.warning("No Layer 1 model — using default 0.12")
 
+    features_df['l2_rank_score'] = _l1_predict(rk_model, 'Layer 2', 0.0)
     if rk_model:
-        features_df['l2_rank_score'] = rk_model.predict(dm)
         logger.info(f"Layer 2 predictions: mean={features_df['l2_rank_score'].mean():.4f}")
-    else:
-        features_df['l2_rank_score'] = 0.0
-        logger.warning("No Layer 2 model — using default 0.0")
 
     # Build 60-feature matrix
     rf_features = core_features + ['l1_win_prob', 'l2_rank_score']

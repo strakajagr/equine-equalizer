@@ -24,11 +24,23 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+# REPAIR-5-FINAL: import feature_contract for trainer-side use. Same
+# fix pattern feature_contract solved in inference: read booster's own
+# feature_names to select features, instead of hardcoded lists that
+# mismatch when L1 boosters get retrained on a different feature set.
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'backend'))
 
 from shared.data_loader import build_feature_matrix, _get_conn
 from shared.feature_definitions import get_core_features
 from shared.evaluation import full_evaluation
 from ensemble.config import ENSEMBLE_FEATURES
+try:
+    from services.feature_contract import predict_with_contract, get_model_features
+except Exception:
+    # Fallback for environments where backend/ isn't co-located. In ECS
+    # production the image has backend/ COPY'd to /app/ so this works.
+    predict_with_contract = None
+    get_model_features = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
@@ -112,22 +124,36 @@ def main():
     rk_model = load_xgb_model(['ranker_core'], '/tmp/ens-rk')
     rf_model = load_rf_model('/tmp/ens-rf')
 
-    X_core = features_df[core_features].fillna(0.0).values.astype(np.float32)
-    dm = xgb.DMatrix(X_core, feature_names=core_features)
+    # REPAIR-5-FINAL: select features per BOOSTER's feature_names (not a
+    # hardcoded 58-feature core list). The L1 boosters retrained on
+    # 2026-05-20 carry 63 features (Phase B Top-5 added); the old build
+    # with a 58-feature core list crashed predict() with
+    #   ValueError: feature_names mismatch.
+    # Pad features_df with any feature the booster needs but FE hasn't
+    # emitted, then let predict_with_contract slice in the right order.
+    def _l1_predict(model, label):
+        if not model:
+            logger.warning(f"No {label} model — using default")
+            return None
+        if predict_with_contract is None:
+            # Legacy fallback (will fail on feature_names mismatch like before;
+            # surfaces the same way the bug originally did).
+            X_core = features_df[core_features].fillna(0.0).values.astype(np.float32)
+            dm = xgb.DMatrix(X_core, feature_names=core_features)
+            return model.predict(dm)
+        needed = get_model_features(model)
+        for col in needed:
+            if col not in features_df.columns:
+                features_df[col] = 0.0
+        return predict_with_contract(model, features_df)
 
     # Layer 1: win probability
-    if wp_model:
-        features_df['win_prob'] = wp_model.predict(dm)
-    else:
-        features_df['win_prob'] = 0.12
-        logger.warning("No L1 model — using default")
+    wp_preds = _l1_predict(wp_model, 'L1 win_prob')
+    features_df['win_prob'] = wp_preds if wp_preds is not None else 0.12
 
     # Layer 2: rank score
-    if rk_model:
-        features_df['rank_score'] = rk_model.predict(dm)
-    else:
-        features_df['rank_score'] = 0.0
-        logger.warning("No L2 model — using default")
+    rk_preds = _l1_predict(rk_model, 'L2 ranker')
+    features_df['rank_score'] = rk_preds if rk_preds is not None else 0.0
 
     # Layer 4: RF longshot probability
     if rf_model:
