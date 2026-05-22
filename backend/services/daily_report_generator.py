@@ -415,56 +415,139 @@ class DailyReportGenerator:
 
     def _evaluate_recommendation(self, rec: Dict) -> tuple:
         """Match a recommendation against actual race results.
-        Returns (outcome 'W'/'L'/'-', payout, pnl)."""
+        Returns (outcome 'W'/'L'/'-', payout, pnl).
+
+        Pari-mutuel payouts are quoted per a base unit (e.g. $1 exacta,
+        $0.10 superfecta, $2 daily double). Bettor's ticket bets a different
+        per-permutation base (e.g. $0.50 box × 24 perms = $12 stake). So
+        realized payout = quoted × (ticket_per_perm / payout_base_unit), per
+        winning permutation. Box and multi-leg bets always have exactly
+        ONE winning permutation. Previous version stored raw quoted_payout
+        as realized — every multi-leg + box P&L row was wrong by a factor
+        equal to (ticket_per_perm / payout_base_unit). Fixed 2026-05-20.
+        """
+        from math import perm as _perm
         bet_type = rec['bet_type']
         stake = float(rec['stake'])
         horses = rec['horses_json'] or []
-        # Pull race outcomes
+        # Pull race outcomes with base unit columns
         out = self._query("""
             SELECT h.horse_name, res.finish_position, res.win_payout, res.place_payout,
-                   res.show_payout, res.exacta_payout, res.trifecta_payout, res.superfecta_payout,
-                   res.daily_double_payout, res.pick3_payout, res.pick4_payout, res.pick5_payout
+                   res.show_payout,
+                   res.exacta_payout, res.exacta_payout_base_unit,
+                   res.trifecta_payout, res.trifecta_payout_base_unit,
+                   res.superfecta_payout, res.superfecta_payout_base_unit,
+                   res.daily_double_payout, res.daily_double_payout_base_unit,
+                   res.pick3_payout, res.pick3_payout_base_unit,
+                   res.pick4_payout, res.pick4_payout_base_unit,
+                   res.pick5_payout, res.pick5_payout_base_unit
             FROM results res JOIN horses h ON res.horse_id = h.horse_id
             WHERE res.race_id = %s
         """, (rec['race_id'],))
         if not out:
             return ('-', 0.0, 0.0)
         finish = {r['horse_name']: r['finish_position'] for r in out}
-        wp = next((float(r['win_payout']) for r in out if r['win_payout'] and r['horse_name'] in horses), None)
-        exa = next((float(r['exacta_payout']) for r in out if r['exacta_payout']), None)
-        tri = next((float(r['trifecta_payout']) for r in out if r['trifecta_payout']), None)
-        sf = next((float(r['superfecta_payout']) for r in out if r['superfecta_payout']), None)
+
+        def _first(col):
+            return next((float(r[col]) for r in out if r.get(col) is not None), None)
+
+        def _realized(raw_payout, payout_base_unit, ticket_per_perm, n_winning=1):
+            """Convert raw pari-mutuel payout to realized ticket payout."""
+            if raw_payout is None or ticket_per_perm is None:
+                return 0.0
+            base = float(payout_base_unit) if payout_base_unit else _conventional_base(bet_type)
+            if not base or base <= 0:
+                return 0.0
+            realized = (float(raw_payout) / base) * float(ticket_per_perm) * int(n_winning)
+            ratio = realized / max(stake, 0.01)
+            if ratio > 100_000:
+                # Sanity bound — pari-mutuel payouts in this universe top out around
+                # 10,000× stake. Hitting > 100,000× implies a calc/base-unit error.
+                # Flag and clamp to 0 rather than silently corrupt the column.
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"strategy_pnl realized payout ratio {ratio:.0f}× stake — bet={bet_type} "
+                    f"stake=${stake} raw=${raw_payout} base=${base} perm_base=${ticket_per_perm}"
+                )
+                return 0.0
+            return realized
 
         # Single-race
         if bet_type == 'win':
+            # win_payout quoted per $2 base universally; strategies stake $2
+            wp = next((float(r['win_payout']) for r in out
+                       if r['win_payout'] and r['horse_name'] in horses), None)
             if finish.get(horses[0]) == 1 and wp:
-                return ('W', wp, wp - stake)
+                realized = (wp / 2.0) * stake  # stake-proportional
+                return ('W', realized, realized - stake)
+            return ('L', 0.0, -stake)
+        if bet_type == 'place':
+            pp = next((float(r['place_payout']) for r in out
+                       if r['place_payout'] and r['horse_name'] in horses), None)
+            if pp and finish.get(horses[0], 99) <= 2:
+                realized = (pp / 2.0) * stake
+                return ('W', realized, realized - stake)
+            return ('L', 0.0, -stake)
+        if bet_type == 'show':
+            sp = next((float(r['show_payout']) for r in out
+                       if r['show_payout'] and r['horse_name'] in horses), None)
+            if sp and finish.get(horses[0], 99) <= 3:
+                realized = (sp / 2.0) * stake
+                return ('W', realized, realized - stake)
             return ('L', 0.0, -stake)
         if bet_type.startswith('exacta_box_'):
-            actual_top2 = sorted([(n,f) for n,f in finish.items() if f and f<=2], key=lambda x:x[1])
-            if len(actual_top2) < 2: return ('L', 0.0, -stake)
+            n = len(horses)
+            n_perms = _perm(n, 2) if n >= 2 else 0
+            per_perm = stake / n_perms if n_perms else 0
+            actual_top2 = sorted([(nm, f) for nm, f in finish.items() if f and f <= 2],
+                                 key=lambda x: x[1])
+            if len(actual_top2) < 2:
+                return ('L', 0.0, -stake)
             hit = actual_top2[0][0] in horses and actual_top2[1][0] in horses
-            if hit and exa: return ('W', exa, exa - stake)
+            exa = _first('exacta_payout'); exa_base = _first('exacta_payout_base_unit')
+            if hit and exa:
+                realized = _realized(exa, exa_base, per_perm)
+                return ('W', realized, realized - stake)
             return ('L', 0.0, -stake)
         if bet_type.startswith('trifecta_box_'):
-            actual_top3 = {n for n,f in finish.items() if f and f<=3}
-            if len(actual_top3) < 3: return ('L', 0.0, -stake)
-            if actual_top3 <= set(horses) and tri: return ('W', tri, tri - stake)
+            n = len(horses)
+            n_perms = _perm(n, 3) if n >= 3 else 0
+            per_perm = stake / n_perms if n_perms else 0
+            actual_top3 = {nm for nm, f in finish.items() if f and f <= 3}
+            if len(actual_top3) < 3:
+                return ('L', 0.0, -stake)
+            tri = _first('trifecta_payout'); tri_base = _first('trifecta_payout_base_unit')
+            if actual_top3 <= set(horses) and tri:
+                realized = _realized(tri, tri_base, per_perm)
+                return ('W', realized, realized - stake)
             return ('L', 0.0, -stake)
         if bet_type.startswith('superfecta_box_'):
-            actual_top4 = {n for n,f in finish.items() if f and f<=4}
-            if len(actual_top4) < 4: return ('L', 0.0, -stake)
-            if actual_top4 <= set(horses) and sf: return ('W', sf, sf - stake)
+            n = len(horses)
+            n_perms = _perm(n, 4) if n >= 4 else 0
+            per_perm = stake / n_perms if n_perms else 0
+            actual_top4 = {nm for nm, f in finish.items() if f and f <= 4}
+            if len(actual_top4) < 4:
+                return ('L', 0.0, -stake)
+            sf = _first('superfecta_payout'); sf_base = _first('superfecta_payout_base_unit')
+            if actual_top4 <= set(horses) and sf:
+                realized = _realized(sf, sf_base, per_perm)
+                return ('W', realized, realized - stake)
             return ('L', 0.0, -stake)
         # Multi-leg: need leg_race_ids + legs_json
         if bet_type.startswith('dd_') or bet_type.startswith('pick'):
             legs = rec['legs_json']
             leg_ids = rec['leg_race_ids_json']
-            if not legs or not leg_ids: return ('-', 0.0, 0.0)
-            # Get winner per leg race
+            if not legs or not leg_ids:
+                return ('-', 0.0, 0.0)
             n_legs = len(leg_ids)
-            payout_col = 'daily_double_payout' if bet_type.startswith('dd') else f'{bet_type.split("_")[0]}_payout'
-            # Get winners for each leg
+            n_perms = 1
+            for L in legs:
+                n_perms *= max(len(L), 1)
+            per_perm = stake / n_perms if n_perms else 0
+            payout_col = 'daily_double_payout' if bet_type.startswith('dd') \
+                else f'{bet_type.split("_")[0]}_payout'
+            base_col = payout_col + '_base_unit'
+            # Winners per leg
             winners = []
             for lrid in leg_ids:
                 wr = self._query("""
@@ -472,15 +555,32 @@ class DailyReportGenerator:
                     WHERE res.race_id = %s AND res.finish_position = 1 LIMIT 1
                 """, (lrid,))
                 winners.append(wr[0]['horse_name'] if wr else None)
-            if any(w is None for w in winners): return ('-', 0.0, 0.0)
+            if any(w is None for w in winners):
+                return ('-', 0.0, 0.0)
             hit = all(winners[i] in legs[i] for i in range(n_legs))
-            # Pull payout from final leg
             final_payout = self._query(f"""
-                SELECT res.{payout_col} AS p FROM results res
+                SELECT res.{payout_col} AS p, res.{base_col} AS b FROM results res
                 WHERE res.race_id = %s AND res.{payout_col} IS NOT NULL LIMIT 1
             """, (leg_ids[-1],))
             if hit and final_payout and final_payout[0]['p']:
                 pay = float(final_payout[0]['p'])
-                return ('W', pay, pay - stake)
+                pay_base = float(final_payout[0]['b']) if final_payout[0]['b'] else None
+                realized = _realized(pay, pay_base, per_perm)
+                return ('W', realized, realized - stake)
             return ('L', 0.0, -stake)
         return ('-', 0.0, -stake)
+
+
+def _conventional_base(bet_type: str) -> float:
+    """Fallback base unit per bet type when DB column is missing/null.
+    Used only if parser hasn't backfilled base_unit. Values reflect
+    the most common US-track convention seen in OOS chart sample 2026-05.
+    """
+    if bet_type.startswith('exacta'):    return 1.00
+    if bet_type.startswith('trifecta'):  return 0.50
+    if bet_type.startswith('superfecta'): return 0.10
+    if bet_type.startswith('dd'):        return 1.00
+    if bet_type.startswith('pick3'):     return 1.00
+    if bet_type.startswith('pick4'):     return 0.50
+    if bet_type.startswith('pick5'):     return 0.50
+    return 1.00
