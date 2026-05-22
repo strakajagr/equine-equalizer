@@ -309,7 +309,15 @@ def parse_runner_line(
         return None
 
     pgm = m.group(1)
-    horse_name = normalize_horse_name(m.group(2))
+    raw_horse_name = m.group(2)
+    # Gate 6 §3: chart annotates disqualified horses with a "DQ-" prefix
+    # in the horse name (e.g. "DQ-Quiddity"). Detect + strip, propagate
+    # is_disqualified to insert_result.
+    is_disqualified = False
+    if raw_horse_name.strip().startswith('DQ-'):
+        is_disqualified = True
+        raw_horse_name = raw_horse_name.strip()[3:].lstrip()
+    horse_name = normalize_horse_name(raw_horse_name)
     jockey_raw = m.group(3).strip()
 
     jockey_parts = jockey_raw.split(',')
@@ -433,6 +441,7 @@ def parse_runner_line(
         'lasix': lasix,
         'lasix_first_time': first_time_lasix,
         'blinkers_on': blinkers,
+        'is_disqualified': is_disqualified,
         'finish_position': finish_position,
         'finish_lengths_behind': finish_lengths,
         'morning_line_odds': odds,
@@ -960,43 +969,51 @@ def parse_payout_section(block: str) -> dict:
             if wps:
                 result['wps'][pgm] = wps
 
-        # Extract exotic payouts from this line
+        # Extract exotic payouts from this line.
         # Pattern: $1.00Exacta 5-6 12.50 or $0.50Trifecta 5-6-7 45.35
+        # Capture the base unit too — payouts are quoted per base unit,
+        # so without it strategy_pnl downstream can't scale to ticket cost.
+        # Combo may include digits, hyphens, slashes (e.g. Pick5 keys like
+        # "5/6-3-3-5-3"), and a parenthetical suffix like "(3correct)" for
+        # Pick3+ wagers. Old regex only matched [\d\-]+ — silently dropped
+        # ALL Pick3/4/5 rows because their combos always carry the suffix.
         for exotic_match in re.finditer(
-            r'\$[\d.]+?(Exacta|Trifecta|Superfecta|'
+            r'\$([\d.]+)(Exacta|Trifecta|Superfecta|'
             r'DailyDouble|Quinella|Pick\s*\d|'
-            r'SuperHighFive)\s+'
-            r'([\d\-]+)\s+'
+            r'SuperHighFive)\s*'
+            r'([\d\-/]+(?:\([^)]*\))?)\s+'
             r'([\d,]+\.\d{2})',
             line, re.IGNORECASE
         ):
-            bet_type = exotic_match.group(1).lower()
-            combo = exotic_match.group(2)
+            base_unit = float(exotic_match.group(1))
+            bet_type = exotic_match.group(2).lower()
+            combo = exotic_match.group(3)
             payout = float(
-                exotic_match.group(3).replace(',', '')
+                exotic_match.group(4).replace(',', '')
             )
 
-            # Normalize bet type names
+            rec = {'combo': combo, 'payout': payout, 'base_unit': base_unit}
             if 'exacta' in bet_type:
-                result['exotics']['exacta'] = {
-                    'combo': combo, 'payout': payout
-                }
+                result['exotics']['exacta'] = rec
             elif 'trifecta' in bet_type:
-                result['exotics']['trifecta'] = {
-                    'combo': combo, 'payout': payout
-                }
+                result['exotics']['trifecta'] = rec
             elif 'superfecta' in bet_type:
-                result['exotics']['superfecta'] = {
-                    'combo': combo, 'payout': payout
-                }
+                result['exotics']['superfecta'] = rec
             elif 'daily' in bet_type:
-                result['exotics']['daily_double'] = {
-                    'combo': combo, 'payout': payout
-                }
+                result['exotics']['daily_double'] = rec
+            elif 'quinella' in bet_type:
+                result['exotics']['quinella'] = rec
+            elif 'superhighfive' in bet_type:
+                result['exotics']['super_high_five'] = rec
             elif 'pick' in bet_type:
-                result['exotics']['pick'] = {
-                    'combo': combo, 'payout': payout
-                }
+                # Discriminate Pick3/Pick4/Pick5/Pick6 by digit. Previously
+                # they all overwrote a single 'pick' key, then never got
+                # written by insert_result — entire pick3/4/5 payout history
+                # was a parser-side data hole (Bug #29).
+                digit_match = re.search(r'\d', bet_type)
+                if digit_match:
+                    n = int(digit_match.group(0))
+                    result['exotics'][f'pick{n}'] = rec
 
     return result
 
@@ -1029,43 +1046,66 @@ def insert_result(conn, race_id, entry_id, horse_id, runner, race, payouts=None)
     win_payout = wps.get('win')
     place_payout = wps.get('place')
     show_payout = wps.get('show')
-    exacta_payout = (
-        exotics.get('exacta', {}).get('payout')
-        if finish == 1 else None
-    )
-    trifecta_payout = (
-        exotics.get('trifecta', {}).get('payout')
-        if finish == 1 else None
-    )
-    superfecta_payout = (
-        exotics.get('superfecta', {}).get('payout')
-        if finish == 1 else None
-    )
-    dd_payout = (
-        exotics.get('daily_double', {}).get('payout')
-        if finish == 1 else None
-    )
+    def _get_payout_and_base(kind):
+        rec = exotics.get(kind, {})
+        return (rec.get('payout'), rec.get('base_unit')) if finish == 1 else (None, None)
+
+    exacta_payout, exacta_base = _get_payout_and_base('exacta')
+    trifecta_payout, trifecta_base = _get_payout_and_base('trifecta')
+    superfecta_payout, superfecta_base = _get_payout_and_base('superfecta')
+    dd_payout, dd_base = _get_payout_and_base('daily_double')
+    quinella_payout, quinella_base = _get_payout_and_base('quinella')
+    pick3_payout, pick3_base = _get_payout_and_base('pick3')
+    pick4_payout, pick4_base = _get_payout_and_base('pick4')
+    pick5_payout, pick5_base = _get_payout_and_base('pick5')
+    pick6_payout, pick6_base = _get_payout_and_base('pick6')
+    shf_payout, shf_base = _get_payout_and_base('super_high_five')
+
+    # Fail-loud guard: winner row with FULL exotics dict but NO exotic
+    # values extracted == parser regression. Log it so the next missing-
+    # payouts class of bug is surfaced rather than silently absorbed.
+    if finish == 1 and payouts and not any(v for v in (
+        exacta_payout, trifecta_payout, superfecta_payout,
+        dd_payout, pick3_payout, pick4_payout, pick5_payout
+    )):
+        import logging
+        logging.getLogger(__name__).warning(
+            f"insert_result: winner row with no exotic payouts extracted "
+            f"(race_id={race_id}). Possible parser regression — payouts "
+            f"dict had {list((payouts or {}).get('exotics', {}).keys())}"
+        )
 
     with conn.cursor() as cur:
         cur.execute(
             """INSERT INTO results (
                 entry_id, race_id, horse_id,
-                finish_position, official_finish,
+                finish_position, official_finish, is_disqualified,
                 call_1_position, call_1_lengths,
                 call_2_position, call_2_lengths,
                 stretch_position, stretch_lengths,
                 lengths_behind,
                 win_payout, place_payout, show_payout,
-                exacta_payout, trifecta_payout,
-                superfecta_payout, daily_double_payout
+                exacta_payout, exacta_payout_base_unit,
+                trifecta_payout, trifecta_payout_base_unit,
+                superfecta_payout, superfecta_payout_base_unit,
+                daily_double_payout, daily_double_payout_base_unit,
+                quinella_payout, quinella_payout_base_unit,
+                pick3_payout, pick3_payout_base_unit,
+                pick4_payout, pick4_payout_base_unit,
+                pick5_payout, pick5_payout_base_unit,
+                pick6_payout, pick6_payout_base_unit,
+                super_high_five_payout, super_high_five_payout_base_unit
             ) VALUES (
-                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
             ON CONFLICT (entry_id) DO UPDATE SET
                 finish_position  = EXCLUDED.finish_position,
                 official_finish  = EXCLUDED.official_finish,
+                is_disqualified  = EXCLUDED.is_disqualified,
                 call_1_position  = EXCLUDED.call_1_position,
                 call_1_lengths   = EXCLUDED.call_1_lengths,
                 call_2_position  = EXCLUDED.call_2_position,
@@ -1073,38 +1113,44 @@ def insert_result(conn, race_id, entry_id, horse_id, runner, race, payouts=None)
                 stretch_position = EXCLUDED.stretch_position,
                 stretch_lengths  = EXCLUDED.stretch_lengths,
                 lengths_behind   = EXCLUDED.lengths_behind,
-                win_payout = COALESCE(
-                    EXCLUDED.win_payout, results.win_payout
-                ),
-                place_payout = COALESCE(
-                    EXCLUDED.place_payout, results.place_payout
-                ),
-                show_payout = COALESCE(
-                    EXCLUDED.show_payout, results.show_payout
-                ),
-                exacta_payout = COALESCE(
-                    EXCLUDED.exacta_payout,
-                    results.exacta_payout
-                ),
-                trifecta_payout = COALESCE(
-                    EXCLUDED.trifecta_payout,
-                    results.trifecta_payout
-                ),
-                superfecta_payout = COALESCE(
-                    EXCLUDED.superfecta_payout,
-                    results.superfecta_payout
-                ),
-                daily_double_payout = COALESCE(
-                    EXCLUDED.daily_double_payout,
-                    results.daily_double_payout
-                )""",
+                win_payout = COALESCE(EXCLUDED.win_payout, results.win_payout),
+                place_payout = COALESCE(EXCLUDED.place_payout, results.place_payout),
+                show_payout = COALESCE(EXCLUDED.show_payout, results.show_payout),
+                exacta_payout = COALESCE(EXCLUDED.exacta_payout, results.exacta_payout),
+                exacta_payout_base_unit = COALESCE(EXCLUDED.exacta_payout_base_unit, results.exacta_payout_base_unit),
+                trifecta_payout = COALESCE(EXCLUDED.trifecta_payout, results.trifecta_payout),
+                trifecta_payout_base_unit = COALESCE(EXCLUDED.trifecta_payout_base_unit, results.trifecta_payout_base_unit),
+                superfecta_payout = COALESCE(EXCLUDED.superfecta_payout, results.superfecta_payout),
+                superfecta_payout_base_unit = COALESCE(EXCLUDED.superfecta_payout_base_unit, results.superfecta_payout_base_unit),
+                daily_double_payout = COALESCE(EXCLUDED.daily_double_payout, results.daily_double_payout),
+                daily_double_payout_base_unit = COALESCE(EXCLUDED.daily_double_payout_base_unit, results.daily_double_payout_base_unit),
+                quinella_payout = COALESCE(EXCLUDED.quinella_payout, results.quinella_payout),
+                quinella_payout_base_unit = COALESCE(EXCLUDED.quinella_payout_base_unit, results.quinella_payout_base_unit),
+                pick3_payout = COALESCE(EXCLUDED.pick3_payout, results.pick3_payout),
+                pick3_payout_base_unit = COALESCE(EXCLUDED.pick3_payout_base_unit, results.pick3_payout_base_unit),
+                pick4_payout = COALESCE(EXCLUDED.pick4_payout, results.pick4_payout),
+                pick4_payout_base_unit = COALESCE(EXCLUDED.pick4_payout_base_unit, results.pick4_payout_base_unit),
+                pick5_payout = COALESCE(EXCLUDED.pick5_payout, results.pick5_payout),
+                pick5_payout_base_unit = COALESCE(EXCLUDED.pick5_payout_base_unit, results.pick5_payout_base_unit),
+                pick6_payout = COALESCE(EXCLUDED.pick6_payout, results.pick6_payout),
+                pick6_payout_base_unit = COALESCE(EXCLUDED.pick6_payout_base_unit, results.pick6_payout_base_unit),
+                super_high_five_payout = COALESCE(EXCLUDED.super_high_five_payout, results.super_high_five_payout),
+                super_high_five_payout_base_unit = COALESCE(EXCLUDED.super_high_five_payout_base_unit, results.super_high_five_payout_base_unit)""",
             (entry_id, race_id, horse_id,
-             finish, finish,
+             finish, finish, runner.get('is_disqualified', False),
              c1, c1_len, c2, c2_len,
              stretch, stretch_len, fin_len,
              win_payout, place_payout, show_payout,
-             exacta_payout, trifecta_payout,
-             superfecta_payout, dd_payout)
+             exacta_payout, exacta_base,
+             trifecta_payout, trifecta_base,
+             superfecta_payout, superfecta_base,
+             dd_payout, dd_base,
+             quinella_payout, quinella_base,
+             pick3_payout, pick3_base,
+             pick4_payout, pick4_base,
+             pick5_payout, pick5_base,
+             pick6_payout, pick6_base,
+             shf_payout, shf_base)
         )
 
 
@@ -1136,6 +1182,24 @@ def insert_past_performance(conn, horse_id, race, runner):
     if runner.get('last_raced_date') and race.get('race_date'):
         days_since = (race['race_date'] - runner['last_raced_date']).days
 
+    # Gate 6 Bug #28 fix: also write running_style + trainer_name.
+    # Pre-fix this INSERT omitted both columns → 2026-05+ PP rows got NULL,
+    # because chart_parser is now the primary write path post the 2026-05-09
+    # equine-ingestion restoration. running_style is derived from call_1/call_2
+    # position (matches transforms.py:_compute_running_style logic).
+    trainer_name_for_pp = runner.get('trainer_name')
+    running_style_val = None
+    if c1_pos is not None:
+        if c1_pos <= 2: running_style_val = 'front_runner'
+        elif c1_pos <= 4: running_style_val = 'presser'
+        elif c1_pos <= 7: running_style_val = 'midpack'
+        else: running_style_val = 'closer'
+    elif c2_pos is not None:
+        if c2_pos <= 2: running_style_val = 'front_runner'
+        elif c2_pos <= 4: running_style_val = 'presser'
+        elif c2_pos <= 7: running_style_val = 'midpack'
+        else: running_style_val = 'closer'
+
     with conn.cursor() as cur:
         cur.execute(
             """INSERT INTO past_performances (
@@ -1143,7 +1207,7 @@ def insert_past_performance(conn, horse_id, race, runner):
                 race_number, distance_furlongs, surface,
                 race_type, purse, claiming_price_entered,
                 field_size, track_condition,
-                jockey_name, weight_carried,
+                jockey_name, trainer_name, weight_carried,
                 lasix, lasix_first_time, blinkers_on,
                 post_position, finish_position, official_finish,
                 call_1_position, call_1_lengths,
@@ -1153,12 +1217,13 @@ def insert_past_performance(conn, horse_id, race, runner):
                 lengths_behind,
                 fraction_1, fraction_2, fraction_3,
                 final_time, closing_odds,
-                days_since_last_race, comment
+                days_since_last_race, comment,
+                running_style
             ) VALUES (
                 %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
                 %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
                 %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                %s,%s,%s,%s,%s
+                %s,%s,%s,%s,%s,%s,%s
             )
             ON CONFLICT (horse_id, race_date, track_code, race_number)
             DO UPDATE SET
@@ -1173,14 +1238,17 @@ def insert_past_performance(conn, horse_id, race, runner):
                 stretch_position = EXCLUDED.stretch_position,
                 stretch_lengths  = EXCLUDED.stretch_lengths,
                 lengths_behind   = EXCLUDED.lengths_behind,
-                closing_odds     = EXCLUDED.closing_odds""",
+                closing_odds     = EXCLUDED.closing_odds,
+                trainer_name     = COALESCE(past_performances.trainer_name, EXCLUDED.trainer_name),
+                running_style    = COALESCE(past_performances.running_style, EXCLUDED.running_style)""",
             (
                 horse_id, race['race_date'], race['track_code'],
                 race['race_number'], race.get('distance_furlongs'),
                 race.get('surface'), race.get('race_type'),
                 race.get('purse'), race.get('claiming_price'),
                 race.get('field_size'), race.get('track_condition'),
-                runner.get('jockey_name'), runner.get('weight_carried'),
+                runner.get('jockey_name'), trainer_name_for_pp,
+                runner.get('weight_carried'),
                 runner.get('lasix', False),
                 runner.get('lasix_first_time', False),
                 runner.get('blinkers_on', False),
@@ -1194,6 +1262,7 @@ def insert_past_performance(conn, horse_id, race, runner):
                 race.get('final_time'),
                 runner.get('morning_line_odds'),
                 days_since, runner.get('comments'),
+                running_style_val,
             )
         )
 
@@ -1298,6 +1367,9 @@ def process_pdf(conn, source, filename: str) -> dict:
                 trainer_id = upsert_trainer(
                     conn, trainer_name or 'Unknown'
                 )
+                # Gate 6 Bug #28 fix: attach trainer_name to runner so
+                # insert_past_performance writes it to past_performances.
+                runner['trainer_name'] = trainer_name
 
                 with conn.cursor() as cur:
                     cur.execute(

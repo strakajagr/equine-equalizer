@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 # LSTM config (must match training)
 SEQUENCE_LENGTH = 5
+MIN_SEQUENCE_LENGTH = 3
 FEATURES_PER_STEP = 8
 
 
@@ -222,8 +223,9 @@ class LSInferenceService:
                     except Exception as e:
                         logger.debug(f"RF predict failed for {horse_id}: {e}")
 
-                # Layer 5: LSTM Trajectory
-                traj_score = 0.0
+                # Layer 5: LSTM Trajectory — NaN = no LSTM history available
+                # (explicit sentinel so consumers can distinguish from a real 0.0)
+                traj_score = float('nan')
                 if self.lstm_model is not None:
                     try:
                         traj_score = self._predict_trajectory(horse_id, race_date)
@@ -348,17 +350,23 @@ class LSInferenceService:
                 edge_pct = ens_prob_norm - market_prob_norm
                 ml_odds = h['ml_odds']
 
-                # Longshot alert logic — UNCHANGED (using normalized ens_prob now)
+                # Longshot alert logic — NaN-aware: missing trajectory_score
+                # does not trigger the > 0.0 check (np.isnan() short-circuits)
+                traj_present = h['traj_score'] is not None and not (
+                    isinstance(h['traj_score'], float) and h['traj_score'] != h['traj_score']
+                )
+                traj_val = h['traj_score'] if traj_present else 0.0
                 longshot_alert = (
                     ens_prob_norm > 0.10
                     and ml_odds >= 10
                     and h['rf_prob'] > 0.05
-                    and h['traj_score'] > 0.0
+                    and traj_present
+                    and traj_val > 0.0
                 )
                 if longshot_alert:
                     if h['rf_prob'] > 0.10 and h['angle_ev'] > 0:
                         confidence = 'high'
-                    elif h['rf_prob'] > 0.05 or h['traj_score'] > 0.3:
+                    elif h['rf_prob'] > 0.05 or (traj_present and traj_val > 0.3):
                         confidence = 'medium'
                     else:
                         confidence = 'low'
@@ -381,7 +389,7 @@ class LSInferenceService:
                             WHERE prediction_id = %s
                         """, (
                             round(ens_prob_norm, 4),
-                            round(h['traj_score'], 4),
+                            round(h['traj_score'], 4) if traj_present else None,
                             round(h['rf_prob'], 4),
                             h['angle_name'],
                             round(h['angle_posterior'], 4) if h['angle_posterior'] else None,
@@ -417,7 +425,8 @@ class LSInferenceService:
                             round(ens_prob_norm, 4),
                             longshot_alert, confidence,
                             rank_val, round(float(row['rank_score'] or 0), 4),
-                            round(h['rf_prob'], 4), round(h['traj_score'], 4),
+                            round(h['rf_prob'], 4),
+                            round(h['traj_score'], 4) if traj_present else None,
                             round(float(row['raw_win_prob'] or 0), 4),
                             round(h['angle_ev'], 2) if h['angle_ev'] > -2 else None,
                             h['angle_name'],
@@ -540,7 +549,12 @@ class LSInferenceService:
             return self._predict_rf_simplified(raw_wp, rank_score, 5.0)
 
     def _predict_trajectory(self, horse_id: str, race_date: date) -> float:
-        """Build sequence from PPs and run LSTM."""
+        """Build sequence from PPs and run LSTM.
+
+        Returns NaN (not 0.0) for the no-history case so callers can distinguish
+        "model said 0.0" from "no data to score". XGB handles NaN natively;
+        the runtime DB write coerces NaN → NULL.
+        """
         rows = execute_query(self.conn,
             """SELECT computed_speed_figure, finish_position, field_size,
                       early_pace_figure, late_pace_figure,
@@ -551,8 +565,8 @@ class LSInferenceService:
                ORDER BY race_date DESC LIMIT %s""",
             (horse_id, race_date, SEQUENCE_LENGTH))
 
-        if len(rows) < 3:
-            return 0.0  # Not enough history
+        if len(rows) < MIN_SEQUENCE_LENGTH:
+            return float('nan')  # explicit sentinel, not silent 0.0
 
         # Build sequence (most recent last)
         seq = np.zeros((SEQUENCE_LENGTH, FEATURES_PER_STEP), dtype=np.float32)

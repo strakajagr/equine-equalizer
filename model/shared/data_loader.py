@@ -37,6 +37,7 @@ psycopg2.extensions.register_type(_DEC2FLOAT)
 from shared.feature_definitions import (
     FEATURE_DEFS,
     GONZO_FEATURE_DEFS,
+    TRAJECTORY_FEATURE_DEFS,
     get_feature_names,
     get_feature_defaults,
     get_all_feature_defaults,
@@ -47,6 +48,11 @@ from shared.gonzo_features import (
     compute_gonzo_trajectory_features,
     compute_gonzo_class_features,
 )
+
+# LSTM config (must match model/trajectory/config.py)
+LSTM_SEQUENCE_LENGTH = 5
+LSTM_MIN_SEQUENCE_LENGTH = 3
+LSTM_FEATURES_PER_STEP = 8
 
 logger = logging.getLogger(__name__)
 
@@ -563,6 +569,110 @@ def _compute_class_features(horse_hist: pd.DataFrame, row: pd.Series) -> dict:
     }
 
 
+def _compute_phase_b_top5_features(
+    horse_hist: pd.DataFrame,
+    row: pd.Series,
+    today_race: pd.DataFrame,
+    pps_by_horse: dict,
+) -> dict:
+    """Phase B Top-5 features (Gate 5 train/inference drift fix).
+
+    Mirrors `backend/services/feature_engineering_service.py::compute_phase_b_top5_features`
+    using the training-side DataFrame inputs. Decision 4 sentinel pattern:
+    -1.0 disambiguates "no PP history" from real-valued 0.
+
+    LEAK-DISCIPLINE: each subquery uses race_date < row['race_date'] (strict).
+    """
+    prior = horse_hist[horse_hist['race_date'] < row['race_date']].sort_values(
+        'race_date', ascending=False
+    )
+
+    feats = {
+        'surface_win_rate':    0.0,
+        'pace_pressure_score': 0.0,
+        'class_drop_flag':     -1.0,
+        'shipped_from_flag':   -1.0,
+        'layoff_off_bucket':   -1.0,
+    }
+
+    if prior.empty:
+        # All sentinels — no PP history for this horse
+        return feats
+
+    # ── Feature 1: surface_win_rate ──
+    today_surface = row.get('surface')
+    if today_surface:
+        surface_pps = prior[
+            (prior['surface'].astype(str).str.lower() == str(today_surface).lower())
+            & (prior['finish_position'].notna())
+        ]
+        if not surface_pps.empty:
+            wins = (surface_pps['finish_position'] == 1).sum()
+            feats['surface_win_rate'] = float(wins) / len(surface_pps)
+
+    # ── Feature 2: pace_pressure_score ──
+    # For each OTHER horse in today's race, look at THEIR recent (last 3) prior
+    # early_pace_figure. Then field-relative E-runner count.
+    if today_race is not None and not today_race.empty:
+        e_pace_avgs = []
+        for _, other_pp in today_race.iterrows():
+            other_horse_id = other_pp.get('horse_id')
+            if other_horse_id is None:
+                continue
+            other_hist = pps_by_horse.get(other_horse_id)
+            if other_hist is None or other_hist.empty:
+                continue
+            other_prior = other_hist[other_hist['race_date'] < row['race_date']].sort_values(
+                'race_date', ascending=False
+            ).head(3)
+            ep = other_prior['early_pace_figure'].dropna()
+            if not ep.empty:
+                e_pace_avgs.append(float(ep.mean()))
+        if e_pace_avgs:
+            field_avg = sum(e_pace_avgs) / len(e_pace_avgs)
+            n_e_runners = sum(1 for p in e_pace_avgs if p > field_avg + 1.0)
+            feats['pace_pressure_score'] = n_e_runners / max(1, len(e_pace_avgs))
+
+    # ── Feature 3: class_drop_flag ──
+    last_purse = float(prior['purse'].dropna().iloc[0]) if not prior['purse'].dropna().empty else None
+    today_purse = row.get('purse')
+    if last_purse and today_purse and last_purse > 0:
+        purse_ratio = float(today_purse) / last_purse
+        feats['class_drop_flag'] = 1.0 if purse_ratio < 0.85 else 0.0
+    else:
+        feats['class_drop_flag'] = 0.0  # PP present but no purse data
+
+    # ── Feature 4: shipped_from_flag ──
+    last_track = prior['track_code'].dropna().iloc[0] if not prior['track_code'].dropna().empty else None
+    today_track = row.get('track_code')
+    if last_track and today_track:
+        feats['shipped_from_flag'] = 0.0 if last_track == today_track else 1.0
+    else:
+        feats['shipped_from_flag'] = 0.0
+
+    # ── Feature 5: layoff_off_bucket ──
+    last_date_raw = prior['race_date'].dropna().iloc[0] if not prior['race_date'].dropna().empty else None
+    today_date = row.get('race_date')
+    if last_date_raw is not None and today_date is not None:
+        last_date = pd.to_datetime(last_date_raw)
+        today_date_ts = pd.to_datetime(today_date)
+        days_off = (today_date_ts - last_date).days
+        if days_off <= 14:
+            feats['layoff_off_bucket'] = 0.0
+        elif days_off <= 30:
+            feats['layoff_off_bucket'] = 1.0
+        elif days_off <= 60:
+            feats['layoff_off_bucket'] = 2.0
+        elif days_off <= 180:
+            feats['layoff_off_bucket'] = 3.0
+        else:
+            feats['layoff_off_bucket'] = 4.0
+    else:
+        feats['layoff_off_bucket'] = 0.0
+
+    return feats
+
+
 def _compute_physical_features(horse_hist: pd.DataFrame, row: pd.Series,
                                 entry_row: Optional[pd.Series]) -> dict:
     """Compute 10 physical/situational features."""
@@ -720,12 +830,92 @@ def _compute_jockey_features(horse_hist: pd.DataFrame, row: pd.Series,
     }
 
 
+def _compute_trajectory_feature(
+    horse_hist: pd.DataFrame,
+    row: pd.Series,
+    lstm_model,
+    lstm_scaler,
+) -> dict:
+    """Compute the LSTM trajectory_score feature with STRICT as-of-race-date
+    leak discipline.
+
+    LEAK-DISCIPLINE INVARIANTS (Gate 3 — Tony's explicit requirement):
+      1. Input sequence is filtered with `race_date < row['race_date']` — the
+         current race and any future races for this horse are EXCLUDED.
+      2. Only computed_speed_figure-bearing PPs are used (matches train.py
+         build_sequences which filters WHERE computed_speed_figure IS NOT NULL).
+      3. Returns NaN if fewer than LSTM_MIN_SEQUENCE_LENGTH prior races exist —
+         the explicit sentinel directive, no silent 0.0 pad.
+      4. Sequence ordering: chronological (oldest first), left-padded with
+         zeros if < LSTM_SEQUENCE_LENGTH available — matches training shape.
+
+    Caller (build_feature_matrix) is responsible for loading lstm_model +
+    lstm_scaler ONCE and passing in. If lstm_model is None this function
+    is not called at all (the feature is omitted from the row).
+    """
+    import torch  # local import — only required when LSTM is wired in
+
+    # INVARIANT 1: strict prior-only filter (as-of-race-date)
+    prior = horse_hist[horse_hist['race_date'] < row['race_date']]
+    # INVARIANT 2: training-shape filters (match train.py build_sequences):
+    #   computed_speed_figure IS NOT NULL  AND  finish_position IS NOT NULL
+    #   AND finish_position < 90
+    prior = prior[prior['computed_speed_figure'].notna()]
+    if 'finish_position' in prior.columns:
+        prior = prior[prior['finish_position'].notna()]
+        prior = prior[prior['finish_position'] < 90]
+
+    # INVARIANT 3: not enough history → explicit NaN sentinel
+    if len(prior) < LSTM_MIN_SEQUENCE_LENGTH:
+        return {'trajectory_score': float('nan')}
+
+    # Last LSTM_SEQUENCE_LENGTH prior races, ordered most-recent FIRST then
+    # reversed to chronological (oldest → newest) to match build_sequences()
+    prior = prior.sort_values('race_date', ascending=False).head(LSTM_SEQUENCE_LENGTH)
+    seq_rows = list(reversed(list(prior.iterrows())))  # chronological
+
+    # Build sequence array — left-pad with zeros if fewer than LSTM_SEQUENCE_LENGTH
+    seq = np.zeros((LSTM_SEQUENCE_LENGTH, LSTM_FEATURES_PER_STEP), dtype=np.float32)
+    offset = LSTM_SEQUENCE_LENGTH - len(seq_rows)
+    for j, (_, r) in enumerate(seq_rows):
+        fs = float(r.get('field_size') or 8)
+        seq[offset + j] = [
+            float(r.get('computed_speed_figure') or 0),
+            float(r.get('finish_position') or 5) / max(fs, 1),
+            float(r.get('early_pace_figure') or 24),
+            float(r.get('late_pace_figure') or 38),
+            float(r.get('days_since_last_race') or 30),
+            float(r.get('purse') or 0),
+            fs,
+            float(r.get('closing_odds') or 5),
+        ]
+
+    seq = np.nan_to_num(seq, nan=0.0, posinf=0.0, neginf=0.0)
+
+    if lstm_scaler is not None:
+        flat = seq.reshape(-1, LSTM_FEATURES_PER_STEP)
+        seq = lstm_scaler.transform(flat).reshape(
+            1, LSTM_SEQUENCE_LENGTH, LSTM_FEATURES_PER_STEP
+        )
+    else:
+        seq = seq.reshape(1, LSTM_SEQUENCE_LENGTH, LSTM_FEATURES_PER_STEP)
+    seq = np.nan_to_num(seq, nan=0.0)
+
+    tensor = torch.FloatTensor(seq)
+    with torch.no_grad():
+        prob = float(lstm_model.predict_proba(tensor).item())
+    # Map [0, 1] → [-1, +1] (matches ls_inference_service.py mapping)
+    return {'trajectory_score': round(prob * 2.0 - 1.0, 4)}
+
+
 def build_feature_matrix(
     conn=None,
     start_year: int = 2022,
     end_year: int = 2025,
     include_odds: bool = True,
     pps_filter=None,
+    lstm_model=None,
+    lstm_scaler=None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Build full feature matrix for training.
@@ -761,6 +951,7 @@ def build_feature_matrix(
         feature_name_list = get_feature_names(include_odds=include_odds)
         feature_defaults = get_all_feature_defaults()
         gonzo_feature_names = [f.name for f in GONZO_FEATURE_DEFS]
+        trajectory_feature_names = [f.name for f in TRAJECTORY_FEATURE_DEFS]
 
         # Phase A3: par-time dict (built once, shared across all rows).
         par_dict = compute_workout_pars(conn)
@@ -821,6 +1012,13 @@ def build_feature_matrix(
             # Class
             feats.update(_compute_class_features(horse_hist, row))
 
+            # Phase B Top-5 (Gate 5 train/inference drift fix — previously these
+            # 5 features fell through to defaults during training while the
+            # inference pipeline computed them. The model trained on constants.)
+            feats.update(_compute_phase_b_top5_features(
+                horse_hist, row, today_race, pps_by_horse
+            ))
+
             # Physical
             feats.update(_compute_physical_features(horse_hist, row, entry_row))
 
@@ -844,12 +1042,24 @@ def build_feature_matrix(
             feats.update(compute_gonzo_trajectory_features(horse_hist, row))
             feats.update(compute_gonzo_class_features(horse_hist, row))
 
-            # Fill any missing features with defaults (covers both base + gonzo)
-            for fname in feature_name_list + gonzo_feature_names:
+            # ── Gate 3: LSTM trajectory_score (strict as-of-race-date) ──
+            # Only computed when caller passes lstm_model (and scaler); for
+            # legacy training scripts that don't pass it, the feature is
+            # filled with NaN default via the all-defaults sweep below.
+            if lstm_model is not None:
+                feats.update(_compute_trajectory_feature(
+                    horse_hist, row, lstm_model, lstm_scaler
+                ))
+
+            # Fill any missing features with defaults (covers base + gonzo + traj)
+            for fname in feature_name_list + gonzo_feature_names + trajectory_feature_names:
                 if fname not in feats:
                     feats[fname] = feature_defaults[fname]
 
-            output_columns = ['pp_id'] + feature_name_list + gonzo_feature_names
+            output_columns = (
+                ['pp_id'] + feature_name_list + gonzo_feature_names
+                + trajectory_feature_names
+            )
             rows_feat.append({k: feats[k] for k in output_columns})
 
             # Label row
@@ -878,10 +1088,59 @@ def build_feature_matrix(
         )['speed_fig_last'].transform('mean')
         features_df['speed_fig_vs_field'] = features_df['speed_fig_last'] - field_avg
 
+        # Gate 6 §G: orphan exclusion (never zero-pad — exclude entirely).
+        # Drop training rows for races that:
+        #   (a) have no results row at all (260 races out of 25,951)
+        #   (b) have no PP rows for the running field (179 races)
+        # These rows would otherwise feed garbage labels into the model.
+        # NB: we keep first-time starters (entries_no_pp_history = 42,966 rows)
+        # — those are legitimate, the FE applies default-value sentinels.
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT DISTINCT pp.race_date, pp.track_code, pp.race_number
+                FROM past_performances pp
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM results res
+                    JOIN races r ON r.race_id = res.race_id
+                    JOIN tracks t ON t.track_id = r.track_id
+                    WHERE r.race_date = pp.race_date
+                      AND t.track_code = pp.track_code
+                      AND r.race_number = pp.race_number
+                )
+                AND pp.race_date BETWEEN %s AND %s
+            """, (
+                pd.Timestamp(year=start_year, month=1, day=1).date(),
+                pd.Timestamp(year=end_year, month=12, day=31).date(),
+            ))
+            no_results_keys = {
+                f"{r['track_code']}_{r['race_date'].strftime('%Y%m%d')}_{r['race_number']}"
+                for r in cur.fetchall()
+            }
+        n_orphans = len(no_results_keys)
+        if n_orphans > 0:
+            before = len(features_df)
+            keep_mask = ~labels_df['race_key'].isin(no_results_keys)
+            features_df = features_df.loc[keep_mask].reset_index(drop=True)
+            labels_df = labels_df.loc[keep_mask].reset_index(drop=True)
+            logger.info(
+                f"Gate-6 orphan exclusion: dropped {before - len(features_df):,} rows "
+                f"from {n_orphans} races without results"
+            )
+
         logger.info(
             f"Feature matrix built: {len(features_df):,} rows × "
             f"{len(features_df.columns)-1} features"
         )
+
+        # Gate 3 §1.2: print trajectory coverage after the FE pass
+        if 'trajectory_score' in features_df.columns:
+            n_total = len(features_df)
+            n_scored = features_df['trajectory_score'].notna().sum()
+            pct = 100.0 * n_scored / n_total if n_total else 0.0
+            logger.info(
+                f"trajectory_score coverage: {n_scored:,}/{n_total:,} "
+                f"({pct:.1f}%) — NaN means <{LSTM_MIN_SEQUENCE_LENGTH} prior PPs"
+            )
         return features_df, labels_df
 
     finally:

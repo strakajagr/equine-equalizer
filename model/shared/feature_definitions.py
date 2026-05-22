@@ -307,12 +307,50 @@ def get_gonzo_sauce_features() -> list[str]:
     return result
 
 
+# ─────────────────────────────────────────────────────────────────────
+# Gate 3 (2026-05-21) — LSTM trajectory feature
+# Defined separately from FEATURE_DEFS / GONZO_FEATURE_DEFS so the
+# existing 71-feature / 14-Gonzo invariants stay intact. Default is NaN
+# (not 0.0) — the dispatch's explicit-sentinel directive: a real score
+# of 0.0 means "model says no trend"; NaN means "no history to score".
+# XGBoost handles NaN natively as a missing-value split.
+# ─────────────────────────────────────────────────────────────────────
+TRAJECTORY_FEATURE_DEFS = [
+    FeatureDef('trajectory_score', 'trajectory', True, float('nan')),
+]
+assert len(TRAJECTORY_FEATURE_DEFS) == 1
+
+
+def get_lean53_plus_top5_plus_trajectory_features() -> list[str]:
+    """59-feature list for Gate 3 retrain wp_full / rk_full models
+    (lean53+top5 = 58, plus trajectory_score = 59)."""
+    result = get_lean53_plus_top5_features() + [f.name for f in TRAJECTORY_FEATURE_DEFS]
+    assert len(result) == 59, f"Expected 59 (58+1), got {len(result)}"
+    return result
+
+
+def get_lean53_core_plus_top5_plus_trajectory_features() -> list[str]:
+    """53-feature list for Gate 3 retrain pl_core / win_prob_core models
+    (lean53_core+top5 = 52, plus trajectory_score = 53)."""
+    result = get_lean53_core_plus_top5_features() + [f.name for f in TRAJECTORY_FEATURE_DEFS]
+    assert len(result) == 53, f"Expected 53 (52+1), got {len(result)}"
+    return result
+
+
+def get_gonzo_sauce_plus_top5_plus_trajectory_features() -> list[str]:
+    """73-feature list for Gate 3 retrain gonzo_sauce (72 + 1)."""
+    result = get_gonzo_sauce_plus_top5_features() + [f.name for f in TRAJECTORY_FEATURE_DEFS]
+    assert len(result) == 73, f"Expected 73 (72+1), got {len(result)}"
+    return result
+
+
 def get_all_feature_defaults() -> dict[str, float]:
-    """All defaults including Gonzo features. Used by data_loader's row
-    loop so any feature missing from a row's dict gets a default rather
-    than KeyError."""
+    """All defaults including Gonzo + trajectory features. Used by
+    data_loader's row loop so any feature missing from a row's dict gets
+    a default rather than KeyError."""
     result = {f.name: f.default_value for f in FEATURE_DEFS}
     result.update({f.name: f.default_value for f in GONZO_FEATURE_DEFS})
+    result.update({f.name: f.default_value for f in TRAJECTORY_FEATURE_DEFS})
     return result
 
 

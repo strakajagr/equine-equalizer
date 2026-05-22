@@ -9,6 +9,7 @@ Run on Fargate:
     --overrides '{"containerOverrides":[{"name":"training","command":["model/trajectory/train.py"]}]}'
 """
 
+import argparse
 import json
 import logging
 import pickle
@@ -62,25 +63,44 @@ class TrajectoryLSTM(nn.Module):
             return torch.sigmoid(logits)
 
 
-def build_sequences(conn) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def build_sequences(conn, end_date: str = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Build (input_sequences, labels, years) from past_performances.
     Each sequence = last N races for a horse, target = did speed improve?
+
+    end_date (YYYY-MM-DD, optional): if provided, only PPs with
+    race_date <= end_date are loaded. Used by Gate 3 to retrain with a
+    strict cutoff (2025-12-31) so the 2026 OOS eval is leak-free.
     """
-    logger.info("Loading past performances for sequence building...")
+    logger.info(f"Loading past performances for sequence building (end_date={end_date or 'unbounded'})...")
     with conn.cursor() as cur:
-        cur.execute("""
-            SELECT horse_id, race_date, computed_speed_figure,
-                   finish_position, field_size, early_pace_figure,
-                   late_pace_figure, days_since_last_race, purse,
-                   closing_odds
-            FROM past_performances
-            WHERE computed_speed_figure IS NOT NULL
-              AND finish_position IS NOT NULL
-              AND finish_position < 90
-              AND EXTRACT(YEAR FROM race_date) BETWEEN 2022 AND 2026
-            ORDER BY horse_id, race_date
-        """)
+        if end_date:
+            cur.execute("""
+                SELECT horse_id, race_date, computed_speed_figure,
+                       finish_position, field_size, early_pace_figure,
+                       late_pace_figure, days_since_last_race, purse,
+                       closing_odds
+                FROM past_performances
+                WHERE computed_speed_figure IS NOT NULL
+                  AND finish_position IS NOT NULL
+                  AND finish_position < 90
+                  AND race_date >= DATE '2022-01-01'
+                  AND race_date <= %s::date
+                ORDER BY horse_id, race_date
+            """, (end_date,))
+        else:
+            cur.execute("""
+                SELECT horse_id, race_date, computed_speed_figure,
+                       finish_position, field_size, early_pace_figure,
+                       late_pace_figure, days_since_last_race, purse,
+                       closing_odds
+                FROM past_performances
+                WHERE computed_speed_figure IS NOT NULL
+                  AND finish_position IS NOT NULL
+                  AND finish_position < 90
+                  AND EXTRACT(YEAR FROM race_date) BETWEEN 2022 AND 2026
+                ORDER BY horse_id, race_date
+            """)
         rows = cur.fetchall()
 
     df = pd.DataFrame([dict(r) for r in rows])
@@ -135,19 +155,31 @@ def build_sequences(conn) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def main():
-    logger.info("LSTM Form Trajectory (Layer 5) training starting")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--end-date', default=None,
+                        help='Strict cutoff for PP loading (YYYY-MM-DD). '
+                             'Gate 3 uses 2025-12-31 to make the 2026 OOS '
+                             'eval leak-free w.r.t. LSTM training.')
+    args = parser.parse_args()
+
+    logger.info(f"LSTM Form Trajectory (Layer 5) training starting (end_date={args.end_date or 'unbounded'})")
     conn = _get_conn()
 
-    sequences, labels, years = build_sequences(conn)
+    sequences, labels, years = build_sequences(conn, end_date=args.end_date)
     conn.close()
 
     n_pos = int(labels.sum())
     logger.info(f"Built {len(sequences):,} sequences. "
                 f"Improved: {n_pos:,} ({n_pos/len(labels)*100:.1f}%)")
 
-    # Temporal split (years is per-sequence; 2026 substrate ends 2026-05-10)
-    train_mask = years <= 2025
-    val_mask = years == 2026
+    # Temporal split (years is per-sequence)
+    #
+    # Default path (no --end-date): train on 2022-2025, val on 2026.
+    # Gate 3 path (--end-date=2025-12-31): no 2026 data loaded at all, so
+    # use the last available year as the validation slice.
+    max_year = int(years.max())
+    train_mask = years < max_year
+    val_mask = years == max_year
 
     X_train_raw = sequences[train_mask]
     y_train = labels[train_mask]
